@@ -16,11 +16,10 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'localhost',
+        hostname: '**',
       },
     ],
-    formats: ['image/webp', 'image/avif'],
-    unoptimized: true,
+    formats: ['image/avif', 'image/webp'],
   },
   typescript: {
     ignoreBuildErrors: false,
