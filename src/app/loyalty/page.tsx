@@ -53,7 +53,7 @@ export default function LoyaltyPage() {
   const { isAuthenticated, user } = useAuthStore();
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-brand-dark">
+    <main className="relative min-h-screen overflow-hidden bg-brand-light dark:bg-brand-dark transition-colors duration-600">
       {/* Magical Background Elements */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-mesh opacity-40" />
@@ -84,10 +84,10 @@ export default function LoyaltyPage() {
               <Star className="h-4 w-4 fill-current" />
               <span>Exclusive Membership</span>
             </div>
-            <h1 className="mb-6 text-6xl font-black text-white md:text-9xl tracking-tighter leading-tight">
+            <h1 className="mb-6 text-6xl font-black text-brand-dark dark:text-white md:text-9xl tracking-tighter leading-tight">
               Urban Loft <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-gold">Rewards</span>
             </h1>
-            <p className="mx-auto max-w-2xl text-xl font-light text-brand-beige/60 leading-relaxed">
+            <p className="mx-auto max-w-2xl text-xl font-light text-brand-muted dark:text-brand-beige/60 leading-relaxed">
               Join our community of regulars and get rewarded for every bite, sip, and workspace booking.
             </p>
             {!isAuthenticated && (

@@ -95,7 +95,7 @@ export default function AboutPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
       />
 
-      <main className="relative min-h-screen overflow-hidden bg-brand-dark">
+    <main className="relative min-h-screen overflow-hidden bg-brand-light dark:bg-brand-dark transition-colors duration-600">
         {/* Magical Background Elements */}
         <div className="fixed inset-0 z-0">
           <div className="absolute inset-0 bg-mesh opacity-40" />
@@ -130,7 +130,7 @@ export default function AboutPage() {
               <h1 className="mb-6 text-7xl font-black text-white md:text-9xl tracking-tighter leading-none">
                 Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-gold">Story</span>
               </h1>
-              <p className="mx-auto max-w-2xl text-xl font-light text-brand-beige/80 leading-relaxed md:text-2xl">
+              <p className="mx-auto max-w-2xl text-xl font-light text-brand-muted dark:text-brand-beige/80 leading-relaxed md:text-2xl">
                 More than just a café. We are a community-driven ecosystem designed to inspire,
                 connect, and nourish the modern urban lifestyle.
               </p>
@@ -150,21 +150,21 @@ export default function AboutPage() {
                 <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-brand-orange/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.3em] text-brand-orange">
                   <span>Our Purpose</span>
                 </div>
-                <h2 className="mb-8 text-4xl font-black text-white md:text-6xl tracking-tight">
+                <h2 className="mb-8 text-4xl font-black text-brand-dark dark:text-white md:text-6xl tracking-tight">
                   Crafting <span className="text-brand-orange">Meaningful</span> Experiences
                 </h2>
-                <p className="mb-8 text-xl font-light text-brand-beige/60 leading-relaxed">
+                <p className="mb-8 text-xl font-light text-brand-muted dark:text-brand-beige/60 leading-relaxed">
                   Urban Loft was born from a simple idea: that a café should be more than just a place to grab a coffee. 
                   It should be a sanctuary for productivity, a hub for connection, and a home for community.
                 </p>
                 <div className="grid gap-6 sm:grid-cols-2">
-                  <div className="p-6 rounded-3xl bg-brand-dark/40 backdrop-blur-xl border border-white/10">
-                    <h4 className="mb-2 font-black text-brand-orange uppercase tracking-widest text-xs">Our Mission</h4>
-                    <p className="text-sm font-light text-brand-beige/60">To provide a premium ecosystem where people can eat, work, and connect seamlessly.</p>
+                  <div className="p-6 rounded-3xl bg-brand-light/40 dark:bg-brand-dark/40 backdrop-blur-xl border border-brand-beige/20 dark:border-white/10">
+                    <h4 className="mb-2 font-black text-brand-brown dark:text-brand-orange uppercase tracking-widest text-xs">Our Mission</h4>
+                    <p className="text-sm font-light text-brand-muted dark:text-brand-beige/60">To provide a premium ecosystem where people can eat, work, and connect seamlessly.</p>
                   </div>
-                  <div className="p-6 rounded-3xl bg-brand-dark/40 backdrop-blur-xl border border-white/10">
-                    <h4 className="mb-2 font-black text-brand-orange uppercase tracking-widest text-xs">Our Vision</h4>
-                    <p className="text-sm font-light text-brand-beige/60">To be the leading urban lifestyle hub across East Africa, fostering innovation and community.</p>
+                  <div className="p-6 rounded-3xl bg-brand-light/40 dark:bg-brand-dark/40 backdrop-blur-xl border border-brand-beige/20 dark:border-white/10">
+                    <h4 className="mb-2 font-black text-brand-brown dark:text-brand-orange uppercase tracking-widest text-xs">Our Vision</h4>
+                    <p className="text-sm font-light text-brand-muted dark:text-brand-beige/60">To be the leading urban lifestyle hub across East Africa, fostering innovation and community.</p>
                   </div>
                 </div>
               </motion.div>
@@ -225,7 +225,7 @@ export default function AboutPage() {
               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-brand-orange/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.3em] text-brand-orange">
                 <span>Our Growth</span>
               </div>
-              <h2 className="text-4xl font-black text-white md:text-6xl tracking-tight">The <span className="text-brand-orange">Timeline</span></h2>
+              <h2 className="text-4xl font-black text-brand-dark dark:text-white md:text-6xl tracking-tight">The <span className="text-brand-orange">Journey</span></h2>
             </div>
 
             <div className="relative mx-auto max-w-4xl">
@@ -248,13 +248,13 @@ export default function AboutPage() {
                     
                     <div className="flex-1 w-full">
                       <div className="electrical-border rounded-[2.5rem]">
-                        <div className="rounded-[2.5rem] bg-brand-dark/40 backdrop-blur-xl p-8 border border-white/10">
+                        <div className="rounded-[2.5rem] bg-brand-light/40 dark:bg-brand-dark/40 backdrop-blur-xl p-8 border border-brand-beige/20 dark:border-white/10">
                           <div className="mb-4 flex items-center justify-between">
-                            <span className="text-2xl font-black text-brand-orange">{item.year}</span>
-                            <span className="text-xs font-black uppercase tracking-widest text-brand-orange/60">{item.location}</span>
+                            <span className="text-2xl font-black text-brand-brown dark:text-brand-orange">{item.year}</span>
+                            <span className="text-xs font-black uppercase tracking-widest text-brand-brown/60 dark:text-brand-orange/60">{item.location}</span>
                           </div>
-                          <h3 className="mb-4 text-2xl font-black text-white tracking-tight">{item.title}</h3>
-                          <p className="text-brand-beige/60 font-light leading-relaxed">{item.description}</p>
+                          <h3 className="mb-4 text-2xl font-black text-brand-dark dark:text-white tracking-tight">{item.title}</h3>
+                          <p className="text-brand-muted dark:text-brand-beige/60 font-light leading-relaxed">{item.description}</p>
                         </div>
                       </div>
                     </div>
@@ -273,7 +273,7 @@ export default function AboutPage() {
               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-brand-orange/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.3em] text-brand-orange">
                 <span>The People Behind the Magic</span>
               </div>
-              <h2 className="text-4xl font-black text-white md:text-6xl tracking-tight">Our <span className="text-brand-orange">Team</span></h2>
+              <h2 className="text-4xl font-black text-brand-dark dark:text-white md:text-6xl tracking-tight">Our <span className="text-brand-orange">Team</span></h2>
             </div>
 
             <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">

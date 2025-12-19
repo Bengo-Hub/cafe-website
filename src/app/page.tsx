@@ -242,8 +242,8 @@ export default function HomePage() {
                             })}
                           </span>
                         </div>
-                        <h3 className="mb-4 text-3xl font-black text-white group-hover:text-brand-orange transition-colors">{event.name}</h3>
-                        <p className="mb-8 text-brand-beige/70 font-light line-clamp-2">{event.description}</p>
+                        <h3 className="mb-4 text-3xl font-black text-brand-dark dark:text-white group-hover:text-brand-orange transition-colors">{event.name}</h3>
+                        <p className="mb-8 text-brand-muted dark:text-brand-beige/70 font-light line-clamp-2">{event.description}</p>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <div className="h-2 w-2 rounded-full bg-brand-orange animate-pulse" />
@@ -290,10 +290,10 @@ export default function HomePage() {
               <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-brand-orange/10 px-6 py-2 text-[11px] font-black uppercase tracking-[0.4em] text-brand-orange border border-brand-orange/20 backdrop-blur-md">
                 <span>Community Voices</span>
               </div>
-              <h2 className="mb-8 text-5xl font-black text-white md:text-7xl tracking-tight">
+              <h2 className="mb-8 text-5xl font-black text-brand-dark dark:text-white md:text-7xl tracking-tight">
                 What Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-gold">Community</span> Says
               </h2>
-              <p className="mx-auto max-w-2xl text-xl text-brand-beige/80 font-light leading-relaxed">
+              <p className="mx-auto max-w-2xl text-xl text-brand-muted dark:text-brand-beige/80 font-light leading-relaxed">
                 Don't just take our word for it - hear from the people who make Urban Loft their second home.
               </p>
             </motion.div>
@@ -320,7 +320,7 @@ export default function HomePage() {
                       />
                     ))}
                   </div>
-                  <p className="mb-10 text-xl italic font-light text-brand-beige/90 leading-relaxed">"{testimonial.content}"</p>
+                  <p className="mb-10 text-xl italic font-light text-brand-muted dark:text-brand-beige/90 leading-relaxed">"{testimonial.content}"</p>
                   <div className="flex items-center gap-5">
                     <div className="relative h-14 w-14 overflow-hidden rounded-full border-2 border-brand-orange/30">
                       <Image
@@ -331,7 +331,7 @@ export default function HomePage() {
                       />
                     </div>
                     <div>
-                      <h4 className="font-black text-white tracking-tight text-lg">{testimonial.name}</h4>
+                      <h4 className="font-black text-brand-dark dark:text-white tracking-tight text-lg">{testimonial.name}</h4>
                       <p className="text-xs font-bold uppercase tracking-widest text-brand-orange/80">{testimonial.role}</p>
                     </div>
                   </div>

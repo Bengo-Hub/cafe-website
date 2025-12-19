@@ -27,7 +27,7 @@ export default function ContactPage() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-brand-dark">
+    <main className="relative min-h-screen overflow-hidden bg-brand-light dark:bg-brand-dark transition-colors duration-600">
       {/* Magical Background Elements */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-mesh opacity-40" />
@@ -59,10 +59,10 @@ export default function ContactPage() {
               <Mail className="h-4 w-4" />
               <span>Get In Touch</span>
             </div>
-            <h1 className="mb-6 text-7xl font-black text-white md:text-9xl tracking-tighter leading-none">
+            <h1 className="mb-6 text-7xl font-black text-brand-dark dark:text-white md:text-9xl tracking-tighter leading-none">
               Contact <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-gold">Us</span>
             </h1>
-            <p className="mx-auto max-w-2xl text-xl font-light text-brand-beige/80 leading-relaxed md:text-2xl">
+            <p className="mx-auto max-w-2xl text-xl font-light text-brand-muted dark:text-brand-beige/80 leading-relaxed md:text-2xl">
               Have a question or just want to say hello? We're here to help and listen.
             </p>
           </motion.div>

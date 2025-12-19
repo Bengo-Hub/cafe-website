@@ -89,7 +89,7 @@ export default function MenuPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(menuSchema) }}
       />
 
-      <main className="relative min-h-screen overflow-hidden bg-brand-dark">
+      <main className="relative min-h-screen overflow-hidden bg-brand-light dark:bg-brand-dark transition-colors duration-600">
         {/* Magical Background Elements */}
         <div className="fixed inset-0 z-0">
           <div className="absolute inset-0 bg-mesh opacity-40" />
@@ -121,10 +121,10 @@ export default function MenuPage() {
                 <Sparkles className="h-4 w-4" />
                 <span>Culinary Excellence</span>
               </div>
-              <h1 className="mb-6 text-7xl font-black text-white md:text-9xl tracking-tighter leading-none">
+              <h1 className="mb-6 text-7xl font-black text-brand-dark dark:text-white md:text-9xl tracking-tighter leading-none">
                 Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-gold">Menu</span>
               </h1>
-              <p className="mx-auto max-w-2xl text-xl font-light text-brand-beige/80 leading-relaxed md:text-2xl">
+              <p className="mx-auto max-w-2xl text-xl font-light text-brand-muted dark:text-brand-beige/80 leading-relaxed md:text-2xl">
                 A curated selection of signature meals, specialty coffees, and artisanal treats
                 crafted with passion and the finest local ingredients.
               </p>
@@ -138,13 +138,13 @@ export default function MenuPage() {
             {/* Sidebar Filters - Desktop */}
             <aside className="hidden w-80 flex-shrink-0 space-y-8 lg:block">
               <div className="sticky top-28 electrical-border rounded-[2.5rem]">
-                <div className="rounded-[2.5rem] bg-brand-dark/40 p-8 shadow-2xl backdrop-blur-xl border border-white/10">
+                <div className="rounded-[2.5rem] bg-brand-light/40 dark:bg-brand-dark/40 p-8 shadow-2xl backdrop-blur-xl border border-brand-beige/20 dark:border-white/10">
                   <div className="mb-10 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-orange/10 text-brand-orange shadow-inner">
                         <Filter className="h-6 w-6" />
                       </div>
-                      <span className="text-2xl font-black text-white tracking-tight">Filters</span>
+                      <span className="text-2xl font-black text-brand-dark dark:text-white tracking-tight">Filters</span>
                     </div>
                     {(selectedCategory !== 'All Items' || searchQuery) && (
                       <button
@@ -170,7 +170,7 @@ export default function MenuPage() {
                           placeholder="Find a dish..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="h-14 w-full rounded-2xl border-none bg-white/5 pl-12 pr-4 text-sm font-medium text-white focus:ring-2 focus:ring-brand-orange/50 transition-all"
+                          className="h-14 w-full rounded-2xl border-none bg-white/5 dark:bg-white/5 pl-12 pr-4 text-sm font-medium text-brand-dark dark:text-white placeholder:text-brand-muted/40 dark:placeholder:text-brand-beige/30 focus:ring-2 focus:ring-brand-orange/50 transition-all"
                         />
                       </div>
                     </div>
@@ -186,7 +186,7 @@ export default function MenuPage() {
                             className={`group flex items-center justify-between rounded-2xl px-5 py-4 text-sm transition-all ${
                               selectedCategory === cat
                                 ? 'bg-brand-orange text-white shadow-xl shadow-brand-orange/30 font-black'
-                                : 'text-brand-beige/60 hover:bg-brand-orange/10 hover:text-brand-orange'
+                                : 'text-brand-muted dark:text-brand-beige/60 hover:bg-brand-orange/10 hover:text-brand-orange'
                             }`}
                           >
                             <span className="tracking-tight">{cat}</span>

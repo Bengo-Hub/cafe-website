@@ -67,10 +67,10 @@ export default function FranchisingPage() {
               <Globe className="h-4 w-4" />
               <span>Global Expansion Opportunities</span>
             </div>
-            <h1 className="mb-6 text-6xl font-black tracking-tight text-white md:text-8xl">
+            <h1 className="mb-6 text-6xl font-black tracking-tight text-brand-dark dark:text-white md:text-8xl">
               Grow <span className="text-brand-orange">With Us</span>
             </h1>
-            <p className="mb-10 text-xl text-brand-orange md:text-3xl font-light leading-relaxed">
+            <p className="mb-10 text-xl text-brand-muted dark:text-brand-orange md:text-3xl font-light leading-relaxed">
               Partner with East Africa's fastest-growing lifestyle cafe brand. 
               Bring the Urban Loft experience to your community.
             </p>

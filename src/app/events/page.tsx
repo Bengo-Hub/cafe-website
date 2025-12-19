@@ -8,7 +8,7 @@ import Image from 'next/image';
 
 export default function EventsPage() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-brand-dark">
+    <main className="relative min-h-screen overflow-hidden bg-brand-light dark:bg-brand-dark transition-colors duration-600">
       {/* Magical Background Elements */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-mesh opacity-40" />
@@ -28,7 +28,7 @@ export default function EventsPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/80 via-brand-dark/40 to-brand-dark" />
         </div>
-        <div className="container relative flex h-full items-center justify-center text-center text-white">
+        <div className="container relative flex h-full items-center justify-center text-center text-brand-dark dark:text-white">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -40,7 +40,7 @@ export default function EventsPage() {
             <h1 className="mb-4 text-5xl font-black md:text-8xl tracking-tight leading-tight">
               Events & <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-gold">Happenings</span>
             </h1>
-            <p className="mx-auto max-w-2xl text-xl text-brand-beige/60 font-light">
+            <p className="mx-auto max-w-2xl text-xl text-brand-muted dark:text-brand-beige/60 font-light">
               Join us for exciting community events, workshops, and live performances.
             </p>
           </motion.div>
