@@ -23,10 +23,10 @@ stringData:
   # ============================================
   # NEXT_PUBLIC_MAPBOX_TOKEN: "your-token-here"
   # NEXT_PUBLIC_SENTRY_DSN: "your-dsn-here"
-NEXT_PUBLIC_API_TIMEOUT: 30000
-NEXT_PUBLIC_API_RETRY_ATTEMPTS: 3
+  NEXT_PUBLIC_API_TIMEOUT: "30000"
+  NEXT_PUBLIC_API_RETRY_ATTEMPTS: "3"
 
-# Auth Configuration
-AUTH_SECRET: bengobox-secret-key-1234567890
-AUTH_CLIENT_ID: cafe-website-client
-AUTH_CLIENT_SECRET: cafe-website-secret
+  # Auth Configuration
+  AUTH_SECRET: "bengobox-secret-key-1234567890"
+  AUTH_CLIENT_ID: "cafe-website-client"
+  AUTH_CLIENT_SECRET: "cafe-website-secret"
