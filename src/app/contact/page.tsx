@@ -62,7 +62,7 @@ export default function ContactPage() {
             <h1 className="mb-6 text-7xl font-black text-white md:text-9xl tracking-tighter leading-none">
               Contact <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-gold">Us</span>
             </h1>
-            <p className="mx-auto max-w-2xl text-xl font-light text-brand-beige/70 dark:text-brand-beige/80 leading-relaxed md:text-2xl">
+            <p className="mx-auto max-w-2xl text-xl font-medium text-white/90 leading-relaxed md:text-2xl">
               Have a question or just want to say hello? We're here to help and listen.
             </p>
           </motion.div>
@@ -104,23 +104,23 @@ export default function ContactPage() {
             {/* Contact Form */}
             <div className="lg:col-span-3">
               <div className="electrical-border rounded-[3rem]">
-                <div className="rounded-[3rem] bg-brand-dark/40 backdrop-blur-xl p-8 md:p-12 border border-white/10">
+                <div className="rounded-[3rem] bg-brand-dark/60 backdrop-blur-2xl p-8 md:p-12 border border-white/20 shadow-2xl">
                   <h2 className="mb-8 text-4xl font-black text-white tracking-tight">Send a <span className="text-brand-orange">Message</span></h2>
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2">
                       <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-brand-orange/60 ml-4">Name</label>
+                        <label className="text-xs font-black uppercase tracking-widest text-brand-orange ml-4">Name</label>
                         <Input
                           name="name"
                           placeholder="Your Name"
                           value={formData.name}
                           onChange={handleChange}
                           required
-                          className="h-14 rounded-2xl border-none bg-white/5 px-6 text-white focus:ring-2 focus:ring-brand-orange/50"
+                          className="h-14 rounded-2xl border-none bg-white/10 px-6 text-white placeholder:text-white/40 focus:ring-2 focus:ring-brand-orange/50"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-brand-orange/60 ml-4">Email</label>
+                        <label className="text-xs font-black uppercase tracking-widest text-brand-orange ml-4">Email</label>
                         <Input
                           name="email"
                           type="email"
@@ -128,23 +128,23 @@ export default function ContactPage() {
                           value={formData.email}
                           onChange={handleChange}
                           required
-                          className="h-14 rounded-2xl border-none bg-white/5 px-6 text-white focus:ring-2 focus:ring-brand-orange/50"
+                          className="h-14 rounded-2xl border-none bg-white/10 px-6 text-white placeholder:text-white/40 focus:ring-2 focus:ring-brand-orange/50"
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-black uppercase tracking-widest text-brand-orange/60 ml-4">Subject</label>
+                      <label className="text-xs font-black uppercase tracking-widest text-brand-orange ml-4">Subject</label>
                       <Input
                         name="subject"
                         placeholder="How can we help?"
                         value={formData.subject}
                         onChange={handleChange}
                         required
-                        className="h-14 rounded-2xl border-none bg-white/5 px-6 text-white focus:ring-2 focus:ring-brand-orange/50"
+                        className="h-14 rounded-2xl border-none bg-white/10 px-6 text-white placeholder:text-white/40 focus:ring-2 focus:ring-brand-orange/50"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-black uppercase tracking-widest text-brand-orange/60 ml-4">Message</label>
+                      <label className="text-xs font-black uppercase tracking-widest text-brand-orange ml-4">Message</label>
                       <textarea
                         name="message"
                         placeholder="Your Message"
@@ -152,7 +152,7 @@ export default function ContactPage() {
                         onChange={handleChange}
                         required
                         rows={6}
-                        className="w-full rounded-3xl border-none bg-white/5 p-6 text-white focus:ring-2 focus:ring-brand-orange/50 transition-all"
+                        className="w-full rounded-3xl border-none bg-white/10 p-6 text-white placeholder:text-white/40 focus:ring-2 focus:ring-brand-orange/50 transition-all"
                       />
                     </div>
                     <Button

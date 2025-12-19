@@ -40,7 +40,7 @@ export default function EventsPage() {
             <h1 className="mb-4 text-5xl font-black md:text-8xl tracking-tight leading-tight">
               Events & <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-gold">Happenings</span>
             </h1>
-            <p className="mx-auto max-w-2xl text-xl text-secondary-brand font-light">
+            <p className="mx-auto max-w-2xl text-xl text-white/90 font-medium">
               Join us for exciting community events, workshops, and live performances.
             </p>
           </motion.div>
