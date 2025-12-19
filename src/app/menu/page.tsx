@@ -5,7 +5,7 @@ import {
   MenuItemModal
 } from '@/components/sections';
 import { Badge, Button } from '@/components/ui';
-import { dummyMenuItems } from '@/lib/dummy-data';
+import { useMenu } from '@/hooks/use-menu';
 import { generateMenuSchema } from '@/lib/utils/schema';
 import { MenuItem } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -36,13 +36,10 @@ export default function MenuPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  const categories = useMemo(() => {
-    const cats = Array.from(new Set(dummyMenuItems.map((item) => item.category)));
-    return ['All Items', ...cats];
-  }, []);
+  const { items, isLoading, categories } = useMenu();
 
   const filteredItems = useMemo(() => {
-    return dummyMenuItems
+    return items
       .filter((item) => {
         const matchesCategory =
           selectedCategory === 'All Items' || item.category === selectedCategory;
@@ -65,7 +62,7 @@ export default function MenuPage() {
         }
         return sortOrder === 'asc' ? comparison : -comparison;
       });
-  }, [selectedCategory, searchQuery, sortBy, sortOrder]);
+  }, [items, selectedCategory, searchQuery, sortBy, sortOrder]);
 
   const handleItemClick = (item: MenuItem) => {
     setSelectedItem(item);
@@ -326,7 +323,19 @@ export default function MenuPage() {
 
               {/* Menu Grid */}
               <AnimatePresence mode="popLayout">
-                {filteredItems.length > 0 ? (
+                {isLoading ? (
+                  <motion.div
+                    key="loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="grid gap-10 md:grid-cols-2 xl:grid-cols-3"
+                  >
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <div key={i} className="h-[500px] rounded-[3rem] bg-white/5 animate-pulse border border-white/5" />
+                    ))}
+                  </motion.div>
+                ) : filteredItems.length > 0 ? (
                   <motion.div
                     layout
                     className={

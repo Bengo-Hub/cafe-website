@@ -11,7 +11,7 @@ export default function BusinessHubPage() {
       {/* Hero */}
       <section className="relative h-[320px] md:h-[420px] overflow-hidden">
         <Image
-          src="/images/hero/hero-5.jpg"
+          src="/images/hero/hero-work-hub-1.jpg"
           alt="Urban Loft Business Hub"
           fill
           className="object-cover"

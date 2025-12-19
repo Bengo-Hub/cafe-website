@@ -24,12 +24,12 @@ interface HeroSectionProps {
 }
 
 const DEFAULT_SLIDES = [
-  '/images/hero/hero-1.jpg',
-  '/images/hero/hero-2.jpg',
-  '/images/hero/hero-3.jpg',
-  '/images/hero/hero-4.jpg',
-  '/images/hero/hero-5.jpg',
-  '/images/hero/hero-6.jpg',
+  '/images/hero/hero-food.jpg',
+  '/images/hero/hero-premium-coffee.jpg',
+  '/images/hero/hero-work-hub-1.jpg',
+  '/images/hero/hero-events.jpg',
+  '/images/hero/hero-accommodation.jpg',
+  '/images/hero/hero-signature-meals.jpg',
 ];
 
 export const HeroSection: React.FC<HeroSectionProps> = ({

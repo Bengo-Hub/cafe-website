@@ -36,7 +36,7 @@ const SLIDES: SlideContent[] = [
     subtitle: 'BUSINESS HUB',
     title: 'Work Productively',
     description: 'Modern co-working spaces with high-speed Wi-Fi.',
-    image: '/images/hero/her-work-hub-1.jpg',
+    image: '/images/hero/hero-work-hub-1.jpg',
     primaryBtn: { text: 'Book a Space', href: '/services/hub' },
     secondaryBtn: { text: 'View Amenities', href: '/services/hub#amenities' },
   },

@@ -11,7 +11,7 @@ export default function EventsServicesPage() {
       {/* Hero */}
       <section className="relative h-[320px] md:h-[420px] overflow-hidden">
         <Image
-          src="/images/hero/hero-4.jpg"
+          src="/images/hero/hero-events.jpg"
           alt="Urban Loft Events & Catering"
           fill
           className="object-cover"

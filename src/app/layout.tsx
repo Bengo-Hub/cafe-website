@@ -1,14 +1,27 @@
 import { Footer, Header } from '@/components/layout';
 import PageTransition from '@/components/layout/PageTransition';
-import { ThemeProvider } from '@/components/providers/ThemeProvider';
-import type { Metadata } from 'next';
+import { Providers } from '@/components/providers/Providers';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
+
+export const viewport: Viewport = {
+  themeColor: '#ea8022',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://urbanloftcafe.com'),
   title: {
     default: 'Urban Loft Cafe - Beyond Food',
     template: '%s | Urban Loft Cafe',
+  },
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/images/logo/logo.jpg',
+    shortcut: '/images/logo/logo.jpg',
+    apple: '/images/logo/logo.jpg',
   },
   description:
     'Eat. Work. Connect. Experience. Premium cafe, business hub, and event space in Kiambu and Busia, Kenya. Specialty coffee, coworking spaces, and memorable events.',
@@ -84,7 +97,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
-        <ThemeProvider>
+        <Providers>
           <div className="min-h-screen flex flex-col">
             <Header />
             <main className="flex-1">
@@ -92,7 +105,7 @@ export default function RootLayout({
             </main>
             <Footer />
           </div>
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

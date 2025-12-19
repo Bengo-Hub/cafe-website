@@ -1,7 +1,9 @@
 'use client';
 
 import {
+    BarChart3,
     Bell,
+    Clock,
     LayoutDashboard,
     LogOut,
     Menu,
@@ -17,6 +19,8 @@ import { useState } from 'react';
 const SIDEBAR_ITEMS = [
   { label: 'Dashboard', icon: LayoutDashboard, href: '/staff' },
   { label: 'Orders', icon: ShoppingBag, href: '/staff/orders' },
+  { label: 'Shifts', icon: Clock, href: '/staff/shifts' },
+  { label: 'Analytics', icon: BarChart3, href: '/staff/analytics' },
   { label: 'Team', icon: Users, href: '/staff/team', adminOnly: true },
   { label: 'Settings', icon: Settings, href: '/staff/settings' },
 ];
