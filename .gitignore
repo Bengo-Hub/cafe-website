@@ -85,3 +85,9 @@ logs/
 *.tmp
 *.temp
 .cache/
+
+# Image backups
+*.original.jpg
+
+# Image optimization script
+optimize-images.js
