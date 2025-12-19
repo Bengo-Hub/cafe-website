@@ -74,18 +74,25 @@ fi
 kubectl get ns "$NAMESPACE" >/dev/null 2>&1 || kubectl create ns "$NAMESPACE"
 
 # Optional: Apply environment secrets if they exist
-if [[ -n "${ENV_SECRET_NAME}" ]] && [[ -f ".env.local" ]]; then
-  step "Creating K8s env secret: ${ENV_SECRET_NAME}"
-  if kubectl create secret generic "$ENV_SECRET_NAME" \
-    --from-env-file=.env.local \
-    -n "$NAMESPACE" \
-    --dry-run=client -o yaml | kubectl apply -f - 2>/dev/null; then
-    ok "Env secret created/updated"
+if [[ -n "${ENV_SECRET_NAME}" ]]; then
+  if [[ -f ".env.local" ]]; then
+    step "Creating K8s env secret from .env.local: ${ENV_SECRET_NAME}"
+    kubectl create secret generic "$ENV_SECRET_NAME" \
+      --from-env-file=.env.local \
+      -n "$NAMESPACE" \
+      --dry-run=client -o yaml | kubectl apply -f -
+    ok "Env secret created/updated from .env.local"
+  elif [[ -f "kubeSecrets/devENV.yaml" ]]; then
+    step "Applying K8s env secret from kubeSecrets/devENV.yaml"
+    kubectl apply -f kubeSecrets/devENV.yaml -n "$NAMESPACE"
+    ok "Env secret applied from kubeSecrets/devENV.yaml"
   else
-    warn "Could not create env secret - deployment will continue with optional secrets"
+    # Ensure the secret exists at least as an empty secret to avoid deployment failure
+    if ! kubectl get secret "$ENV_SECRET_NAME" -n "$NAMESPACE" >/dev/null 2>&1; then
+      warn "No .env.local or kubeSecrets/devENV.yaml found. Creating empty secret ${ENV_SECRET_NAME} to avoid deployment failure."
+      kubectl create secret generic "$ENV_SECRET_NAME" -n "$NAMESPACE"
+    fi
   fi
-else
-  info "No .env.local file found - skipping secret creation (optional for cafe-website)"
 fi
 
 # Update Helm values in devops-k8s repo

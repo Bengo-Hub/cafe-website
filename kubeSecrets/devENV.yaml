@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cafe-website-env
+  namespace: cafe
+type: Opaque
+stringData:
+  # ============================================
+  # API CONFIGURATION
+  # ============================================
+  NEXT_PUBLIC_ORDERING_API_URL: "https://orderapi.codevertexitsolutions.com"
+  NEXT_PUBLIC_AUTH_URL: "https://sso.codevertexitsolutions.com"
+  NEXT_PUBLIC_AUTH_UI_URL: "https://accounts.codevertexitsolutions.com"
+  NEXT_PUBLIC_NOTIFICATIONS_URL: "https://notifications.codevertexitsolutions.com"
+
+  # ============================================
+  # APPLICATION CONFIGURATION
+  # ============================================
+  NODE_ENV: "production"
+  
+  # ============================================
+  # OPTIONAL SECRETS
+  # ============================================
+  # NEXT_PUBLIC_MAPBOX_TOKEN: "your-token-here"
+  # NEXT_PUBLIC_SENTRY_DSN: "your-dsn-here"
