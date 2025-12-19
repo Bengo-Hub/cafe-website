@@ -8,13 +8,23 @@ import { Menu, Moon, Sun, User, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
   const { theme, toggleTheme } = useThemeStore();
   const { isAuthenticated, user, logout } = useAuthStore();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -27,7 +37,7 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 transition-all duration-600 glass-morphism border-b border-brand-beige/20 dark:border-brand-orange/10 shadow-lg dark:shadow-2xl dark:shadow-black/50 backdrop-blur-2xl">
+    <header className={`sticky top-0 z-50 transition-all duration-600 glass-morphism border-b border-brand-beige/20 dark:border-brand-orange/10 shadow-lg dark:shadow-2xl dark:shadow-black/50 backdrop-blur-2xl ${isScrolled ? 'scroll-solid' : ''}`}>
       <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-brand-orange/30 dark:via-brand-orange/30 to-transparent" />
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 md:h-24 items-center justify-between">

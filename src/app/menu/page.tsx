@@ -121,7 +121,7 @@ export default function MenuPage() {
                 <Sparkles className="h-4 w-4" />
                 <span>Culinary Excellence</span>
               </div>
-              <h1 className="mb-6 text-7xl font-black text-brand-dark dark:text-white md:text-9xl tracking-tighter leading-none">
+              <h1 className="mb-6 text-7xl font-black text-white md:text-9xl tracking-tighter leading-none">
                 Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-gold">Menu</span>
               </h1>
               <p className="mx-auto max-w-2xl text-xl font-light text-brand-muted dark:text-brand-beige/80 leading-relaxed md:text-2xl">

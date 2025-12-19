@@ -107,6 +107,11 @@ body::before {
     @apply bg-brand-light/20 dark:bg-brand-dark/50 border-brand-beige/40 dark:border-brand-orange/20;
   }
 
+  /* Solid header on scroll */
+  header.scroll-solid {
+    @apply bg-brand-light/95 dark:bg-brand-dark/95 backdrop-blur-xl border-brand-beige/40 dark:border-brand-orange/20 shadow-lg;
+  }
+
   .glass-morphism-lg {
     @apply backdrop-blur-2xl bg-brand-light/20 dark:bg-brand-dark/50 border border-brand-beige/30 dark:border-brand-orange/20;
   }

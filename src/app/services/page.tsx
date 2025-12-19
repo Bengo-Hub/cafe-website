@@ -66,7 +66,7 @@ export default function ServicesPage() {
   ];
 
   return (
-      <main className="relative min-h-screen overflow-hidden bg-brand-dark">
+      <main className="relative min-h-screen overflow-hidden bg-brand-light dark:bg-brand-dark transition-colors duration-600">
         {/* Magical Background Elements */}
         <div className="fixed inset-0 z-0">
           <div className="absolute inset-0 bg-mesh opacity-40" />
@@ -98,10 +98,10 @@ export default function ServicesPage() {
                 <Star className="h-4 w-4" />
                 <span>Premium Offerings</span>
               </div>
-              <h1 className="mb-6 text-7xl font-black text-brand-dark dark:text-white md:text-9xl tracking-tighter leading-none">
+              <h1 className="mb-6 text-7xl font-black text-white md:text-9xl tracking-tighter leading-none">
                 Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-gold">Services</span>
               </h1>
-              <p className="mx-auto max-w-2xl text-xl font-light text-brand-muted dark:text-brand-beige/80 leading-relaxed md:text-2xl">
+              <p className="mx-auto max-w-2xl text-xl font-light text-brand-beige/70 dark:text-brand-beige/80 leading-relaxed md:text-2xl">
                 Everything you need to eat, work, and connect in one modern space.
                 Discover our ecosystem designed for your lifestyle.
               </p>
@@ -143,9 +143,9 @@ export default function ServicesPage() {
           
           <div className="container relative z-10">
             <div className="mx-auto max-w-4xl electrical-border rounded-[3rem]">
-              <div className="overflow-hidden rounded-[3rem] bg-brand-light/40 dark:bg-brand-dark/40 backdrop-blur-xl p-10 md:p-20 text-center shadow-2xl border border-brand-beige/20 dark:border-white/10">
+              <div className="overflow-hidden rounded-[3rem] bg-brand-light/60 dark:bg-brand-dark/40 backdrop-blur-xl p-10 md:p-20 text-center shadow-2xl border border-brand-beige/20 dark:border-white/10">
                 <h2 className="mb-6 text-4xl font-black text-brand-dark dark:text-white md:text-6xl tracking-tight">Need a <span className="text-brand-orange">Custom Solution?</span></h2>
-                <p className="mb-10 text-xl font-light text-brand-muted dark:text-brand-beige/60 leading-relaxed">
+                <p className="mb-10 text-xl font-light text-brand-brown dark:text-brand-beige/60 leading-relaxed">
                   Whether it's a large corporate event, a long-term office rental, or a special catering request, we're here to help.
                 </p>
                 <div className="flex flex-wrap justify-center gap-4">

@@ -28,7 +28,7 @@ export default function EventsPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/80 via-brand-dark/40 to-brand-dark" />
         </div>
-        <div className="container relative flex h-full items-center justify-center text-center text-brand-dark dark:text-white">
+        <div className="container relative flex h-full items-center justify-center text-center text-white">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
