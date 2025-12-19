@@ -34,7 +34,8 @@ COPY --from=builder /app/node_modules ./node_modules
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
+    adduser -S nextjs -u 1001 && \
+    chown -R nextjs:nodejs /app/.next
 
 USER nextjs
 
