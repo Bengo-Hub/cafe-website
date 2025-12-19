@@ -1,103 +1,89 @@
-# Sprint 4: Authentication & Order Tracking
+# Sprint 4: Authentication, Order Tracking & Staff Portal
 
-**Duration**: 1-2 weeks  
-**Status**: Not Started  
-**Goal**: Implement SSO authentication and real-time order tracking with maps
+**Duration**: 2 weeks  
+**Status**: In Progress 🏗️  
+**Goal**: Implement SSO authentication, real-time order tracking, and the Staff/Admin Portal
 
 ---
 
 ## Tasks
 
 ### 1. SSO Authentication Setup
-- [ ] Install NextAuth.js or custom OIDC client
-- [ ] Configure OAuth2/OIDC settings
-- [ ] Setup auth-service endpoints in config
-- [ ] Create authentication provider wrapper
-- [ ] Implement session management
+- [x] Install NextAuth.js or custom OIDC client
+- [x] Configure OAuth2/OIDC settings (Custom Provider)
+- [x] Setup auth-service endpoints in config
+- [x] Create authentication provider wrapper (src/auth.ts)
+- [x] Implement session management (JWT + Session callbacks)
 
 ### 2. Login Flow
-- [ ] Create login page (`/auth/login`)
-- [ ] Implement "Login with Email" form
+- [x] Create login page (`/auth/login`)
+- [x] Implement "Login with Email" form (Dummy)
+- [x] Add "Sign in with BengoBox SSO" button
 - [ ] Add "Login with Google" button
 - [ ] Add "Login with Microsoft" button
-- [ ] Build authorization redirect handler
-- [ ] Generate PKCE code challenge/verifier
-- [ ] Implement state parameter for CSRF protection
-- [ ] Handle authorization code exchange
-- [ ] Store tokens in httpOnly cookies
-- [ ] Add LoadingSpinner to login button during authentication
+- [x] Build authorization redirect handler (NextAuth)
+- [x] Generate PKCE code challenge/verifier (NextAuth)
+- [x] Implement state parameter for CSRF protection (NextAuth)
+- [x] Handle authorization code exchange (NextAuth)
+- [x] Store tokens in httpOnly cookies (NextAuth)
+- [x] Add LoadingSpinner to login button during authentication
 - [ ] Show spinner during OAuth redirects
 
 ### 3. Auth Callback Handler (`/auth/callback`)
-- [ ] Create callback route handler
-- [ ] Validate state parameter
-- [ ] Exchange authorization code for tokens
-- [ ] Validate JWT signature (JWKS)
-- [ ] Extract user claims (user_id, tenant_id, roles)
+- [x] Create callback route handler (api/auth/[...nextauth])
+- [x] Validate state parameter (NextAuth)
+- [x] Exchange authorization code for tokens (NextAuth)
+- [x] Validate JWT signature (JWKS) (NextAuth)
+- [x] Extract user claims (user_id, tenant_id, roles)
 - [ ] Store session in Redis (if available, or in-memory)
-- [ ] Set httpOnly cookies (access_token, refresh_token)
-- [ ] Redirect to intended URL or home
+- [x] Set httpOnly cookies (access_token, refresh_token)
+- [x] Redirect to intended URL or home
 
 ### 4. Session Management
-- [ ] Implement middleware for protected routes
-- [ ] Check JWT validity on each request
-- [ ] Auto-refresh expired tokens
-- [ ] Handle token refresh flow
+- [x] Implement middleware for protected routes
+- [x] Check JWT validity on each request
+- [x] Auto-refresh expired tokens
+- [x] Handle token refresh flow
 - [ ] Clear session on logout
 - [ ] Implement logout endpoint (`/auth/logout`)
 - [ ] Redirect to auth-service logout URL
 
 ### 5. User Profile & Context
-- [ ] Create user context (React Context)
+- [x] Create user context (Zustand Store + NextAuth Session)
 - [ ] Fetch user profile from `/auth/me`
-- [ ] Display user info in navigation
-- [ ] Add profile dropdown menu
-- [ ] Show logout button
+- [x] Display user info in navigation
+- [x] Add profile dropdown menu
+- [x] Show logout button
 - [ ] Implement "My Orders" link
 - [ ] Add "My Bookings" link (future)
 
 ### 6. Protected Routes
-- [ ] Protect `/admin/*` routes
+- [x] Protect `/admin/*` routes (Middleware)
+- [x] Protect `/staff/*` routes (Middleware)
 - [ ] Protect `/track-order` (optional)
-- [ ] Protect `/loyalty` page
-- [ ] Redirect unauthenticated users to login
-- [ ] Store intended URL for post-login redirect
+- [x] Protect `/loyalty` page (Middleware)
+- [x] Redirect unauthenticated users to login
+- [x] Store intended URL for post-login redirect
 
-### 7. Order Tracking Page (`/track-order`)
-- [ ] Create order tracking page layout
-- [ ] Accept order_id as query parameter
-- [ ] Fetch order details from ordering-service (dummy)
-- [ ] Display order status timeline
-- [ ] Show order items and total
-- [ ] Create status badges (pending, preparing, out for delivery)
-- [ ] Display estimated delivery time
-- [x] Implement loading.tsx skeleton with map and details
-- [ ] Add LoadingSpinner during order fetch
+### 7. Order Tracking (Redirect)
+- [x] Implement redirect to `ordering-service` tracking page
+- [x] Pass `order_id` and `tenant_slug` in query parameters
+- [x] Ensure SSO session persists across redirect
+- [x] Users can enter Order ID on `cafe-website` and get redirected to `ordering-service`
+- [x] `ordering-service` handles timeline and live driver coordinates from `logistics-service`
 
-### 8. Real-Time Tracking (Maps)
-- [ ] Install react-leaflet for OpenStreetMap
-- [ ] Create map component with order location
-- [ ] Add marker for rider location
-- [ ] Add marker for delivery destination
-- [ ] Implement WebSocket connection to logistics-service
-- [ ] Handle location_update messages
-- [ ] Update marker position in real-time
-- [ ] Calculate and display ETA
-- [ ] Show distance to destination
+### 8. Menu Integration (Display Only)
+- [ ] Pull sample main dishes from `ordering-service` API for display
+- [ ] Implement redirect to `ordering-service` when user clicks "Add to Cart", "Whitelist", or "View"
+- [ ] Pass `item_id` and `action` to `ordering-service` for state management
 
-### 9. Google Maps Integration (Optional)
-- [ ] Install @react-google-maps/api
-- [ ] Create GoogleMap component
-- [ ] Detect map provider from env (OSM vs Google)
-- [ ] Prioritize Google Maps if API key is set
-- [ ] Implement same features as OpenStreetMap
-- [ ] Style map with custom colors
-
-### 10. Rider Information
+### 10. Rider Information & Payouts
 - [ ] Display rider name and photo
 - [ ] Show rider phone number
 - [ ] Add "Call Rider" button
 - [ ] Display vehicle information
+- [ ] **Integration**: Logistics-service calculates rider payouts
+- [ ] **Integration**: Ordering-service manages customer feedback and ratings
 - [ ] Show rider rating (if available)
 
 ### 11. Fallback Polling

@@ -57,12 +57,14 @@ The Urban Loft Cafe Website integrates with multiple BengoBox microservices. Thi
 **Endpoints Used**:
 - `GET /v1/{tenant}/tasks/{task_id}` - Task details
 - `WS /track/{order_id}` - Real-time location tracking
+- `GET /v1/{tenant}/billing/payouts` - Rider payout information (for staff portal)
 
 **Data Flows**:
 - Real-time order tracking via WebSocket
 - Rider location updates
 - ETA calculations
 - Fallback polling if WebSocket fails
+- **Rider Payouts**: Logistics-service is responsible for calculating rider/driver payout amounts based on distance, time, and base rates.
 
 **Gaps**: None - service is fully functional
 
@@ -76,28 +78,38 @@ The Urban Loft Cafe Website integrates with multiple BengoBox microservices. Thi
 - `POST /api/v1/{tenant}/payments/intents` - Create payment
 - `GET /api/v1/{tenant}/payments/{payment_id}` - Payment status
 - `POST /api/v1/{tenant}/payments/webhook` - Payment webhook
+- `POST /api/v1/{tenant}/payouts` - Execute rider payouts (triggered by logistics-service)
 
 **Data Flows**:
 - Payment intents for bookings/events
 - M-Pesa STK Push
 - Card payment processing
 - Payment status updates
+- **Payout Execution**: Treasury-service executes the actual payouts to riders after calculation by logistics-service.
 
 **Gaps**: 
 - Need to verify treasury-service API endpoints
 - Need to document payment webhook handling
 - Need M-Pesa configuration details
 
-**Mitigation**: Use dummy payment flow until treasury-service is fully documented
-
 ---
 
-### 5. Notifications Service ✅
-**Status**: Available  
-**Integration Type**: REST API
+### 6. Staff/Admin Portal Integration (New)
+**Status**: In Progress 🏗️
+**Integration Type**: REST API (Ordering & Logistics)
 
-**Endpoints Used**:
-- `POST /api/v1/notifications/email` - Send email
+**Capabilities**:
+- **Staff Management**: Admin-only interface to manage cafe staff roles and assignments.
+- **Order Management**: Staff interface to manage the lifecycle of online orders.
+- **Status Updates**: Staff can update order status (Confirmed, Preparing, Ready, Packaged, Dispatched).
+- **Rider Coordination**: View assigned riders and their real-time status.
+- **Customer Feedback**: View ratings and feedback for orders and riders.
+
+**Data Flows**:
+- Fetch active orders from `ordering-service`.
+- Update order status in `ordering-service`.
+- Fetch rider status from `logistics-service`.
+- Fetch customer feedback from `ordering-service`.
 - `POST /api/v1/notifications/sms` - Send SMS
 
 **Data Flows**:

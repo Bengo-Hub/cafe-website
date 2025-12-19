@@ -8,7 +8,7 @@ import Image from 'next/image';
 
 export default function EventsPage() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-brand-light dark:bg-brand-dark transition-colors duration-600">
+    <main className="relative min-h-screen overflow-hidden section-blend-cream">
       {/* Magical Background Elements */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-mesh opacity-40" />
@@ -40,7 +40,7 @@ export default function EventsPage() {
             <h1 className="mb-4 text-5xl font-black md:text-8xl tracking-tight leading-tight">
               Events & <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-gold">Happenings</span>
             </h1>
-            <p className="mx-auto max-w-2xl text-xl text-brand-muted dark:text-brand-beige/60 font-light">
+            <p className="mx-auto max-w-2xl text-xl text-secondary-brand font-light">
               Join us for exciting community events, workshops, and live performances.
             </p>
           </motion.div>
@@ -60,7 +60,7 @@ export default function EventsPage() {
                 transition={{ duration: 0.8, delay: index * 0.1 }}
               >
                 <div className="electrical-border rounded-[3rem]">
-                  <Card className="overflow-hidden shadow-2xl border-none bg-white/5 backdrop-blur-xl rounded-[3rem]">
+                  <Card className="overflow-hidden shadow-2xl border-none magical-card rounded-[3rem]">
                     <div className="grid md:grid-cols-2">
                       <div className="relative h-[350px] md:h-auto overflow-hidden">
                         <Image
@@ -75,23 +75,23 @@ export default function EventsPage() {
                         <div className="mb-6 inline-flex w-fit rounded-full bg-brand-orange/10 px-5 py-1.5 text-[10px] font-black uppercase tracking-widest text-brand-orange border border-brand-orange/20">
                           {event.category}
                         </div>
-                        <h2 className="mb-6 text-4xl font-black text-white tracking-tight">{event.name}</h2>
-                        <p className="mb-10 text-xl text-brand-beige/70 font-light leading-relaxed">{event.description}</p>
+                        <h2 className="mb-6 text-4xl font-black text-primary-brand tracking-tight">{event.name}</h2>
+                        <p className="mb-10 text-xl text-secondary-brand font-light leading-relaxed">{event.description}</p>
                         
                         <div className="space-y-6 border-t border-white/5 pt-10">
-                          <div className="flex items-center gap-4 text-brand-beige/80">
+                          <div className="flex items-center gap-4 text-secondary-brand">
                             <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
                               <Calendar className="h-6 w-6 text-brand-orange" />
                             </div>
                             <span className="text-lg font-medium">{event.date}</span>
                           </div>
-                          <div className="flex items-center gap-4 text-brand-beige/80">
+                          <div className="flex items-center gap-4 text-secondary-brand">
                             <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
                               <Clock className="h-6 w-6 text-brand-orange" />
                             </div>
                             <span className="text-lg font-medium">{event.time}</span>
                           </div>
-                          <div className="flex items-center gap-4 text-brand-beige/80">
+                          <div className="flex items-center gap-4 text-secondary-brand">
                             <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
                               <MapPin className="h-6 w-6 text-brand-orange" />
                             </div>

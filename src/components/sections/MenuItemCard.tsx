@@ -10,10 +10,18 @@ import { Badge, Card } from '../ui';
 interface MenuItemCardProps {
   item: MenuItem;
   onClick?: () => void;
+  onAddToCart?: (e: React.MouseEvent) => void;
+  onView?: (e: React.MouseEvent) => void;
   className?: string;
 }
 
-export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onClick, className = '' }) => {
+export const MenuItemCard: React.FC<MenuItemCardProps> = ({ 
+  item, 
+  onClick, 
+  onAddToCart,
+  onView,
+  className = '' 
+}) => {
   return (
     <motion.div
       whileHover={{ y: -8 }}
@@ -55,10 +63,22 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onClick, class
 
           {/* Hover Actions */}
           <div className="absolute bottom-6 left-0 right-0 z-10 flex translate-y-10 justify-center gap-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
-            <button className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-brand-orange shadow-2xl transition-all hover:scale-110 hover:bg-brand-orange hover:text-white">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddToCart?.(e);
+              }}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-brand-orange shadow-2xl transition-all hover:scale-110 hover:bg-brand-orange hover:text-white"
+            >
               <ShoppingCart className="h-5 w-5" />
             </button>
-            <button className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-orange text-white shadow-2xl transition-all hover:scale-110 hover:bg-brand-burnt">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onView?.(e);
+              }}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-orange text-white shadow-2xl transition-all hover:scale-110 hover:bg-brand-burnt"
+            >
               <Eye className="h-5 w-5" />
             </button>
           </div>

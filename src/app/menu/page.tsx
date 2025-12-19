@@ -1,8 +1,8 @@
 'use client';
 
 import {
-    MenuItemCard,
-    MenuItemModal
+  MenuItemCard,
+  MenuItemModal
 } from '@/components/sections';
 import { Badge, Button } from '@/components/ui';
 import { dummyMenuItems } from '@/lib/dummy-data';
@@ -10,16 +10,16 @@ import { generateMenuSchema } from '@/lib/utils/schema';
 import { MenuItem } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-    ArrowUpDown,
-    ChevronDown,
-    Filter,
-    LayoutGrid,
-    List,
-    Search,
-    SlidersHorizontal,
-    Sparkles,
-    UtensilsCrossed,
-    X
+  ArrowUpDown,
+  ChevronDown,
+  Filter,
+  LayoutGrid,
+  List,
+  Search,
+  SlidersHorizontal,
+  Sparkles,
+  UtensilsCrossed,
+  X
 } from 'lucide-react';
 import Image from 'next/image';
 import Script from 'next/script';
@@ -72,8 +72,16 @@ export default function MenuPage() {
     setIsModalOpen(true);
   };
 
+  const handleRedirect = (item: MenuItem, action: 'add-to-cart' | 'view' | 'whitelist') => {
+    const tenant = process.env.NEXT_PUBLIC_TENANT_SLUG || 'urban-loft';
+    const orderingUrl = process.env.NEXT_PUBLIC_ORDERING_SERVICE_URL || 'https://ordering.codevertexitsolutions.com';
+    const redirectUrl = `${orderingUrl}/menu?item_id=${item.id}&action=${action}&tenant=${tenant}`;
+    
+    window.location.href = redirectUrl;
+  };
+
   const handleOrder = (item: MenuItem) => {
-    console.log(`Ordered ${item.name}`);
+    handleRedirect(item, 'add-to-cart');
     setIsModalOpen(false);
   };
 
@@ -124,7 +132,7 @@ export default function MenuPage() {
               <h1 className="mb-6 text-7xl font-black text-white md:text-9xl tracking-tighter leading-none">
                 Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-gold">Menu</span>
               </h1>
-              <p className="mx-auto max-w-2xl text-xl font-light text-brand-muted dark:text-brand-beige/80 leading-relaxed md:text-2xl">
+              <p className="mx-auto max-w-2xl text-xl font-light text-brand-beige/70 dark:text-brand-beige/80 leading-relaxed md:text-2xl">
                 A curated selection of signature meals, specialty coffees, and artisanal treats
                 crafted with passion and the finest local ingredients.
               </p>
@@ -339,6 +347,8 @@ export default function MenuPage() {
                         <MenuItemCard 
                           item={item} 
                           onClick={() => handleItemClick(item)}
+                          onAddToCart={() => handleRedirect(item, 'add-to-cart')}
+                          onView={() => handleRedirect(item, 'view')}
                           className={viewMode === 'list' ? 'flex flex-row h-56' : ''}
                         />
                       </motion.div>

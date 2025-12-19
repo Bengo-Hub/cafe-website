@@ -6,21 +6,46 @@
 
 **Key Capabilities**:
 - Customer-facing website with SEO-optimized public pages
-- Integrated online ordering (ordering-service)
+- Integrated online ordering (Redirects to ordering-service)
 - Event, room, and conference bookings
 - Business hub (co-working, offices) booking system
 - Staff/admin panel with seamless service transitions
 - Single Sign-On (SSO) integration across all services
-- Real-time order tracking with live map integration(open street map is default but also implement google maps and prioritize it if api keys are set)
+- Real-time order tracking (Redirects to ordering-service)
 - Responsive PWA-ready design (mobile-first)
 - Loyalty program access
 - Theme switching (Light/Dark mode)
 - Auth-state aware navigation (Login/Signup/Profile)
+- **Staff/Admin Portal**: Centralized management for cafe operations, staff, and orders.
 
 **Inspired By**:
 - https://artcaffemarket.co.ke/ - Modern café website design
 - https://javahouseafrica.com/ - Premium brand experience
 - [ubereats.com](https://www.ubereats.com/) - Uber Eats
+
+---
+
+## Branding & Identity
+
+**Tagline**: BEYOND FOOD - Eat. Work. Connect. Experience.
+
+**Brand Promise**: Great food. Premium service. Meaningful experiences. Every time.
+
+**Core Values**:
+- **Excellence**: Never compromising on food quality, service, or hygiene.
+- **Gratitude**: Appreciating every customer and community member.
+- **Respect**: Treating everyone with dignity and warmth.
+- **Friendliness**: Creating a welcoming, "urban boho" atmosphere.
+- **Community**: Being a hub for connection and collaboration.
+- **Experience**: Curating peaceful, premium moments with mellow music and warm service.
+
+**Visual Identity**:
+- **Primary Color**: Urban Loft Orange (#ea8022)
+- **Secondary Colors**: Gold (#ae6221), Brown (#663209), Taupe (#958c80)
+- **Backgrounds**: Creamy Light (#f5f1ec), Dark Espresso (#2c1a02)
+- **Typography**: Modern sans-serif (Helvetica Neue) for clarity and premium feel.
+
+---
 
 **Entity Ownership**: The cafe website is a frontend application that integrates with backend services. It does NOT own any entities - all data is managed by respective microservices:
 - Orders → ordering-service
@@ -28,6 +53,8 @@
 - Payments → treasury-service
 - User identity → auth-service
 - Menu/catalog → ordering-service
+- **Microservice Switching**: This website acts as the central hub. It redirects users to specialized services for specific tasks (e.g., Ordering, Tracking, Rider Management) to avoid logic duplication. All services share SSO via `auth-service`.
+- **Display-Only Integration**: The cafe website pulls data (like sample dishes) for display purposes only. Any action that modifies state (adding to cart, updating an order, assigning a rider) is handled by redirecting the user to the owning microservice's UI.
 
 ---
 
@@ -168,19 +195,19 @@ All Services Validate JWT:
 - Filter by category (meals, beverages, specials)
 - Search functionality
 - Item details modal (nutrition info, dietary tags)
-- "Order Now" button → Redirects to ordering-service PWA
-- No login required for browsing
+- **Action Redirects**: Clicking "Add to Cart", "Whitelist", or "View" redirects the user to the `ordering-service` PWA.
+- No login required for browsing.
 
 **Integration Points**:
-- Menu data from ordering-service API: `GET /api/v1/{tenant}/menu/items`
-- Real-time availability from inventory-service
-- Images from S3/CDN
+- **Display**: Pulls sample main dishes and menu data from `ordering-service` API: `GET /api/v1/{tenant}/menu/items`.
+- **Logic**: All cart and order management is delegated to the `ordering-service`.
+- Images from S3/CDN.
 
 **Data Flow**:
 ```
-Website → Ordering Service API → Menu Items
-Website → Inventory Service API → Stock Availability (optional)
-User clicks "Order" → Redirect to ordering-service PWA with item pre-selected
+Website → Ordering Service API → Fetch Sample Dishes (Display Only)
+User Action (Add to Cart) → Redirect to:
+https://ordering.codevertexitsolutions.com/menu?item_id={id}&action=add-to-cart&tenant={tenant}
 ```
 
 ---
@@ -256,32 +283,15 @@ User clicks "Order" → Redirect to ordering-service PWA with item pre-selected
 
 ---
 
-### 7. Order Tracking (`/track-order`)
+### 7. Order Tracking (Redirect)
 
 **Features**:
-- Order status display
-- Real-time delivery tracking (live map)
-- Rider information (name, phone, vehicle)
-- Estimated arrival time (ETA)
-- Delivery progress timeline
-- Contact rider button
-- Order details summary
+- Redirects users to the `ordering-service` tracking page.
+- Passes `order_id` and `tenant_slug` via query parameters.
+- Seamless transition via shared SSO.
 
 **Integration Points**:
-- Order data from ordering-service: `GET /api/v1/{tenant}/orders/{order_id}`
-- Live tracking from logistics-service: WebSocket connection
-- Map integration (Mapbox/Google Maps)
-
-**Real-time Flow**:
-```
-Website → WebSocket → Logistics Service
-    ↓
-Live Location Updates
-    ↓
-Map Marker Updates
-    ↓
-ETA Recalculation
-```
+- Redirect URL: `https://ordering.codevertexitsolutions.com/track?id={order_id}&tenant={tenant_slug}`
 
 ---
 
@@ -697,6 +707,33 @@ workbox.routing.registerRoute(
 - Code splitting
 - Minimal JavaScript bundle
 
+### 6. Order Tracking (`/track-order`)
+
+**Features**:
+- Simple entry form for Order ID.
+- **Redirect Logic**: Upon submission, redirects to the `ordering-service` tracking page.
+- **Deep Linking**: Accepts `id` query parameter for direct redirection.
+
+**Data Flow**:
+```
+User enters Order ID → Redirect to:
+https://ordering.codevertexitsolutions.com/track?id={order_id}&tenant={tenant}
+```
+
+---
+
+### 7. Staff/Admin Portal (`/staff`, `/admin`)
+
+**Features**:
+- Centralized dashboard for cafe operations.
+- **Service Redirection**: Any task requiring deep integration with a microservice (e.g., assigning a rider, managing inventory) redirects the staff member to the specific service's UI.
+- **Unified SSO**: Seamless transitions between services without re-authentication.
+
+**Integration Points**:
+- **Ordering**: Redirects to `ordering-service` for order fulfillment.
+- **Logistics**: Redirects to `logistics-service` for rider assignments and fleet management.
+- **Notifications**: Direct integration for sending alerts (no UI required).
+
 ---
 
 ## Implementation Sprints
@@ -735,9 +772,8 @@ See detailed sprint documents in [docs/sprints/](./sprints/) directory.
 ### Sprint 4: Authentication & Order Tracking (Weeks 4-5)
 - [ ] SSO integration with auth-service
 - [ ] Login/logout flows
-- [ ] Order tracking page
-- [ ] Real-time map integration (OpenStreetMap + Google Maps)
-- [ ] WebSocket support with fallback polling
+- [ ] Order tracking redirector page
+- [ ] Integration with `ordering-service` for tracking handoff
 
 **Document**: [sprint-4-auth-tracking.md](./sprints/sprint-4-auth-tracking.md)
 
@@ -750,6 +786,17 @@ See detailed sprint documents in [docs/sprints/](./sprints/) directory.
 - [ ] Monitoring setup
 
 **Document**: [sprint-5-pwa-polish.md](./sprints/sprint-5-pwa-polish.md)
+
+### Sprint 6: Real Staff/Admin Portal (Weeks 7-8)
+- [x] Base layout and dashboard UI
+- [x] Order Management UI with status workflow
+- [x] Team Management UI
+- [ ] Service redirection logic for order fulfillment and logistics
+- [ ] RBAC implementation (Staff vs Admin permissions)
+- [ ] Analytics dashboard (Superset embedding)
+- [ ] Staff shift and attendance tracking
+
+**Document**: [sprint-6-staff-portal.md](./sprints/sprint-6-staff-portal.md)
 
 ---
 

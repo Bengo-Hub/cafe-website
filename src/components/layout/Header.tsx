@@ -5,6 +5,7 @@ import { useAuthStore } from '@/lib/store/auth-store';
 import { useThemeStore } from '@/lib/store/theme-store';
 import { motion } from 'framer-motion';
 import { Menu, Moon, Sun, User, X } from 'lucide-react';
+import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -156,15 +157,14 @@ export function Header() {
                   transition={{ duration: 0.3 }}
                   className="flex items-center gap-2 ml-3 lg:gap-3 lg:ml-4"
                 >
-                  <Link href="/login">
-                    <Button 
-                      size="sm" 
-                      variant="ghost" 
-                      className="text-brand-muted dark:text-brand-beige/70 hover:text-brand-dark dark:hover:text-brand-light hover:bg-brand-beige/10 dark:hover:bg-white/5 font-black uppercase tracking-widest text-[9px] lg:text-[10px] rounded-full px-3 lg:px-6 h-10 lg:h-11 transition-all whitespace-nowrap"
-                    >
-                      Login
-                    </Button>
-                  </Link>
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    onClick={() => signIn('bengobox-auth')}
+                    className="text-brand-muted dark:text-brand-beige/70 hover:text-brand-dark dark:hover:text-brand-light hover:bg-brand-beige/10 dark:hover:bg-white/5 font-black uppercase tracking-widest text-[9px] lg:text-[10px] rounded-full px-3 lg:px-6 h-10 lg:h-11 transition-all whitespace-nowrap"
+                  >
+                    Login
+                  </Button>
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Link href="/signup">
                       <Button 
@@ -283,11 +283,17 @@ export function Header() {
                 transition={{ delay: 0.2, duration: 0.3 }}
                 className="space-y-3"
               >
-                <Link href="/login" className="block" onClick={() => setMobileMenuOpen(false)}>
-                  <Button className="w-full rounded-lg" size="sm" variant="outline">
-                    Login
-                  </Button>
-                </Link>
+                <Button 
+                  className="w-full rounded-lg" 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    signIn('bengobox-auth');
+                  }}
+                >
+                  Login
+                </Button>
                 <Link href="/signup" className="block" onClick={() => setMobileMenuOpen(false)}>
                   <Button className="w-full rounded-lg bg-gradient-to-r from-brand-orange to-brand-burnt hover:from-brand-burnt hover:to-brand-burnt text-white" size="sm">
                     Sign Up

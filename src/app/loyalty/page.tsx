@@ -53,7 +53,7 @@ export default function LoyaltyPage() {
   const { isAuthenticated, user } = useAuthStore();
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-brand-light dark:bg-brand-dark transition-colors duration-600">
+    <main className="relative min-h-screen overflow-hidden section-blend-cream">
       {/* Magical Background Elements */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-mesh opacity-40" />
@@ -84,10 +84,10 @@ export default function LoyaltyPage() {
               <Star className="h-4 w-4 fill-current" />
               <span>Exclusive Membership</span>
             </div>
-            <h1 className="mb-6 text-6xl font-black text-brand-dark dark:text-white md:text-9xl tracking-tighter leading-tight">
+            <h1 className="mb-6 text-6xl font-black text-primary-brand md:text-9xl tracking-tighter leading-tight">
               Urban Loft <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-gold">Rewards</span>
             </h1>
-            <p className="mx-auto max-w-2xl text-xl font-light text-brand-muted dark:text-brand-beige/60 leading-relaxed">
+            <p className="mx-auto max-w-2xl text-xl font-light text-secondary-brand leading-relaxed">
               Join our community of regulars and get rewarded for every bite, sip, and workspace booking.
             </p>
             {!isAuthenticated && (
@@ -195,12 +195,12 @@ export default function LoyaltyPage() {
                 transition={{ delay: index * 0.1 }}
                 className="electrical-border rounded-[2.5rem]"
               >
-                <div className="h-full p-12 text-center rounded-[2.5rem] bg-white/5 backdrop-blur-xl border-none">
+                <div className="h-full p-12 text-center rounded-[2.5rem] magical-card border-none">
                   <div className="mx-auto mb-10 flex h-24 w-24 items-center justify-center rounded-3xl bg-brand-orange/10 text-brand-orange border border-brand-orange/20">
                     {step.icon}
                   </div>
-                  <h3 className="mb-6 text-2xl font-black text-white tracking-tight">{step.title}</h3>
-                  <p className="text-lg font-light text-brand-beige/60 leading-relaxed">{step.description}</p>
+                  <h3 className="mb-6 text-2xl font-black text-primary-brand tracking-tight">{step.title}</h3>
+                  <p className="text-lg font-light text-secondary-brand leading-relaxed">{step.description}</p>
                 </div>
               </motion.div>
             ))}
@@ -228,20 +228,20 @@ export default function LoyaltyPage() {
                 transition={{ delay: index * 0.1 }}
                 className="electrical-border rounded-[3rem]"
               >
-                <Card className={`h-full overflow-hidden border-none bg-white/5 backdrop-blur-xl p-10 flex flex-col`}>
+                <Card className={`h-full overflow-hidden border-none magical-card p-10 flex flex-col`}>
                   <div className="mb-8">
                     <h3 className={`text-4xl font-black tracking-tighter ${tier.color}`}>{tier.name}</h3>
-                    <p className="text-xs font-black uppercase tracking-widest text-brand-beige/40">{tier.points} pts</p>
+                    <p className="text-xs font-black uppercase tracking-widest text-secondary-brand opacity-40">{tier.points} pts</p>
                   </div>
                   <ul className="mb-10 space-y-5 flex-grow">
                     {tier.benefits.map((benefit, i) => (
-                      <li key={i} className="flex items-start gap-4 text-sm font-light text-brand-beige/70">
+                      <li key={i} className="flex items-start gap-4 text-sm font-light text-secondary-brand">
                         <CheckCircle2 className={`h-5 w-5 shrink-0 ${tier.color}`} />
                         <span>{benefit}</span>
                       </li>
                     ))}
                   </ul>
-                  <Button className={`w-full h-14 rounded-2xl font-black uppercase tracking-widest text-xs ${tier.name === 'Bronze' ? 'bg-brand-orange text-white' : 'bg-white/5 text-white border border-white/10 hover:bg-white/10'}`}>
+                  <Button className={`w-full h-14 rounded-2xl font-black uppercase tracking-widest text-xs ${tier.name === 'Bronze' ? 'bg-brand-orange text-white' : 'bg-white/5 text-primary-brand border border-white/10 hover:bg-white/10'}`}>
                     {tier.name === 'Bronze' ? 'Current Tier' : 'Learn More'}
                   </Button>
                 </Card>
