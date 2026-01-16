@@ -1,9 +1,9 @@
 'use client';
 
 import {
-    HeroCarousel,
-    MenuItemCard,
-    ServiceCard,
+  HeroCarousel,
+  MenuItemCard,
+  ServiceCard,
 } from '@/components/sections';
 import { Button, Card } from '@/components/ui';
 import { dummyEvents, dummyMenuItems, testimonials } from '@/lib/dummy-data';
@@ -86,7 +86,7 @@ export default function HomePage() {
               <ServiceCard
                 title="Urban Loft Café"
                 description="Premium café dining with signature meals and a modern ambience. Perfect for families, professionals, and travelers."
-                image="/images/services/eat-out.jpg"
+                image="/images/services/thecafe.jpg"
                 href="/menu"
                 features={[
                   'Signature café meals',

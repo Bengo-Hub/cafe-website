@@ -15,9 +15,9 @@ export const teamMembers: TeamMember[] = [
   {
     id: 'team-1',
     name: 'Sarah Mwangi',
-    role: 'Director',
-    bio: 'Visionary leader with 15+ years in hospitality management. Sarah founded Urban Loft Cafe with a mission to redefine the cafe experience in East Africa.',
-    image: '/images/team/team-1.jpg',
+    role: 'Service Lead',
+    bio: 'Dedicated service professional ensuring every guest feels welcome. Sarah leads our front-of-house team with warmth and efficiency.',
+    image: '/images/team/sarah-mwangi.jpg',
     social: {
       email: 'sarah@urbanloftcafe.com',
     },
@@ -25,28 +25,31 @@ export const teamMembers: TeamMember[] = [
   {
     id: 'team-2',
     name: 'Michael Omondi',
-    role: 'General Manager',
-    bio: 'Operations expert ensuring excellence in every detail. Michael brings 10 years of experience from leading hotel chains.',
-    image: '/images/team/team-2.jpg',
+    role: 'Operations Manager',
+    bio: 'Operations expert ensuring excellence in every detail. Michael coordinates service delivery and maintains our high standards.',
+    image: '/images/team/omondi-michael.jpg',
     social: {
       email: 'michael@urbanloftcafe.com',
     },
   },
   {
     id: 'team-3',
-    name: 'Grace Wanjiru',
-    role: 'Chief Operations Officer',
-    bio: 'Driving operational efficiency and customer satisfaction. Grace specializes in process optimization and quality control.',
-    image: '/images/team/team-1.jpg',
+    name: 'David Kibet',
+    role: 'Head Chef',
+    bio: 'Culinary artist crafting unforgettable dining experiences. David brings creativity and passion to every dish that leaves our kitchen.',
+    image: '/images/team/david-kibet.jpg',
     social: {
-      email: 'grace@urbanloftcafe.com',
+      email: 'david@urbanloftcafe.com',
     },
   },
   {
     id: 'team-4',
-    name: 'David Kibet',
-    role: 'Finance Manager',
-    bio: 'Managing financial strategy and growth. David ensures fiscal responsibility while supporting business expansion.',
-    image: '/images/team/team-2.jpg',
+    name: 'Grace Wanjiru',
+    role: 'Guest Relations Manager',
+    bio: 'Driving customer satisfaction and memorable experiences. Grace ensures every visit to Urban Loft exceeds expectations.',
+    image: '/images/team/grace-wanjiru-2.jpg',
+    social: {
+      email: 'grace@urbanloftcafe.com',
+    },
   },
 ];

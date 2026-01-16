@@ -4,12 +4,12 @@ import { ServiceCard } from '@/components/sections';
 import { Button } from '@/components/ui';
 import { motion } from 'framer-motion';
 import {
-    Briefcase,
-    GraduationCap,
-    Hotel,
-    Music,
-    Star,
-    Utensils
+  Briefcase,
+  GraduationCap,
+  Hotel,
+  Music,
+  Star,
+  Utensils
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -19,7 +19,7 @@ export default function ServicesPage() {
       title: 'The Café',
       description: 'Premium dining with urban boho ambience, perfect for families, professionals, and travelers.',
       icon: <Utensils className="h-8 w-8" />,
-      image: '/images/services/food-ordering.jpg',
+      image: '/images/services/urban-experience.jpg',
       link: '/menu',
       features: ['Signature meals', 'Specialty coffee', 'Fresh juices', 'Weekly specials'],
     },
