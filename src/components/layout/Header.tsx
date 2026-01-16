@@ -201,120 +201,173 @@ export function Header() {
         </div>
       </nav>
 
-      {/* Full-screen Mobile Menu */}
+      {/* Modern Half-Screen Mobile Menu */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-[100] bg-white dark:bg-brand-dark lg:hidden flex flex-col"
-          >
-            {/* Mobile Menu Header */}
-            <div className="flex items-center justify-between p-6 border-b border-brand-beige/10">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl overflow-hidden">
-                  <Image src="/images/logo/logo.jpg" alt="Logo" width={40} height={40} />
-                </div>
-                <span className="font-black text-brand-dark dark:text-white tracking-tighter">Urban Loft</span>
-              </div>
-              <button
-                onClick={() => setMobileMenuOpen(false)}
-                className="p-2 rounded-xl bg-brand-orange/10 text-brand-orange"
+          <>
+            {/* Backdrop with blur effect */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm lg:hidden"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+
+            {/* Slide-in Drawer - Right side, half width, full height */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed top-0 right-0 z-[9999] lg:hidden w-[80%] sm:w-[65%] md:w-[50%] max-w-sm flex flex-col shadow-2xl"
+              style={{
+                backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff',
+                height: '100dvh',
+                minHeight: '100vh',
+              }}
+            >
+              {/* Drawer Header */}
+              <div
+                className="flex-shrink-0 flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-800"
+                style={{ backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff' }}
               >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-
-            {/* Mobile Menu Links */}
-            <div className="flex-grow overflow-y-auto py-10 px-6">
-              <div className="space-y-2">
-                {navigation.map((item, idx) => {
-                  const isActive = pathname === item.href;
-                  return (
-                    <motion.div
-                      key={item.name}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.05 }}
-                    >
-                      <Link
-                        href={item.href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={`block py-4 text-3xl font-black tracking-tighter transition-all ${
-                          isActive ? 'text-brand-orange' : 'text-brand-dark dark:text-white/70'
-                        }`}
-                      >
-                        {item.name}
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Mobile Menu Footer */}
-            <div className="p-8 bg-brand-orange/5 border-t border-brand-orange/10">
-              <div className="flex flex-col gap-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex gap-4">
-                    {socialLinks.map((social, idx) => (
-                      <a key={idx} href={social.href} className="h-10 w-10 rounded-xl bg-white dark:bg-brand-dark border border-brand-orange/10 flex items-center justify-center text-brand-orange hover:bg-brand-orange hover:text-white transition-all">
-                        <social.icon className="h-5 w-5" />
-                      </a>
-                    ))}
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl overflow-hidden shadow-md">
+                    <Image src="/images/logo/logo.jpg" alt="Logo" width={36} height={36} className="object-cover" />
                   </div>
-                  <button
-                    onClick={toggleTheme}
-                    className="h-10 w-10 rounded-xl bg-white dark:bg-brand-dark border border-brand-orange/10 flex items-center justify-center text-brand-orange"
-                  >
-                    {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-                  </button>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-brand-dark dark:text-white">Urban Loft</span>
+                    <span className="text-[10px] text-brand-muted dark:text-gray-400">Café</span>
+                  </div>
                 </div>
-                
-                <div className="space-y-3">
-                  <a href="tel:+254700000000" className="flex items-center gap-3 text-sm font-bold text-brand-dark dark:text-white/70">
-                    <Phone className="h-4 w-4 text-brand-orange" /> +254 700 000 000
-                  </a>
-                  <a href="mailto:hello@urbanloftcafe.com" className="flex items-center gap-3 text-sm font-bold text-brand-dark dark:text-white/70">
-                    <Mail className="h-4 w-4 text-brand-orange" /> hello@urbanloftcafe.com
-                  </a>
-                </div>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-brand-orange hover:text-white transition-all duration-200"
+                  aria-label="Close menu"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
 
+              {/* Navigation Links */}
+              <nav
+                className="flex-1 min-h-0 overflow-y-auto py-6 px-4"
+                style={{
+                  backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff',
+                }}
+              >
+                <ul className="space-y-1">
+                  {navigation.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                      <li key={item.name}>
+                        <Link
+                          href={item.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 ${
+                            isActive
+                              ? 'bg-brand-orange text-white'
+                              : 'text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-white' : 'bg-brand-orange'}`} />
+                          <span className="text-base font-semibold">{item.name}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+
+                {/* Quick Actions */}
+                <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+                  <div className="grid grid-cols-2 gap-3">
+                    <Link
+                      href="/menu"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex flex-col items-center justify-center p-3 rounded-xl bg-brand-orange/10 border border-brand-orange/20 hover:bg-brand-orange/20 transition-all"
+                    >
+                      <ShoppingBag className="h-5 w-5 text-brand-orange mb-1" />
+                      <span className="text-xs font-semibold text-brand-dark dark:text-white">Order</span>
+                    </Link>
+                    <button
+                      onClick={toggleTheme}
+                      className="flex flex-col items-center justify-center p-3 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
+                    >
+                      {theme === 'light' ? <Moon className="h-5 w-5 text-gray-600 mb-1" /> : <Sun className="h-5 w-5 text-yellow-400 mb-1" />}
+                      <span className="text-xs font-semibold text-brand-dark dark:text-white">{theme === 'light' ? 'Dark' : 'Light'}</span>
+                    </button>
+                  </div>
+                </div>
+              </nav>
+
+              {/* Drawer Footer */}
+              <div
+                className="flex-shrink-0 px-5 py-4 border-t border-gray-200 dark:border-gray-700"
+                style={{ backgroundColor: theme === 'dark' ? '#222222' : '#f9fafb' }}
+              >
+                {/* Auth Buttons */}
                 {!isAuthenticated ? (
-                  <div className="grid grid-cols-2 gap-4">
-                    <Button 
-                      variant="outline" 
-                      className="rounded-xl font-black uppercase tracking-widest text-xs h-12"
+                  <div className="flex gap-3 mb-4">
+                    <Button
+                      variant="outline"
+                      className="flex-1 rounded-xl font-semibold text-sm h-11 border-gray-200 dark:border-gray-700"
                       onClick={() => {
                         setMobileMenuOpen(false);
                         login();
                       }}
                     >
-                      Login
+                      Log In
                     </Button>
-                    <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>
-                      <Button className="w-full rounded-xl font-black uppercase tracking-widest text-xs h-12 bg-brand-orange text-white">
-                        Join Now
+                    <Link href="/signup" onClick={() => setMobileMenuOpen(false)} className="flex-1">
+                      <Button className="w-full rounded-xl font-semibold text-sm h-11 bg-brand-orange hover:bg-brand-burnt text-white shadow-lg shadow-brand-orange/25">
+                        Sign Up
                       </Button>
                     </Link>
                   </div>
                 ) : (
-                  <Button 
-                    variant="outline" 
-                    className="w-full rounded-xl font-black uppercase tracking-widest text-xs h-12 border-brand-orange text-brand-orange"
-                    onClick={() => {
-                      logout();
-                      setMobileMenuOpen(false);
-                    }}
-                  >
-                    Logout
-                  </Button>
+                  <div className="flex items-center gap-3 mb-4 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+                    <div className="h-10 w-10 rounded-full bg-brand-orange text-white flex items-center justify-center font-bold">
+                      {user?.name?.charAt(0) || <User className="h-5 w-5" />}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-brand-dark dark:text-white">{user?.name || 'User'}</p>
+                      <p className="text-xs text-gray-500">Member</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="text-xs font-semibold text-brand-orange hover:underline"
+                    >
+                      Logout
+                    </button>
+                  </div>
                 )}
+
+                {/* Contact & Social */}
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-2">
+                    {socialLinks.map((social, idx) => (
+                      <a
+                        key={idx}
+                        href={social.href}
+                        className="h-9 w-9 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:text-brand-orange hover:border-brand-orange transition-all"
+                      >
+                        <social.icon className="h-4 w-4" />
+                      </a>
+                    ))}
+                  </div>
+                  <a href="tel:+254700000000" className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-brand-orange transition-colors">
+                    <Phone className="h-4 w-4" />
+                    <span>Call Us</span>
+                  </a>
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </header>
