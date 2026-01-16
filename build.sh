@@ -96,12 +96,22 @@ if [[ -n "${ENV_SECRET_NAME}" ]]; then
 fi
 
 # Update Helm values in devops-k8s repo
-if [[ -n "${GIT_TOKEN:-}" ]] && [[ -d "$DEVOPS_DIR" ]]; then
+if [[ -n "${GIT_TOKEN:-}" ]]; then
   step "Updating Helm values in devops-k8s"
+
+  # Clone devops-k8s repo if it doesn't exist
+  if [[ ! -d "$DEVOPS_DIR" ]]; then
+    info "Cloning devops-k8s repo..."
+    git clone "https://${GIT_TOKEN}@github.com/${DEVOPS_REPO}.git" "$DEVOPS_DIR"
+  fi
 
   cd "$DEVOPS_DIR"
   git config user.email "$GIT_EMAIL"
   git config user.name "$GIT_USER"
+
+  # Ensure we have the latest changes
+  git fetch origin main
+  git reset --hard origin/main
 
   if [[ -f "$VALUES_FILE_PATH" ]]; then
     yq -i ".image.tag = \"${GIT_COMMIT_ID}\"" "$VALUES_FILE_PATH"
@@ -114,6 +124,8 @@ if [[ -n "${GIT_TOKEN:-}" ]] && [[ -d "$DEVOPS_DIR" ]]; then
   fi
 
   cd - > /dev/null
+else
+  warn "GIT_TOKEN not set - skipping devops-k8s update"
 fi
 
 ok "Deployment pipeline complete"
