@@ -7,7 +7,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
     Facebook,
     Instagram,
-    Mail,
     Menu,
     Moon,
     Phone,
