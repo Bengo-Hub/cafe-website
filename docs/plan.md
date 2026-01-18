@@ -807,13 +807,38 @@ See detailed sprint documents in [docs/sprints/](./sprints/) directory.
 
 ---
 
+## Service Integration Status (January 2026)
+
+### Integration Priority and Status
+
+| Priority | Service | Status | Blocks |
+|----------|---------|--------|--------|
+| 1 | Auth Service (SSO) | ✅ Available | Sprint 4 |
+| 2 | Ordering Service | ✅ Available | Sprint 2 (menu display) |
+| 3 | Notifications Service | ✅ Available | Sprint 3 (forms) |
+| 4 | Logistics Service | ✅ Available | Sprint 4 (tracking) |
+| 5 | Treasury Service | ⚠️ Verify | Sprint 4 (payments) |
+| 6 | Booking Service | ❌ Missing | Sprint 3 (events) |
+
+### Critical Integration Gaps
+
+1. **Booking Service** - Not implemented. Use contact forms as mitigation.
+2. **Treasury Payment Integration** - Verify API availability for event bookings.
+
+See [INTEGRATIONS.md](./INTEGRATIONS.md) for detailed integration documentation.
+
+---
+
 ## References
 
-- [Urban Loft Cafe Profile](../urban-loft-cafe-profile.md)
-- [Inception Report](../../resources/Urban Cafe Food Delivery System Inception Report.docx.md)
-- [Cross-Service Data Ownership](../../docs/CROSS-SERVICE-DATA-OWNERSHIP.md)
-- [Auth Service Integration](../../../auth-service/auth-api/docs/integrations.md)
+- [Complete Service Integrations Guide](./INTEGRATIONS.md)
+- [Service Dependencies Analysis](./SERVICE-DEPENDENCIES.md)
+- [Urban Loft Cafe Profile](./urban-loft-cafe-profile.md)
+- [Inception Report](../../resources/Urban%20Cafe%20Food%20Delivery%20System%20Inception%20Report.docx.md)
+- [Cross-Service Data Ownership](../../../docs/CROSS-SERVICE-DATA-OWNERSHIP.md)
+- [Microservices Architecture](../../../docs/microservice-architecture.md)
+- [Auth Integration Guide](../../../docs/AUTH-INTEGRATION-GUIDE.md)
 - [Ordering Service Integration](../../../ordering-service/ordering-backend/docs/integrations.md)
 - [Logistics Service Integration](../../../logistics-service/logistics-api/docs/integrations.md)
-- [Subscription Service Integration](../../../subscription-service/docs/integrations.md)
+- [Treasury Service Integration](../../../finance-service/treasury-api/docs/integrations.md)
 

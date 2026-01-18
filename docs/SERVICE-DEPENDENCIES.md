@@ -1,8 +1,22 @@
 # Cafe Website - Service Dependencies Analysis
 
+**Last Updated**: January 2026
+**Related Document**: [Complete Integrations Guide](./INTEGRATIONS.md)
+
 ## Service Integration Overview
 
 The Urban Loft Cafe Website integrates with multiple BengoBox microservices. This document analyzes each dependency, identifies gaps, and provides mitigation strategies.
+
+### Quick Reference: Integration Priority Order
+
+| Priority | Service | Status | Required For |
+|----------|---------|--------|--------------|
+| 1 | Auth Service | ✅ Available | SSO, protected routes |
+| 2 | Ordering Service | ✅ Available | Menu display, order placement |
+| 3 | Notifications Service | ✅ Available | Contact forms, alerts |
+| 4 | Logistics Service | ✅ Available | Order tracking |
+| 5 | Treasury Service | ⚠️ Verify | Event/room payments |
+| 6 | Booking Service | ❌ Missing | Events, rooms, conferences |
 
 ## Integrated Services
 
