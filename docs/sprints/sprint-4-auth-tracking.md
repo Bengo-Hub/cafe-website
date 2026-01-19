@@ -178,6 +178,52 @@
 
 ---
 
+## Critical Gaps Identified (January 2026 Audit)
+
+### HIGH PRIORITY
+
+**1. Complete Logout Flow** (Status: ⚠️ Incomplete)
+- [ ] Implement `/auth/logout` endpoint
+- [ ] Clear httpOnly cookies properly
+- [ ] Invalidate session in Redis (if used)
+- [ ] Redirect to auth-service logout endpoint for SSO session cleanup
+- [ ] Reset user context/store
+
+**2. Treasury Service API Verification** (Status: ⚠️ Needs Documentation)
+- [ ] Verify treasury-api endpoints match cafe-website expectations
+- [ ] Document payment intent creation flow
+- [ ] Add webhook handling for payment confirmations
+- [ ] Document error cases and retry logic
+
+**3. Redis Session Storage** (Status: 🏗️ Optional but Recommended)
+- [ ] Configure Redis connection settings
+- [ ] Document key patterns: `session:{session_id}`
+- [ ] Set appropriate TTL (match token expiry)
+- [ ] Implement fallback to in-memory if Redis unavailable
+
+**4. Role-Based Access Control (RBAC)** (Status: 🏗️ In Progress)
+- [ ] Implement RBAC middleware for staff/admin routes
+- [ ] Document role-to-permission mapping:
+  - `customer`: Place orders, view loyalty, track orders
+  - `staff`: Manage orders, view dashboard
+  - `admin`: Full access to staff portal
+- [ ] Add role checking in protected route middleware
+
+### MEDIUM PRIORITY
+
+**5. Error Handling & Resilience**
+- [ ] Add circuit breaker for auth-service calls
+- [ ] Document retry policies for service failures
+- [ ] Implement graceful degradation (read-only mode)
+- [ ] Add user-facing error messages for common failures
+
+**6. Booking Service Dependency** (Status: ❌ Blocking)
+- Booking service does NOT exist yet
+- Events, room bookings, conference hall features blocked
+- Mitigation: Use contact forms + static content until service created
+
+---
+
 ## Related Documents
 - [Plan.md](../plan.md)
 - [SERVICE-DEPENDENCIES.md](../SERVICE-DEPENDENCIES.md)
