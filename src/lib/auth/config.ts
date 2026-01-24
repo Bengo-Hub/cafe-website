@@ -1,13 +1,37 @@
 import { NextAuthConfig } from "next-auth";
 import { JWT } from "next-auth/jwt";
 
+// SSO URLs - production defaults
+const AUTH_SERVICE_URL = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || "https://sso.codevertexitsolutions.com";
+const CAFE_WEBSITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://cafe.codevertexitsolutions.com";
+
+// Export SSO URLs for use in logout and redirect functions
+export const SSO_URLS = {
+  authService: AUTH_SERVICE_URL,
+  siteUrl: CAFE_WEBSITE_URL,
+  // SSO login URL with return_to parameter for post-login redirect
+  getLoginUrl: (returnTo?: string) => {
+    const loginUrl = new URL("/login", `${AUTH_SERVICE_URL.replace('/api/v1', '')}`);
+    if (returnTo) {
+      loginUrl.searchParams.set("return_to", returnTo);
+    }
+    return loginUrl.toString();
+  },
+  // SSO logout URL for proper session cleanup
+  getLogoutUrl: (returnTo?: string) => {
+    const logoutUrl = new URL("/api/v1/auth/logout", AUTH_SERVICE_URL);
+    logoutUrl.searchParams.set("post_logout_redirect_uri", returnTo || CAFE_WEBSITE_URL);
+    return logoutUrl.toString();
+  },
+};
+
 export const authConfig: NextAuthConfig = {
   providers: [
     {
       id: "bengobox-auth",
       name: "BengoBox SSO",
       type: "oidc",
-      issuer: process.env.NEXT_PUBLIC_AUTH_SERVICE_URL,
+      issuer: AUTH_SERVICE_URL,
       clientId: process.env.AUTH_CLIENT_ID,
       clientSecret: process.env.AUTH_CLIENT_SECRET,
       authorization: {

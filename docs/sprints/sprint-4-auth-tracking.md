@@ -1,7 +1,7 @@
 # Sprint 4: Authentication, Order Tracking & Staff Portal
 
-**Duration**: 2 weeks  
-**Status**: In Progress 🏗️  
+**Duration**: 2 weeks
+**Status**: ✅ SSO Complete (January 2026)
 **Goal**: Implement SSO authentication, real-time order tracking, and the Staff/Admin Portal
 
 ---
@@ -182,12 +182,17 @@
 
 ### HIGH PRIORITY
 
-**1. Complete Logout Flow** (Status: ⚠️ Incomplete)
-- [ ] Implement `/auth/logout` endpoint
-- [ ] Clear httpOnly cookies properly
-- [ ] Invalidate session in Redis (if used)
-- [ ] Redirect to auth-service logout endpoint for SSO session cleanup
-- [ ] Reset user context/store
+**1. Complete Logout Flow** (Status: ✅ COMPLETED - January 2026)
+- [x] Implement logout via `use-auth.ts` hook
+- [x] Clear NextAuth session (`signOut({ redirect: false })`)
+- [x] Clear Zustand auth store
+- [x] Redirect to auth-service logout endpoint (`SSO_URLS.getLogoutUrl()`)
+- [x] SSO logout URL clears server-side session and redirects back
+
+**Implementation Files:**
+- `src/lib/auth/config.ts` - `SSO_URLS.getLogoutUrl()` with `post_logout_redirect_uri`
+- `src/hooks/use-auth.ts` - `logout()` function with proper SSO redirect
+- `src/app/staff/layout.tsx` - Logout button wired to `useAuth().logout`
 
 **2. Treasury Service API Verification** (Status: ⚠️ Needs Documentation)
 - [ ] Verify treasury-api endpoints match cafe-website expectations

@@ -15,6 +15,7 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { useAuth } from '@/hooks/use-auth';
 
 const SIDEBAR_ITEMS = [
   { label: 'Dashboard', icon: LayoutDashboard, href: '/staff' },
@@ -28,6 +29,7 @@ const SIDEBAR_ITEMS = [
 export default function StaffLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const { logout, user } = useAuth();
 
   return (
     <div className="min-h-screen section-blend-cream flex">
@@ -65,7 +67,10 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
           </nav>
 
           <div className="mt-auto pt-8 border-t border-white/10">
-            <button className="flex items-center gap-4 px-6 py-4 w-full text-brand-beige/60 hover:text-red-400 transition-colors">
+            <button
+              onClick={logout}
+              className="flex items-center gap-4 px-6 py-4 w-full text-brand-beige/60 hover:text-red-400 transition-colors"
+            >
               <LogOut className="h-5 w-5" />
               <span className="font-bold tracking-tight">Logout</span>
             </button>
@@ -89,11 +94,11 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
             
             <div className="flex items-center gap-4 pl-6 border-l border-brand-beige/10">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-black text-primary-brand">Alex Staff</p>
-                <p className="text-[10px] font-black uppercase tracking-widest text-brand-orange">Cafe Manager</p>
+                <p className="text-sm font-black text-primary-brand">{user?.name || 'Staff User'}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-brand-orange">{user?.role || 'Staff'}</p>
               </div>
               <div className="h-12 w-12 rounded-2xl bg-brand-orange/20 border border-brand-orange/30 flex items-center justify-center text-brand-orange font-black">
-                AS
+                {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
               </div>
             </div>
           </div>

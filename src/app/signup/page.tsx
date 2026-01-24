@@ -1,29 +1,24 @@
 'use client';
 
-import { Button, Card, Input } from '@/components/ui';
-import { useAuthStore } from '@/lib/store/auth-store';
+import { Button, Card } from '@/components/ui';
+import { SSO_URLS } from '@/lib/auth/config';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export default function SignupPage() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const login = useAuthStore((state) => state.login);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Dummy signup
-    login({
-      id: '1',
-      name: name,
-      email: email,
-      role: 'customer',
-    });
-    router.push('/');
+  // Redirect to SSO signup page with return URL to cafe-website
+  const handleSSOSignup = () => {
+    setIsLoading(true);
+    // Redirect to auth-ui signup page with return URL
+    const authServiceUrl = SSO_URLS.authService.replace('/api/v1', '');
+    const signupUrl = new URL('/signup', authServiceUrl);
+    signupUrl.searchParams.set('return_to', `${SSO_URLS.siteUrl}/`);
+    window.location.href = signupUrl.toString();
   };
 
   return (
@@ -44,56 +39,34 @@ export default function SignupPage() {
               <p className="mt-2 text-lg font-light text-secondary-brand">Start your Urban Loft journey today</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-brand/60" htmlFor="name">
-                  Full Name
-                </label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="John Doe"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  className="h-14 rounded-2xl bg-white/50 dark:bg-brand-dark/50 border-brand-beige/20 focus:border-brand-orange px-6"
-                />
-              </div>
+            <div className="space-y-6">
+              <p className="text-center text-secondary-brand text-sm">
+                Create your BengoBox account to access all services including ordering, reservations, and loyalty rewards.
+              </p>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-brand/60" htmlFor="email">
-                  Email Address
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="h-14 rounded-2xl bg-white/50 dark:bg-brand-dark/50 border-brand-beige/20 focus:border-brand-orange px-6"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-brand/60" htmlFor="password">
-                  Password
-                </label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="h-14 rounded-2xl bg-white/50 dark:bg-brand-dark/50 border-brand-beige/20 focus:border-brand-orange px-6"
-                />
-              </div>
-
-              <Button type="submit" className="w-full h-16 rounded-2xl text-lg font-black uppercase tracking-widest bg-brand-orange hover:bg-brand-orange/90 text-white shadow-xl shadow-brand-orange/20 transition-all hover:scale-[1.02]">
-                Create Account
+              <Button
+                onClick={handleSSOSignup}
+                disabled={isLoading}
+                className="w-full h-16 rounded-2xl text-lg font-black uppercase tracking-widest bg-brand-orange hover:bg-brand-orange/90 text-white shadow-xl shadow-brand-orange/20 transition-all hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
+              >
+                {isLoading ? 'Redirecting...' : 'Sign Up with BengoBox SSO'}
               </Button>
-            </form>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-brand-beige/30" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white dark:bg-brand-dark px-4 text-secondary-brand/60 tracking-widest">
+                    Single Sign-On
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-center text-secondary-brand/70 text-xs">
+                Your account works across all BengoBox services: Urban Cafe, POS, Ordering App, and more.
+              </p>
+            </div>
 
             <div className="mt-10 text-center text-sm font-light text-secondary-brand">
               Already have an account?{' '}

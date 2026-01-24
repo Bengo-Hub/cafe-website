@@ -813,12 +813,29 @@ See detailed sprint documents in [docs/sprints/](./sprints/) directory.
 
 | Priority | Service | Status | Blocks |
 |----------|---------|--------|--------|
-| 1 | Auth Service (SSO) | ✅ Available | Sprint 4 |
+| 1 | Auth Service (SSO) | ✅ **Integrated** | Sprint 4 ✅ |
 | 2 | Ordering Service | ✅ Available | Sprint 2 (menu display) |
 | 3 | Notifications Service | ✅ Available | Sprint 3 (forms) |
 | 4 | Logistics Service | ✅ Available | Sprint 4 (tracking) |
 | 5 | Treasury Service | ⚠️ Verify | Sprint 4 (payments) |
 | 6 | Booking Service | ❌ Missing | Sprint 3 (events) |
+
+### SSO Integration Completed (January 2026)
+
+**Files Implemented:**
+- `src/lib/auth/config.ts` - SSO URLs with production defaults, NextAuth OIDC provider configuration
+- `src/hooks/use-auth.ts` - SSO login/logout hooks with proper session clearing
+- `src/app/login/page.tsx` - Redirects to SSO login
+- `src/app/signup/page.tsx` - Redirects to SSO signup with return URL
+- `src/app/staff/layout.tsx` - Staff portal with SSO logout integration
+
+**SSO Features:**
+- ✅ OIDC provider integration with auth-service
+- ✅ JWT token validation via JWKS
+- ✅ Access token refresh flow
+- ✅ SSO logout (clears NextAuth session + redirects to SSO logout endpoint)
+- ✅ Production URLs as defaults (`https://sso.codevertexitsolutions.com`)
+- ✅ Return URL support for post-login/signup redirects
 
 ### Critical Integration Gaps
 
