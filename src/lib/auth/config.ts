@@ -3,7 +3,7 @@ import { JWT } from "next-auth/jwt";
 
 // SSO URLs - production defaults
 const AUTH_SERVICE_URL = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || "https://sso.codevertexitsolutions.com";
-const CAFE_WEBSITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://cafe.codevertexitsolutions.com";
+const CAFE_WEBSITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://theurbanloftcafe.com";
 
 // Export SSO URLs for use in logout and redirect functions
 export const SSO_URLS = {
