@@ -43,6 +43,21 @@ info "Image: ${IMAGE_REPO}:${GIT_COMMIT_ID}"
 for c in git docker trivy; do command -v "$c" >/dev/null || { err "$c is required"; exit 1; }; done
 if [[ "${DEPLOY}" == "true" ]]; then for c in kubectl helm yq jq; do command -v "$c" >/dev/null || { err "$c is required"; exit 1; }; done; fi
 
+# =============================================================================
+# Auto-sync secrets from devops-k8s
+# =============================================================================
+if [[ ${DEPLOY} == "true" ]]; then
+  info "Checking and syncing required secrets from devops-k8s..."
+  SYNC_SCRIPT=$(mktemp)
+  if curl -fsSL https://raw.githubusercontent.com/Bengo-Hub/devops-k8s/main/scripts/tools/check-and-sync-secrets.sh -o "$SYNC_SCRIPT" 2>/dev/null; then
+    source "$SYNC_SCRIPT"
+    check_and_sync_secrets "REGISTRY_USERNAME" "REGISTRY_PASSWORD" "GIT_TOKEN" || info "Secret sync failed - continuing with existing secrets"
+    rm -f "$SYNC_SCRIPT"
+  else
+    info "Unable to download secret sync script - continuing with existing secrets"
+  fi
+fi
+
 step "Filesystem scan"
 trivy fs . --exit-code "$TRIVY_ECODE" --format table --skip-files "*.pem" --skip-files "*.key" --skip-files "*.crt" || true
 
