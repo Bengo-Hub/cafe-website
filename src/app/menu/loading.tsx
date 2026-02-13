@@ -29,4 +29,4 @@ export default function MenuLoading() {
     </div>
   );
 }
-// Updated
+// Updated - minor tweak
