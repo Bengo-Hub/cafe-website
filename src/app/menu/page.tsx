@@ -72,8 +72,8 @@ export default function MenuPage() {
   const handleRedirect = (item: MenuItem, action: 'add-to-cart' | 'view' | 'whitelist') => {
     const tenant = process.env.NEXT_PUBLIC_TENANT_SLUG || 'urban-loft';
     const orderingUrl = process.env.NEXT_PUBLIC_ORDERING_SERVICE_URL || 'https://ordering.codevertexitsolutions.com';
-    const redirectUrl = `${orderingUrl}/menu?item_id=${item.id}&action=${action}&tenant=${tenant}`;
-    
+    const redirectUrl = `${orderingUrl}/${tenant}/menu?item_id=${item.id}&action=${action}`;
+
     window.location.href = redirectUrl;
   };
 
