@@ -93,7 +93,7 @@ export function generateLocalBusinessSchema(): LocalBusinessSchema {
     name: 'Urban Loft Cafe',
     image: [
       `${process.env.NEXT_PUBLIC_APP_URL}/images/hero/hero-food.jpg`,
-      `${process.env.NEXT_PUBLIC_APP_URL}/images/logo/logo.jpg`,
+      `${process.env.NEXT_PUBLIC_APP_URL}/images/logo/logo.jpeg`,
     ],
     url: process.env.NEXT_PUBLIC_APP_URL || 'https://urbanloftcafe.com',
     telephone: '+254-700-000-000',

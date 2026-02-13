@@ -68,7 +68,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
 
           {/* CTA Link */}
           {href && (
-            <Link href={href} className="inline-flex items-center gap-2 text-brand-orange font-black uppercase tracking-widest text-xs group/link">
+            <div className="inline-flex items-center gap-2 text-brand-orange font-black uppercase tracking-widest text-xs group/link">
               <span>Explore More</span>
               <div className="h-8 w-8 rounded-full bg-brand-orange/10 flex items-center justify-center transition-all group-hover/link:bg-brand-orange group-hover/link:text-white">
                 <svg
@@ -83,7 +83,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
                   <path d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </div>
-            </Link>
+            </div>
           )}
         </div>
       </Card>

@@ -4,12 +4,10 @@ import { Button, Card } from '@/components/ui';
 import { SSO_URLS } from '@/lib/auth/config';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   // Redirect to SSO signup page with return URL to cafe-website
   const handleSSOSignup = () => {

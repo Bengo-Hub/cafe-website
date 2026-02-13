@@ -19,9 +19,9 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.json',
   icons: {
-    icon: '/images/logo/logo.jpg',
-    shortcut: '/images/logo/logo.jpg',
-    apple: '/images/logo/logo.jpg',
+    icon: '/images/logo/logo.jpeg',
+    shortcut: '/images/logo/logo.jpeg',
+    apple: '/images/logo/logo.jpeg',
   },
   description:
     'Eat. Work. Connect. Experience. Premium cafe, business hub, and event space in Kiambu and Busia, Kenya. Specialty coffee, coworking spaces, and memorable events.',
@@ -94,10 +94,16 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Provide an explicit null session on the server to avoid the client
+  // attempting an initial fetch to the NextAuth endpoints in environments
+  // where the auth backend is unavailable. This prevents ClientFetchError
+  // being thrown by NextAuth's client during dev when the SSO is unreachable.
+  const session = null;
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
-        <Providers>
+        <Providers session={session}>
           <div className="min-h-screen flex flex-col">
             <Header />
             <main className="flex-1">

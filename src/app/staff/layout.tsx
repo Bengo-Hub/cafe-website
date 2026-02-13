@@ -98,7 +98,7 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
                 <p className="text-[10px] font-black uppercase tracking-widest text-brand-orange">{user?.role || 'Staff'}</p>
               </div>
               <div className="h-12 w-12 rounded-2xl bg-brand-orange/20 border border-brand-orange/30 flex items-center justify-center text-brand-orange font-black">
-                {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                {user?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
               </div>
             </div>
           </div>

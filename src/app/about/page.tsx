@@ -13,7 +13,7 @@ export default function AboutPage() {
     '@type': 'Organization',
     name: 'Urban Loft Cafe',
     url: process.env.NEXT_PUBLIC_APP_URL || 'https://urbanloftcafe.com',
-    logo: `${process.env.NEXT_PUBLIC_APP_URL}/images/logo/logo.jpg`,
+    logo: `${process.env.NEXT_PUBLIC_APP_URL}/images/logo/logo.jpeg`,
     foundingDate: '2023',
     founders: teamMembers.map((member) => ({
       '@type': 'Person',

@@ -26,6 +26,10 @@ export const SSO_URLS = {
 };
 
 export const authConfig: NextAuthConfig = {
+  // Ensure a secret is available. In development we provide a short-lived
+  // fallback so NextAuth doesn't throw during local runs. In production set
+  // `NEXTAUTH_SECRET` in your environment.
+  secret: process.env.NEXTAUTH_SECRET || (process.env.NODE_ENV === 'development' ? 'dev-secret' : undefined),
   providers: [
     {
       id: "bengobox-auth",

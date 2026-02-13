@@ -106,7 +106,7 @@ export default function MenuPage() {
         <section className="relative h-[60vh] min-h-[600px] w-full overflow-hidden">
           <div className="absolute inset-0">
             <Image
-              src="/images/services/food-ordering.jpg"
+              src="/images/services/thecafe.jpg"
               alt="Our Menu"
               fill
               className="object-cover scale-105"
@@ -488,6 +488,8 @@ export default function MenuPage() {
           onClose={() => setIsModalOpen(false)}
           onOrder={handleOrder}
         />
+
+        {/* Menu Item Modal */}
       </main>
     </>
   );
