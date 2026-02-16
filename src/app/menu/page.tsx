@@ -12,6 +12,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowUpDown,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Filter,
   LayoutGrid,
   List,
@@ -23,7 +25,9 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Script from 'next/script';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
+
+const ITEMS_PER_PAGE = 8;
 
 export default function MenuPage() {
   const menuSchema = generateMenuSchema();
@@ -31,12 +35,11 @@ export default function MenuPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'category'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 8;
 
   const { items, isLoading, categories } = useMenu();
 
@@ -66,32 +69,9 @@ export default function MenuPage() {
       });
   }, [items, selectedCategory, searchQuery, sortBy, sortOrder]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
-
-  const paginatedItems = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredItems.slice(start, start + pageSize);
-  }, [filteredItems, currentPage, pageSize]);
-
-  // Group the (paginated) items by category so we can show a single image per category
-  const groupedByCategory = useMemo(() => {
-    return paginatedItems.reduce((acc: Record<string, MenuItem[]>, it) => {
-      acc[it.category] = acc[it.category] || [];
-      acc[it.category].push(it);
-      return acc;
-    }, {} as Record<string, MenuItem[]>);
-  }, [paginatedItems]);
-
-  // Ensure current page is valid when filters change
-  useEffect(() => {
-    if (currentPage > totalPages) setCurrentPage(1);
-  }, [currentPage, totalPages]);
-
-  const slugify = (s: string) =>
-    s
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9\-]/g, '');
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE));
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedItems = filteredItems.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const handleItemClick = (item: MenuItem) => {
     setSelectedItem(item);
@@ -113,6 +93,20 @@ export default function MenuPage() {
 
   const toggleSortOrder = () => {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+  };
+
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
+  const handleCategoryChange = (cat: string) => {
+    setSelectedCategory(cat);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
   };
 
   return (
@@ -185,6 +179,7 @@ export default function MenuPage() {
                         onClick={() => {
                           setSelectedCategory('All Items');
                           setSearchQuery('');
+                          setCurrentPage(1);
                         }}
                         className="text-xs font-black uppercase tracking-widest text-brand-orange hover:text-brand-burnt transition-colors"
                       >
@@ -203,8 +198,8 @@ export default function MenuPage() {
                           type="text"
                           placeholder="Find a dish..."
                           value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="h-14 w-full rounded-2xl border-none bg-white/5 dark:bg-white/5 pl-12 pr-4 text-sm font-medium text-brand-dark dark:text-white placeholder:text-brand-muted/40 dark:placeholder:text-brand-beige/30 focus:ring-2 focus:ring-brand-orange/50 transition-all"
+                          onChange={(e) => handleSearchChange(e.target.value)}
+                          className="h-14 w-full rounded-2xl border-none bg-white/5 dark:bg:white/5 pl-12 pr-4 text-sm font-medium text-brand-dark dark:text-white placeholder:text-brand-muted/40 dark:placeholder:text-brand-beige/30 focus:ring-2 focus:ring-brand-orange/50 transition-all"
                         />
                       </div>
                     </div>
@@ -216,7 +211,7 @@ export default function MenuPage() {
                         {categories.map((cat) => (
                           <button
                             key={cat}
-                            onClick={() => setSelectedCategory(cat)}
+                            onClick={() => handleCategoryChange(cat)}
                             className={`group flex items-center justify-between rounded-2xl px-5 py-4 text-sm transition-all ${
                               selectedCategory === cat
                                 ? 'bg-brand-orange text-white shadow-xl shadow-brand-orange/30 font-black'
@@ -225,7 +220,7 @@ export default function MenuPage() {
                           >
                             <span className="tracking-tight">{cat}</span>
                             {selectedCategory === cat ? (
-                              <div className="h-2 w-2 rounded-full bg-white" />
+                              <div className="h-2 w-2 rounded-full bg:white" />
                             ) : (
                               <ChevronDown className="h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100 -rotate-90" />
                             )}
@@ -241,7 +236,10 @@ export default function MenuPage() {
                         {(['name', 'price', 'category'] as const).map((option) => (
                           <button
                             key={option}
-                            onClick={() => setSortBy(option)}
+                            onClick={() => {
+                              setSortBy(option);
+                              setCurrentPage(1);
+                            }}
                             className={`flex items-center gap-4 text-sm capitalize transition-colors ${
                               sortBy === option ? 'font-black text-brand-orange' : 'text-brand-beige/60 hover:text-white'
                             }`}
@@ -271,7 +269,7 @@ export default function MenuPage() {
                     type="text"
                     placeholder="Search for dishes, drinks, ingredients..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => handleSearchChange(e.target.value)}
                     className="w-full rounded-[2rem] border-none bg-brand-dark/40 py-6 pl-16 pr-8 shadow-2xl focus:ring-2 focus:ring-brand-orange/50 text-white backdrop-blur-xl text-lg font-medium border border-white/10"
                   />
                 </div>
@@ -285,7 +283,7 @@ export default function MenuPage() {
                     <SlidersHorizontal className="mr-2 h-5 w-5 text-brand-orange" />
                     Filters
                   </Button>
-                  
+
                   <div className="hidden items-center rounded-[2rem] bg-brand-dark/40 p-2 shadow-2xl backdrop-blur-xl md:flex border border-white/10">
                     <button
                       onClick={() => setViewMode('grid')}
@@ -308,7 +306,7 @@ export default function MenuPage() {
                   <Button
                     variant="outline"
                     onClick={toggleSortOrder}
-                    className="h-16 px-8 rounded-[2rem] border-none bg-brand-dark/40 shadow-2xl backdrop-blur-xl flex items-center gap-3 font-black text-white"
+                    className="h-16 px-8 rounded-[2rem] border-none bg-brand-dark/40 shadow-2xl backdrop-blur-xl flex items-center gap-3 font-black text:white"
                   >
                     <ArrowUpDown className="h-5 w-5 text-brand-orange" />
                     <span className="uppercase text-[10px] tracking-[0.2em]">{sortOrder}</span>
@@ -327,7 +325,7 @@ export default function MenuPage() {
                   {selectedCategory !== 'All Items' && (
                     <Badge variant="info" className="flex items-center gap-3 pl-4 pr-2 py-2 rounded-full bg-brand-orange/10 text-brand-orange border-none font-black text-[10px] uppercase tracking-widest">
                       {selectedCategory}
-                      <button onClick={() => setSelectedCategory('All Items')} className="p-1 hover:bg-brand-orange/20 rounded-full transition-colors">
+                      <button onClick={() => handleCategoryChange('All Items')} className="p-1 hover:bg-brand-orange/20 rounded-full transition-colors">
                         <X className="h-3 w-3" />
                       </button>
                     </Badge>
@@ -335,7 +333,7 @@ export default function MenuPage() {
                   {searchQuery && (
                     <Badge variant="default" className="flex items-center gap-3 pl-4 pr-2 py-2 rounded-full bg-brand-dark/40 backdrop-blur-md border border-white/10 font-black text-[10px] uppercase tracking-widest text-white">
                       "{searchQuery}"
-                      <button onClick={() => setSearchQuery('')} className="p-1 hover:bg-brand-orange/10 rounded-full transition-colors">
+                      <button onClick={() => handleSearchChange('')} className="p-1 hover:bg-brand-orange/10 rounded-full transition-colors">
                         <X className="h-3 w-3" />
                       </button>
                     </Badge>
@@ -346,11 +344,16 @@ export default function MenuPage() {
               {/* Results Count */}
               <div className="flex items-center justify-between border-b border-white/10 pb-6">
                 <p className="text-lg font-light text-brand-beige/60">
-                  Showing <span className="font-black text-white">{filteredItems.length}</span> exquisite items
+                  Showing <span className="font-black text-white">{filteredItems.length}</span> items
+                  {totalPages > 1 && (
+                    <span className="ml-2">
+                      (page {currentPage} of {totalPages})
+                    </span>
+                  )}
                 </p>
               </div>
 
-              {/* Menu Grid */}
+              {/* Menu Grid / List */}
               <AnimatePresence mode="popLayout">
                 {isLoading ? (
                   <motion.div
@@ -364,72 +367,33 @@ export default function MenuPage() {
                       <div key={i} className="h-[500px] rounded-[3rem] bg-white/5 animate-pulse border border-white/5" />
                     ))}
                   </motion.div>
-                ) : filteredItems.length > 0 ? (
+                ) : paginatedItems.length > 0 ? (
                   <motion.div
                     layout
                     className={
                       viewMode === 'grid'
-                        ? "grid gap-8 sm:grid-cols-2 xl:grid-cols-3"
-                        : "flex flex-col gap-8"
+                        ? 'grid gap-8 sm:grid-cols-2 xl:grid-cols-3'
+                        : 'flex flex-col gap-8'
                     }
                   >
-                    {/* Render paginated items grouped by category. Show one image per category header and only the first item in that category will show its image in list mode. */}
-                    {Object.entries(groupedByCategory).map(([category, items]) => (
-                      <div key={category} className="space-y-6">
-                        <div className="flex items-center justify-between gap-4">
-                          <h3 className="text-2xl font-black tracking-tight">{category}</h3>
-                          <div className="hidden md:block h-20 w-40 relative rounded-xl overflow-hidden">
-                            <Image
-                              src={`/images/menu/categories/${slugify(category)}.jpg`}
-                              alt={category}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        </div>
-
-                        <div className={viewMode === 'grid' ? 'grid gap-8 sm:grid-cols-2 xl:grid-cols-3' : 'flex flex-col gap-6'}>
-                          {items.map((item, idx) => (
-                            <motion.div
-                              key={item.id}
-                              layout
-                              initial={{ opacity: 0, scale: 0.98 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              exit={{ opacity: 0, scale: 0.98 }}
-                              transition={{ duration: 0.3, ease: 'easeOut' }}
-                            >
-                              <MenuItemCard
-                                item={item}
-                                onClick={() => handleItemClick(item)}
-                                onAddToCart={() => handleRedirect(item, 'add-to-cart')}
-                                onView={() => handleRedirect(item, 'view')}
-                                className={viewMode === 'list' ? 'flex flex-row h-44' : ''}
-                                showImage={viewMode === 'grid' ? true : idx === 0}
-                              />
-                            </motion.div>
-                          ))}
-                        </div>
-                      </div>
+                    {paginatedItems.map((item) => (
+                      <motion.div
+                        key={item.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 0.4, ease: 'easeOut' }}
+                      >
+                        <MenuItemCard
+                          item={item}
+                          onClick={() => handleItemClick(item)}
+                          onAddToCart={() => handleRedirect(item, 'add-to-cart')}
+                          onView={() => handleRedirect(item, 'view')}
+                          className={viewMode === 'list' ? 'flex flex-row h-56' : ''}
+                        />
+                      </motion.div>
                     ))}
-
-                    {/* Pagination controls */}
-                    <div className="mt-6 flex items-center justify-center gap-4">
-                      <Button
-                        variant="outline"
-                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                        disabled={currentPage === 1}
-                      >
-                        Previous
-                      </Button>
-                      <span className="text-sm font-medium">Page {currentPage} of {totalPages}</span>
-                      <Button
-                        variant="outline"
-                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                        disabled={currentPage === totalPages}
-                      >
-                        Next
-                      </Button>
-                    </div>
                   </motion.div>
                 ) : (
                   /* Empty State */
@@ -446,7 +410,7 @@ export default function MenuPage() {
                     </div>
                     <h3 className="mb-4 text-4xl font-black text-white tracking-tight">No dishes found</h3>
                     <p className="mb-12 max-w-md text-xl text-brand-beige/60 font-light leading-relaxed">
-                      We couldn't find any items matching your current filters. Try adjusting your search or category.
+                      We couldn&apos;t find any items matching your current filters. Try adjusting your search or category.
                     </p>
                     <Button
                       variant="primary"
@@ -455,6 +419,7 @@ export default function MenuPage() {
                       onClick={() => {
                         setSearchQuery('');
                         setSelectedCategory('All Items');
+                        setCurrentPage(1);
                       }}
                     >
                       Reset all filters
@@ -462,6 +427,57 @@ export default function MenuPage() {
                   </motion.div>
                 )}
               </AnimatePresence>
+
+              {/* Pagination (bottom only) */}
+              {paginatedItems.length > 0 && totalPages > 1 && (
+                <div className="flex items-center justify-center gap-4 pt-8 border-t border-white/10">
+                  <Button
+                    variant="outline"
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage <= 1}
+                    className="rounded-full h-14 px-6 border-brand-orange/30 text-brand-orange disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft className="h-5 w-5 mr-2" />
+                    Previous
+                  </Button>
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum: number;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => goToPage(pageNum)}
+                          className={`h-12 w-12 rounded-full font-black text-sm transition-all ${
+                            currentPage === pageNum
+                              ? 'bg-brand-orange text-white shadow-lg shadow-brand-orange/30'
+                              : 'bg-brand-dark/40 text-brand-beige/60 hover:bg-brand-orange/20 hover:text-brand-orange'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage >= totalPages}
+                    className="rounded-full h-14 px-6 border-brand-orange/30 text-brand-orange disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Next
+                    <ChevronRight className="h-5 w-5 ml-2" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -481,8 +497,8 @@ export default function MenuPage() {
                 initial={{ y: '100%' }}
                 animate={{ y: 0 }}
                 exit={{ y: '100%' }}
-                transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                className="fixed bottom-0 left-0 right-0 z-[101] rounded-t-[3.5rem] bg-brand-dark/90 p-10 shadow-2xl backdrop-blur-2xl lg:hidden max-h-[90vh] overflow-y-auto border-t border-white/10"
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="fixed bottom-0 left-0 right-0 z-[101] rounded-t-[3.5rem] bg-brand-dark/90 p-10 shadow-2xl backdrop-blur-2xl lg:hidden max-h:[90vh] overflow-y-auto border-t border-white/10"
               >
                 <div className="mx-auto mb-10 h-2 w-20 rounded-full bg-brand-orange/20" />
                 
@@ -503,7 +519,10 @@ export default function MenuPage() {
                       {categories.map((cat) => (
                         <button
                           key={cat}
-                          onClick={() => setSelectedCategory(cat)}
+                          onClick={() => {
+                            handleCategoryChange(cat);
+                            setShowFilters(false);
+                          }}
                           className={`rounded-2xl px-8 py-4 text-sm font-black transition-all ${
                             selectedCategory === cat
                               ? 'bg-brand-orange text-white shadow-xl shadow-brand-orange/30'
@@ -522,7 +541,10 @@ export default function MenuPage() {
                       {(['name', 'price', 'category'] as const).map((option) => (
                         <button
                           key={option}
-                          onClick={() => setSortBy(option)}
+                          onClick={() => {
+                            setSortBy(option);
+                            setCurrentPage(1);
+                          }}
                           className={`rounded-2xl border-2 px-8 py-5 text-sm font-black capitalize transition-all ${
                             sortBy === option
                               ? 'border-brand-orange bg-brand-orange/5 text-brand-orange'
@@ -556,8 +578,6 @@ export default function MenuPage() {
           onClose={() => setIsModalOpen(false)}
           onOrder={handleOrder}
         />
-
-        {/* Menu Item Modal */}
       </main>
     </>
   );
