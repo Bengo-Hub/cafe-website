@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Script from 'next/script';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 export default function MenuPage() {
   const menuSchema = generateMenuSchema();
@@ -34,7 +34,9 @@ export default function MenuPage() {
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 8;
 
   const { items, isLoading, categories } = useMenu();
 
@@ -63,6 +65,33 @@ export default function MenuPage() {
         return sortOrder === 'asc' ? comparison : -comparison;
       });
   }, [items, selectedCategory, searchQuery, sortBy, sortOrder]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
+
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredItems.slice(start, start + pageSize);
+  }, [filteredItems, currentPage, pageSize]);
+
+  // Group the (paginated) items by category so we can show a single image per category
+  const groupedByCategory = useMemo(() => {
+    return paginatedItems.reduce((acc: Record<string, MenuItem[]>, it) => {
+      acc[it.category] = acc[it.category] || [];
+      acc[it.category].push(it);
+      return acc;
+    }, {} as Record<string, MenuItem[]>);
+  }, [paginatedItems]);
+
+  // Ensure current page is valid when filters change
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(1);
+  }, [currentPage, totalPages]);
+
+  const slugify = (s: string) =>
+    s
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9\-]/g, '');
 
   const handleItemClick = (item: MenuItem) => {
     setSelectedItem(item);
@@ -344,24 +373,63 @@ export default function MenuPage() {
                         : "flex flex-col gap-8"
                     }
                   >
-                    {filteredItems.map((item) => (
-                      <motion.div
-                        key={item.id}
-                        layout
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ duration: 0.4, ease: "easeOut" }}
-                      >
-                        <MenuItemCard 
-                          item={item} 
-                          onClick={() => handleItemClick(item)}
-                          onAddToCart={() => handleRedirect(item, 'add-to-cart')}
-                          onView={() => handleRedirect(item, 'view')}
-                          className={viewMode === 'list' ? 'flex flex-row h-56' : ''}
-                        />
-                      </motion.div>
+                    {/* Render paginated items grouped by category. Show one image per category header and only the first item in that category will show its image in list mode. */}
+                    {Object.entries(groupedByCategory).map(([category, items]) => (
+                      <div key={category} className="space-y-6">
+                        <div className="flex items-center justify-between gap-4">
+                          <h3 className="text-2xl font-black tracking-tight">{category}</h3>
+                          <div className="hidden md:block h-20 w-40 relative rounded-xl overflow-hidden">
+                            <Image
+                              src={`/images/menu/categories/${slugify(category)}.jpg`}
+                              alt={category}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        </div>
+
+                        <div className={viewMode === 'grid' ? 'grid gap-8 sm:grid-cols-2 xl:grid-cols-3' : 'flex flex-col gap-6'}>
+                          {items.map((item, idx) => (
+                            <motion.div
+                              key={item.id}
+                              layout
+                              initial={{ opacity: 0, scale: 0.98 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.98 }}
+                              transition={{ duration: 0.3, ease: 'easeOut' }}
+                            >
+                              <MenuItemCard
+                                item={item}
+                                onClick={() => handleItemClick(item)}
+                                onAddToCart={() => handleRedirect(item, 'add-to-cart')}
+                                onView={() => handleRedirect(item, 'view')}
+                                className={viewMode === 'list' ? 'flex flex-row h-44' : ''}
+                                showImage={viewMode === 'grid' ? true : idx === 0}
+                              />
+                            </motion.div>
+                          ))}
+                        </div>
+                      </div>
                     ))}
+
+                    {/* Pagination controls */}
+                    <div className="mt-6 flex items-center justify-center gap-4">
+                      <Button
+                        variant="outline"
+                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                      >
+                        Previous
+                      </Button>
+                      <span className="text-sm font-medium">Page {currentPage} of {totalPages}</span>
+                      <Button
+                        variant="outline"
+                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                      >
+                        Next
+                      </Button>
+                    </div>
                   </motion.div>
                 ) : (
                   /* Empty State */
