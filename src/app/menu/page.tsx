@@ -372,7 +372,7 @@ export default function MenuPage() {
                     layout
                     className={
                       viewMode === 'grid'
-                        ? 'grid gap-8 sm:grid-cols-2 xl:grid-cols-3'
+                        ? 'grid gap-8 sm:grid-cols-2 xl:grid-cols-3 auto-rows-[minmax(480px,1fr)]'
                         : 'flex flex-col gap-8'
                     }
                   >
@@ -384,13 +384,14 @@ export default function MenuPage() {
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ duration: 0.4, ease: 'easeOut' }}
+                        className={viewMode === 'grid' ? 'min-h-[480px]' : viewMode === 'list' ? 'h-56' : ''}
                       >
                         <MenuItemCard
                           item={item}
                           onClick={() => handleItemClick(item)}
                           onAddToCart={() => handleRedirect(item, 'add-to-cart')}
                           onView={() => handleRedirect(item, 'view')}
-                          className={viewMode === 'list' ? 'flex flex-row h-56' : ''}
+                          className={viewMode === 'list' ? 'flex flex-row h-full' : 'h-full'}
                         />
                       </motion.div>
                     ))}
