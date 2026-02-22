@@ -5,24 +5,21 @@ const nextConfig = {
     unoptimized: true,
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
+        protocol: "http",
+        hostname: "localhost",
       },
       {
-        protocol: 'https',
-        hostname: '**',
+        protocol: "https",
+        hostname: "**",
       },
     ],
   },
   typescript: {
     ignoreBuildErrors: false,
   },
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
   experimental: {
-    optimizePackageImports: ['lucide-react'],
+    optimizePackageImports: ["lucide-react"],
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

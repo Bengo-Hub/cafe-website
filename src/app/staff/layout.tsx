@@ -3,6 +3,9 @@
 import {
     BarChart3,
     Bell,
+    Bike,
+    Box,
+    ChefHat,
     Clock,
     LayoutDashboard,
     LogOut,
@@ -20,6 +23,9 @@ import { useAuth } from '@/hooks/use-auth';
 const SIDEBAR_ITEMS = [
   { label: 'Dashboard', icon: LayoutDashboard, href: '/staff' },
   { label: 'Orders', icon: ShoppingBag, href: '/staff/orders' },
+  { label: 'Menu', icon: ChefHat, href: '/staff/menu' },
+  { label: 'Inventory', icon: Box, href: '/staff/inventory' },
+  { label: 'Riders', icon: Bike, href: '/staff/riders', adminOnly: true },
   { label: 'Shifts', icon: Clock, href: '/staff/shifts' },
   { label: 'Analytics', icon: BarChart3, href: '/staff/analytics' },
   { label: 'Team', icon: Users, href: '/staff/team', adminOnly: true },
@@ -98,7 +104,7 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
                 <p className="text-[10px] font-black uppercase tracking-widest text-brand-orange">{user?.role || 'Staff'}</p>
               </div>
               <div className="h-12 w-12 rounded-2xl bg-brand-orange/20 border border-brand-orange/30 flex items-center justify-center text-brand-orange font-black">
-                {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                {user?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
               </div>
             </div>
           </div>

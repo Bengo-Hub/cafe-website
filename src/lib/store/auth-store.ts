@@ -6,6 +6,11 @@ interface User {
   name: string;
   email: string;
   role: string;
+  roles?: string[];
+  tenantId?: string;
+  tenantSlug?: string;
+  phone?: string;
+  image?: string;
 }
 
 interface AuthState {
@@ -24,7 +29,7 @@ export const useAuthStore = create<AuthState>()(
       logout: () => set({ user: null, isAuthenticated: false }),
     }),
     {
-      name: 'auth-storage',
+      name: 'cafe-auth-storage',
     }
   )
 );

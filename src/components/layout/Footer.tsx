@@ -45,7 +45,7 @@ export function Footer() {
             <div className="flex items-center gap-4 group mb-8">
               <div className="relative h-16 w-16 electrical-border rounded-2xl overflow-hidden transition-all duration-500 hover:scale-110">
                 <Image
-                  src="/images/logo/logo.jpg"
+                  src="/images/logo/logo.jpeg"
                   alt="Urban Loft Cafe logo"
                   fill
                   className="object-cover transition-transform duration-700 group-hover:scale-110"

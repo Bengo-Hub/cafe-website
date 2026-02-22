@@ -81,7 +81,7 @@ export function Header() {
             <Link href="/" className="flex items-center gap-3 group" aria-label="Urban Loft Cafe Home">
               <div className="relative h-10 w-10 md:h-14 md:w-14 rounded-2xl overflow-hidden transition-all duration-500 group-hover:rotate-3 shadow-lg shadow-brand-orange/20">
                 <Image
-                  src="/images/logo/logo.jpg"
+                  src="/images/logo/logo.jpeg"
                   alt="Urban Loft Cafe logo"
                   fill
                   className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -234,7 +234,7 @@ export function Header() {
               >
                 <div className="flex items-center gap-3">
                   <div className="h-9 w-9 rounded-xl overflow-hidden shadow-md">
-                    <Image src="/images/logo/logo.jpg" alt="Logo" width={36} height={36} className="object-cover" />
+                    <Image src="/images/logo/logo.jpeg" alt="Logo" width={36} height={36} className="object-cover" />
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm font-bold text-brand-dark dark:text-white">Urban Loft</span>
