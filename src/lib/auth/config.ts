@@ -5,15 +5,23 @@ import { JWT } from "next-auth/jwt";
 const AUTH_SERVICE_URL = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || "https://sso.codevertexitsolutions.com";
 const CAFE_WEBSITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://theurbanloftcafe.com";
 
+const AUTH_UI_URL = process.env.NEXT_PUBLIC_AUTH_UI_URL || "https://accounts.codevertexitsolutions.com";
+
 // Export SSO URLs for use in logout and redirect functions
 export const SSO_URLS = {
   authService: AUTH_SERVICE_URL,
+  authUi: AUTH_UI_URL,
   siteUrl: CAFE_WEBSITE_URL,
   // SSO login URL with return_to parameter for post-login redirect
   getLoginUrl: (returnTo?: string) => {
-    const loginUrl = new URL("/login", `${AUTH_SERVICE_URL.replace('/api/v1', '')}`);
+    const loginUrl = new URL("/login", AUTH_UI_URL);
     if (returnTo) {
       loginUrl.searchParams.set("return_to", returnTo);
+    }
+    // Propagate tenant slug if available
+    const tenant = process.env.NEXT_PUBLIC_TENANT_SLUG;
+    if (tenant) {
+      loginUrl.searchParams.set("tenant", tenant);
     }
     return loginUrl.toString();
   },
@@ -39,7 +47,10 @@ export const authConfig: NextAuthConfig = {
       clientId: process.env.AUTH_CLIENT_ID,
       clientSecret: process.env.AUTH_CLIENT_SECRET,
       authorization: {
-        params: { scope: "openid profile email offline_access" },
+        params: {
+          scope: "openid profile email offline_access",
+          tenant: process.env.NEXT_PUBLIC_TENANT_SLUG || "codevertex"
+        },
       },
       profile(profile) {
         return {
@@ -69,7 +80,7 @@ export const authConfig: NextAuthConfig = {
           },
         } as any;
       }
-      
+
       // Return previous token if the access token has not expired yet
       if (token.expiresAt && Date.now() < (token.expiresAt as number) * 1000) {
         return token;
