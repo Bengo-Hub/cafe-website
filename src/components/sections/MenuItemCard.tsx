@@ -31,10 +31,10 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
       className={`${className} electrical-border rounded-[2rem]`}
       onClick={onClick}
     >
-      <Card className="group relative h-full cursor-pointer overflow-hidden border-none bg-white/80 shadow-xl transition-all duration-500 hover:shadow-brand-orange/10 dark:bg-brand-dark/80 backdrop-blur-sm">
+      <Card className="group relative h-full flex flex-col cursor-pointer overflow-hidden border-none bg-white/80 shadow-xl transition-all duration-500 hover:shadow-brand-orange/10 dark:bg-brand-dark/80 backdrop-blur-sm">
         {/* Image Section (optional) */}
         {showImage && (
-          <div className="relative h-60 w-full overflow-hidden">
+          <div className="relative h-60 w-full shrink-0 overflow-hidden">
             <Image
               src={item.image || '/images/menu/placeholder-food.svg'}
               alt={item.name}
@@ -92,8 +92,8 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
         )}
 
         {/* Content Section */}
-        <div className="p-6">
-          <div className="mb-2 flex items-center justify-between">
+        <div className="flex flex-1 flex-col p-6 min-h-0">
+          <div className="mb-2 flex shrink-0 items-center justify-between">
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-orange">
               {item.category}
             </span>
@@ -104,15 +104,15 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
             </div>
           </div>
 
-          <h3 className="mb-3 text-xl font-black text-primary-brand tracking-tight transition-colors group-hover:text-brand-orange">
+          <h3 className="mb-2 line-clamp-2 shrink-0 text-xl font-black text-primary-brand tracking-tight transition-colors group-hover:text-brand-orange">
             {item.name}
           </h3>
 
-          <p className="mb-6 line-clamp-2 text-sm font-light leading-relaxed text-secondary-brand">
+          <p className="mb-4 flex-1 min-h-0 line-clamp-2 text-sm font-light leading-relaxed text-secondary-brand">
             {item.description}
           </p>
 
-          <div className="flex items-center justify-between border-t border-brand-beige/20 pt-5">
+          <div className="mt-auto flex shrink-0 items-center justify-between border-t border-brand-beige/20 pt-4">
             <span className="text-2xl font-black text-brand-orange tracking-tight">
               <span className="text-xs font-medium text-secondary-brand mr-1">KES</span> {item.price.toLocaleString()}
             </span>
