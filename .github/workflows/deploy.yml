@@ -105,19 +105,10 @@ jobs:
       id-token: write
 
     steps:
-      - name: Re-trigger if secrets were just synced
-        if: needs.sync-secrets.outputs.result == 'synced'
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
-        run: |
-          echo "Secrets were just synced in this workflow run."
-          echo "GitHub loads secret values at job start — newly created secrets"
-          echo "are not available until the next run."
-          echo ""
-          echo "Re-triggering workflow so the deploy job picks up the new values..."
-          gh workflow run deploy.yml --repo "${{ github.repository }}" --ref "${{ github.ref }}"
-          echo "Workflow re-triggered. This run will exit gracefully."
-          exit 0
+      # NOTE: Removed automatic re-trigger when secrets were synced. The
+      # workflow will now continue for both 'synced' and 'skipped' results.
+      # If secrets were created during this run they may not be available
+      # until the next run; the Verify step below will catch missing values.
 
       - name: Abort if sync was partial
         if: needs.sync-secrets.outputs.result == 'partial'
@@ -128,19 +119,19 @@ jobs:
           exit 1
 
       - name: Checkout code
-        if: needs.sync-secrets.outputs.result != 'synced'
+        if: needs.sync-secrets.outputs.result != 'partial'
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        if: needs.sync-secrets.outputs.result != 'synced'
+        if: needs.sync-secrets.outputs.result != 'partial'
         uses: docker/setup-buildx-action@v3
 
       - name: Install DevOps Tools
-        if: needs.sync-secrets.outputs.result != 'synced'
+        if: needs.sync-secrets.outputs.result != 'partial'
         uses: Bengo-Hub/devops-k8s/.github/actions/install-devops-tools@main
 
       - name: Set deployment variables
-        if: needs.sync-secrets.outputs.result != 'synced'
+        if: needs.sync-secrets.outputs.result != 'partial'
         run: |
           echo "DEPLOY=true" >> $GITHUB_ENV
           echo "SETUP_DATABASES=false" >> $GITHUB_ENV
@@ -153,7 +144,7 @@ jobs:
           echo "APP_NAME=cafe-website" >> $GITHUB_ENV
 
       - name: Debug available secrets
-        if: needs.sync-secrets.outputs.result != 'synced'
+        if: needs.sync-secrets.outputs.result != 'partial'
         run: |
           echo "Checking which tokens are available..."
           [[ -n "${{ secrets.GH_PAT }}" ]] && echo "✅ GH_PAT is set" || echo "❌ GH_PAT not found"
@@ -161,7 +152,7 @@ jobs:
           echo "Note: GH_PAT required for cross-repo push to devops-k8s"
 
       - name: Verify secrets
-        if: needs.sync-secrets.outputs.result != 'synced'
+        if: needs.sync-secrets.outputs.result != 'partial'
         run: |
           echo "Verifying deployment secrets..."
           echo "Sync result: ${{ needs.sync-secrets.outputs.result }}"
@@ -211,7 +202,7 @@ jobs:
           KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
 
       - name: Run production deployment
-        if: needs.sync-secrets.outputs.result != 'synced'
+        if: needs.sync-secrets.outputs.result != 'partial'
         env:
           KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
           # GitHub tokens for cross-repo push (priority order in build.sh)
@@ -238,7 +229,7 @@ jobs:
           ./build.sh
 
       - name: Tag and push :latest
-        if: success() && needs.sync-secrets.outputs.result != 'synced'
+        if: success() && needs.sync-secrets.outputs.result != 'partial'
         env:
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
@@ -255,7 +246,7 @@ jobs:
           docker push "${IMAGE_REPO}:latest"
 
       - name: Check ArgoCD Application status
-        if: success() && needs.sync-secrets.outputs.result != 'synced'
+        if: success() && needs.sync-secrets.outputs.result != 'partial'
         env:
           KUBE_CONFIG_B64: ${{ secrets.KUBE_CONFIG }}
           NS: cafe
