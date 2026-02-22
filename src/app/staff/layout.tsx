@@ -3,6 +3,9 @@
 import {
     BarChart3,
     Bell,
+    Bike,
+    Box,
+    ChefHat,
     Clock,
     LayoutDashboard,
     LogOut,
@@ -20,6 +23,9 @@ import { useAuth } from '@/hooks/use-auth';
 const SIDEBAR_ITEMS = [
   { label: 'Dashboard', icon: LayoutDashboard, href: '/staff' },
   { label: 'Orders', icon: ShoppingBag, href: '/staff/orders' },
+  { label: 'Menu', icon: ChefHat, href: '/staff/menu' },
+  { label: 'Inventory', icon: Box, href: '/staff/inventory' },
+  { label: 'Riders', icon: Bike, href: '/staff/riders', adminOnly: true },
   { label: 'Shifts', icon: Clock, href: '/staff/shifts' },
   { label: 'Analytics', icon: BarChart3, href: '/staff/analytics' },
   { label: 'Team', icon: Users, href: '/staff/team', adminOnly: true },

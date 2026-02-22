@@ -44,11 +44,14 @@ export const authConfig: NextAuthConfig = {
       profile(profile) {
         return {
           id: profile.sub,
-          name: profile.name,
+          name: profile.name || profile.email?.split("@")[0],
           email: profile.email,
           image: profile.picture,
           role: profile.role || "customer",
+          roles: profile.roles || [profile.role || "customer"],
           tenantId: profile.tenant_id,
+          tenantSlug: profile.tenant_slug,
+          phone: profile.phone,
         };
       },
     },

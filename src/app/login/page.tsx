@@ -1,43 +1,32 @@
 'use client';
 
-import { Button, Card, Input } from '@/components/ui';
-import { useAuthStore } from '@/lib/store/auth-store';
+import { Button, Card } from '@/components/ui';
+import { SSO_URLS } from '@/lib/auth/config';
 import { motion } from 'framer-motion';
+import { ShieldCheck } from 'lucide-react';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense, useState } from 'react';
 
-export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+function LoginContent() {
   const [isLoading, setIsLoading] = useState(false);
-  const login = useAuthStore((state) => state.login);
-  const router = useRouter();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    
-    // For now, we still support dummy login for development
-    if (process.env.NEXT_PUBLIC_USE_DUMMY_DATA === 'true') {
-      login({
-        id: '1',
-        name: 'John Doe',
-        email: email,
-        role: 'customer',
-      });
-      router.push('/');
-      return;
-    }
-
-    // Real SSO login would go here
-    // signIn('bengobox-auth');
-  };
+  const searchParams = useSearchParams();
+  const returnTo = searchParams?.get('return_to') ?? '/';
 
   const handleSSOLogin = () => {
     setIsLoading(true);
-    signIn('bengobox-auth', { callbackUrl: '/' });
+    // Redirect through bridge screen after SSO for sync confirmation
+    const bridgeUrl = `/auth/bridge?return_to=${encodeURIComponent(returnTo)}`;
+    signIn('bengobox-auth', { callbackUrl: bridgeUrl });
+  };
+
+  const handleSSOSignup = () => {
+    setIsLoading(true);
+    const authServiceUrl = SSO_URLS.authService.replace('/api/v1', '');
+    const signupUrl = new URL('/signup', authServiceUrl);
+    signupUrl.searchParams.set('return_to', `${SSO_URLS.siteUrl}${returnTo}`);
+    window.location.href = signupUrl.toString();
   };
 
   return (
@@ -59,13 +48,13 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-6">
-              <Button 
+              <Button
                 onClick={handleSSOLogin}
                 disabled={isLoading}
                 className="w-full h-16 rounded-2xl text-sm font-black uppercase tracking-widest bg-primary-brand text-white hover:bg-primary-brand/90 transition-all flex items-center justify-center gap-3"
               >
-                <img src="/icons/bengobox-logo.svg" alt="" className="h-5 w-5 invert" />
-                Sign in with BengoBox SSO
+                <ShieldCheck className="h-5 w-5" />
+                {isLoading ? 'Redirecting to SSO...' : 'Sign in with BengoBox'}
               </Button>
 
               <div className="relative">
@@ -73,68 +62,45 @@ export default function LoginPage() {
                   <span className="w-full border-t border-brand-beige/20"></span>
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white dark:bg-brand-dark px-4 text-secondary-brand opacity-40 font-bold tracking-widest">Or continue with</span>
+                  <span className="bg-white dark:bg-brand-dark px-4 text-secondary-brand opacity-40 font-bold tracking-widest">Single Sign-On</span>
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-brand/60" htmlFor="email">
-                    Email Address
-                  </label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="name@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="h-14 rounded-2xl bg-white/50 dark:bg-brand-dark/50 border-brand-beige/20 focus:border-brand-orange px-6"
-                  />
-                </div>
+              <p className="text-center text-secondary-brand/70 text-xs leading-relaxed">
+                Your BengoBox account gives you access to all services including ordering, reservations, loyalty rewards, and more.
+              </p>
 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-brand/60" htmlFor="password">
-                      Password
-                    </label>
-                    <Link
-                      href="/forgot-password"
-                      className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-orange hover:text-brand-orange/80"
-                    >
-                      Forgot?
-                    </Link>
-                  </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="h-14 rounded-2xl bg-white/50 dark:bg-brand-dark/50 border-brand-beige/20 focus:border-brand-orange px-6"
-                  />
-                </div>
-
-                <Button 
-                  type="submit" 
-                  disabled={isLoading}
-                  className="w-full h-16 rounded-2xl text-lg font-black uppercase tracking-widest bg-brand-orange hover:bg-brand-orange/90 text-white shadow-xl shadow-brand-orange/20 transition-all hover:scale-[1.02]"
-                >
-                  {isLoading ? 'Signing in...' : 'Sign In'}
-                </Button>
-              </form>
+              <Button
+                onClick={handleSSOSignup}
+                disabled={isLoading}
+                variant="outline"
+                className="w-full h-14 rounded-2xl text-sm font-black uppercase tracking-widest border-brand-orange/30 text-brand-orange hover:bg-brand-orange/5 transition-all"
+              >
+                {isLoading ? 'Redirecting...' : 'Create New Account'}
+              </Button>
             </div>
 
             <div className="mt-10 text-center text-sm font-light text-secondary-brand">
-              Don't have an account?{' '}
-              <Link href="/signup" className="font-black text-brand-orange hover:text-brand-orange/80 uppercase tracking-widest text-xs ml-1">
-                Sign up now
+              Need help?{' '}
+              <Link href="/contact" className="font-black text-brand-orange hover:text-brand-orange/80 uppercase tracking-widest text-xs ml-1">
+                Contact Us
               </Link>
             </div>
           </Card>
         </div>
       </motion.div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <main className="flex min-h-screen items-center justify-center bg-brand-cream dark:bg-brand-dark">
+        <div className="animate-pulse text-secondary-brand">Loading...</div>
+      </main>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }

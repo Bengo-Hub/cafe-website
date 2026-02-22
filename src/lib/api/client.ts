@@ -18,6 +18,13 @@ export class ApiError extends Error {
   }
 }
 
+function tenantHeaders(): Record<string, string> {
+  return {
+    'X-Tenant-Slug': config.tenant.slug,
+    ...(config.tenant.id ? { 'X-Tenant-ID': config.tenant.id } : {}),
+  };
+}
+
 export async function apiClient<T = any>(
   url: string,
   options: RequestInit = {}
@@ -36,6 +43,7 @@ export async function apiClient<T = any>(
         signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
+          ...tenantHeaders(),
           ...options.headers,
         },
       });
