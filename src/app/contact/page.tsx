@@ -73,8 +73,8 @@ export default function ContactPage() {
       <section className="container relative z-10 -mt-24 pb-20">
         <div className="grid gap-8 md:grid-cols-3">
           {[
-            { icon: Phone, title: "Call Us", details: ["+254 700 000 000", "+254 711 111 111"], color: "bg-brand-brown" },
-            { icon: Mail, title: "Email Us", details: ["hello@urbanloftcafe.com", "events@urbanloftcafe.com"], color: "bg-brand-orange" },
+            { icon: Phone, title: "Call Us", details: ["0116010638"], color: "bg-brand-brown" },
+            { icon: Mail, title: "Email Us", details: ["urbanloftc@gmail.com"], color: "bg-brand-orange" },
             { icon: Clock, title: "Visit Us", details: ["Mon - Fri: 7AM - 9PM", "Sat - Sun: 8AM - 8PM"], color: "bg-brand-dark" }
           ].map((item, idx) => (
             <motion.div
