@@ -182,7 +182,7 @@ All Services Validate JWT:
 AUTH_SERVICE_URL=https://sso.codevertexitsolutions.com
 AUTH_CLIENT_ID=cafe-website
 AUTH_CLIENT_SECRET=<stored-encrypted>
-AUTH_REDIRECT_URI=https://cafe.codevertexitsolutions.com/auth/callback
+AUTH_REDIRECT_URI=https://theurbanloftcafe.com/auth/callback
 AUTH_JWKS_ENDPOINT=https://sso.codevertexitsolutions.com/api/v1/.well-known/jwks.json
 ```
 
