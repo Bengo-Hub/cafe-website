@@ -74,13 +74,13 @@ export function Footer() {
                 <div className="p-2 rounded-lg bg-brand-orange/10 dark:bg-brand-orange/20 group-hover/item:bg-brand-orange/30 transition-colors">
                   <Phone className="h-5 w-5 text-brand-orange" />
                 </div>
-                <span className="text-sm font-bold tracking-wide">+254 (TBD)</span>
+                <span className="text-sm font-bold tracking-wide">0116010638</span>
               </a>
-              <a href="mailto:urbanloftcafec@gmail.com" className="flex items-center gap-4 p-3 rounded-lg bg-brand-beige/10 dark:bg-white/5 border border-brand-muted/30 dark:border-white/10 text-brand-muted dark:text-brand-beige/60 hover:text-brand-orange dark:hover:text-brand-orange hover:border-brand-orange/30 dark:hover:border-brand-orange/30 hover:bg-brand-orange/5 dark:hover:bg-brand-orange/5 transition-all duration-300 group/item">
+              <a href="mailto:urbanloftc@gmail.com" className="flex items-center gap-4 p-3 rounded-lg bg-brand-beige/10 dark:bg-white/5 border border-brand-muted/30 dark:border-white/10 text-brand-muted dark:text-brand-beige/60 hover:text-brand-orange dark:hover:text-brand-orange hover:border-brand-orange/30 dark:hover:border-brand-orange/30 hover:bg-brand-orange/5 dark:hover:bg-brand-orange/5 transition-all duration-300 group/item">
                 <div className="p-2 rounded-lg bg-brand-orange/10 dark:bg-brand-orange/20 group-hover/item:bg-brand-orange/30 transition-colors">
                   <Mail className="h-5 w-5 text-brand-orange" />
                 </div>
-                <span className="text-sm font-bold tracking-wide">urbanloftcafec@gmail.com</span>
+                <span className="text-sm font-bold tracking-wide">urbanloftc@gmail.com</span>
               </a>
             </div>
           </div>
