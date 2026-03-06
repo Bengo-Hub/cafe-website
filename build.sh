@@ -66,7 +66,7 @@ step "Docker build"
 DOCKER_BUILDKIT=1 docker build . \
   --build-arg NEXT_PUBLIC_AUTH_SERVICE_URL="${NEXT_PUBLIC_AUTH_SERVICE_URL:-https://sso.codevertexitsolutions.com}" \
   --build-arg NEXT_PUBLIC_AUTH_UI_URL="${NEXT_PUBLIC_AUTH_UI_URL:-https://accounts.codevertexitsolutions.com}" \
-  --build-arg NEXT_PUBLIC_ORDERING_SERVICE_URL="${NEXT_PUBLIC_ORDERING_SERVICE_URL:-https://orderapi.codevertexitsolutions.com}" \
+  --build-arg NEXT_PUBLIC_ORDERING_SERVICE_URL="${NEXT_PUBLIC_ORDERING_SERVICE_URL:-https://orderingapi.codevertexitsolutions.com}" \
   --build-arg NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL="${NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL:-https://notificationsapi.codevertexitsolutions.com}" \
   --build-arg NEXT_PUBLIC_LOGISTICS_SERVICE_URL="${NEXT_PUBLIC_LOGISTICS_SERVICE_URL:-https://logisticsapi.codevertexitsolutions.com}" \
   --build-arg NEXT_PUBLIC_TREASURY_SERVICE_URL="${NEXT_PUBLIC_TREASURY_SERVICE_URL:-https://booksapi.codevertexitsolutions.com}" \

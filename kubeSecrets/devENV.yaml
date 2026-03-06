@@ -11,7 +11,7 @@ stringData:
   # ============================================
   NEXT_PUBLIC_AUTH_SERVICE_URL: "https://sso.codevertexitsolutions.com"
   NEXT_PUBLIC_AUTH_UI_URL: "https://accounts.codevertexitsolutions.com"
-  NEXT_PUBLIC_ORDERING_SERVICE_URL: "https://orderapi.codevertexitsolutions.com"
+  NEXT_PUBLIC_ORDERING_SERVICE_URL: "https://orderingapi.codevertexitsolutions.com"
   NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL: "https://notificationsapi.codevertexitsolutions.com"
   NEXT_PUBLIC_LOGISTICS_SERVICE_URL: "https://logisticsapi.codevertexitsolutions.com"
   NEXT_PUBLIC_TREASURY_SERVICE_URL: "https://booksapi.codevertexitsolutions.com"

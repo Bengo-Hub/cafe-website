@@ -81,7 +81,7 @@ export default function MenuPage() {
   };
 
   const handleRedirect = (item: MenuItem, action: 'add-to-cart' | 'view' | 'whitelist') => {
-    const orderingUrl = process.env.NEXT_PUBLIC_ORDERING_SERVICE_URL || 'https://orderapi.codevertexitsolutions.com';
+    const orderingUrl = process.env.NEXT_PUBLIC_ORDERING_SERVICE_URL || 'https://orderingapi.codevertexitsolutions.com';
     const redirectUrl = `${orderingUrl}/${tenantSlug}/menu?item_id=${item.id}&action=${action}`;
 
     window.location.href = redirectUrl;

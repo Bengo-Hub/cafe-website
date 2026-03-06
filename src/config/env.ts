@@ -1,7 +1,7 @@
 // Production base URLs (used when NEXT_PUBLIC_* are not set, e.g. Docker build without build-args)
 const PRODUCTION = {
   auth: 'https://sso.codevertexitsolutions.com',
-  ordering: 'https://orderapi.codevertexitsolutions.com',
+  ordering: 'https://orderingapi.codevertexitsolutions.com',
   logistics: 'https://logisticsapi.codevertexitsolutions.com',
   treasury: 'https://booksapi.codevertexitsolutions.com',
   booking: 'https://booking.codevertexitsolutions.com',
