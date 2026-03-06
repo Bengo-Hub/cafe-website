@@ -94,16 +94,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Provide an explicit null session on the server to avoid the client
-  // attempting an initial fetch to the NextAuth endpoints in environments
-  // where the auth backend is unavailable. This prevents ClientFetchError
-  // being thrown by NextAuth's client during dev when the SSO is unreachable.
-  const session = null;
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
-        <Providers session={session}>
+        <Providers>
           <div className="min-h-screen flex flex-col">
             <Header />
             <main className="flex-1">

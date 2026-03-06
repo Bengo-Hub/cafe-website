@@ -1,7 +1,7 @@
 'use client';
 
 import { Button, Card } from '@/components/ui';
-import { useAuthStore } from '@/lib/store/auth-store';
+import { useAuth } from '@/hooks/use-auth';
 import { motion } from 'framer-motion';
 import { Award, CheckCircle2, Gift, Star, Trophy, Zap } from 'lucide-react';
 import Image from 'next/image';
@@ -50,7 +50,7 @@ const REWARDS = [
 ];
 
 export default function LoyaltyPage() {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user } = useAuth();
 
   return (
     <main className="relative min-h-screen overflow-hidden section-blend-cream">

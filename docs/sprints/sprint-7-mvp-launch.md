@@ -7,7 +7,8 @@
 
 ## Progress
 
-- **2026-03-06 (RBAC + TanStack Query)**: RBAC from auth-api: added `GET /api/v1/auth/me` integration via `lib/api/auth.ts` and `useMe()` hook with TanStack Query (staleTime 5 min). Dashboard layout uses `useMe()` for roles/permissions; nav visibility and route protection use auth-api data when available (fallback to session). Added `hasPermission()` in `lib/auth/roles.ts`. Unauthorized (403) page at `/unauthorized` and 404 at `not-found.tsx`; non-staff users hitting dashboard redirect to `/unauthorized`. All data fetching in the app uses TanStack Query (useQuery/useMutation); no raw fetch/axios in components.
+- **2026-03-06 (SSO-only, no NextAuth)**: Replaced NextAuth with direct SSO (PKCE): login/signup pages redirect to auth-service `/api/v1/authorize`; callback at `/auth/callback` exchanges code for tokens and fetches profile; Zustand auth store persists session/user; `cafe-website` OAuth client in auth-api seed uses redirect_uris `{origin}/auth/callback` and is public (PKCE). Removed NextAuth dependency and `/api/auth/*` route; dashboard layout redirects unauthenticated users to `/login` (which redirects to SSO). See `docs/architecture.md` Auth section.
+- **2026-03-06 (RBAC + TanStack Query)**: RBAC from auth-api: added `GET /api/v1/auth/me` integration via `lib/api/auth.ts` and `useMe()` hook with TanStack Query (staleTime 5 min). Dashboard layout uses `useMe()` for roles/permissions; nav visibility and route protection use auth-api data when available. Added `hasPermission()` in `lib/auth/roles.ts`. Unauthorized (403) page at `/unauthorized` and 404 at `not-found.tsx`; non-staff users hitting dashboard redirect to `/unauthorized`. All data fetching in the app uses TanStack Query (useQuery/useMutation); no raw fetch/axios in components.
 - **2026-03-06 (later)**: Tenant/brand: tenant slug from route (`/t/[slug]`) or `NEXT_PUBLIC_TENANT_SLUG` fallback via `useTenantSlug()`. Auth-api `GET /api/v1/tenants/by-slug/{slug}` (public) used to load tenant name/slug and optional branding (logo URL, primary/secondary colors from tenant metadata). `TenantBrandProvider` applies brand colors to CSS variables; Header and dashboard sidebar use tenant org name/logo when available. Settings page: added Branding section (org name, logo URL, brand colors). Menu: graceful fallback to empty list when catalog API fails. D3 items ticked: fallback on API fail, MenuItemCard image fallback (in mapper), CategoryFilter uses real categories.
 - **2026-03-06**: D1 auth token fix and D2 role-based dashboard implemented. Auth store now persists `accessToken` and `refreshToken`; session callback (via use-auth) syncs tokens into the store. API client reads token from auth store for `Authorization` header. Dashboard layout: `hasRole` / `hasStaffOrAdminRole` helpers added; sidebar hides Riders/Team for non-admin; non-staff users visiting `/dashboard/*` are redirected to `/`. Doc ticks updated for D1, D2, and already-done D3/D5 items.
 
@@ -30,9 +31,9 @@
 
 ### D1: Auth token fix (Day 1) -- CRITICAL
 
-The dashboard API modules read `accessToken` from localStorage (`cafe-auth-storage`), but the Zustand auth store does not persist it. NextAuth manages tokens server-side.
+The dashboard API modules read `accessToken` from the Zustand auth store (`cafe-auth-storage`). SSO callback persists session (accessToken, refreshToken) and user in the store.
 
-- [x] Option A (recommended): Persist `accessToken` in Zustand auth store after NextAuth session callback
+- [x] Persist `accessToken` (and session/user) in Zustand auth store after SSO callback
 - [x] Update `lib/store/auth-store.ts` to include `accessToken` and `refreshToken` in persisted state
 - [x] Update `lib/api/client.ts` to read token from updated store
 - [ ] Test: API calls from dashboard pages successfully authenticate against backend services
@@ -40,7 +41,7 @@ The dashboard API modules read `accessToken` from localStorage (`cafe-auth-stora
 
 ### D2: Role-based sidebar (Day 1)
 
-- [x] Read `roles` from NextAuth session in dashboard layout
+- [x] Read `roles` from auth store (populated by SSO callback and /me) in dashboard layout
 - [x] Fetch roles (and permissions) from auth-api `GET /api/v1/auth/me` via `useMe()` with TanStack Query (staleTime 5 min)
 - [x] Conditionally hide `adminOnly` sidebar items (Riders, Team) for non-admin users
 - [x] Add role check utility: `hasRole(session, 'admin' | 'staff' | 'manager')` and `hasPermission()`

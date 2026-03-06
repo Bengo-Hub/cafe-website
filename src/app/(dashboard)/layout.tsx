@@ -56,10 +56,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const rbacUser = effectiveUserForRbac(user ?? undefined, me?.roles ?? meRoles);
 
-  // Redirect non-staff users (e.g. customer) to unauthorized page
+  // Redirect unauthenticated users to login (which redirects to SSO)
   useEffect(() => {
     if (isLoading) return;
-    if (isAuthenticated && user && !hasStaffOrAdminRole(rbacUser ?? user)) {
+    if (!isAuthenticated) {
+      const returnTo = pathname ? `/login?return_to=${encodeURIComponent(pathname)}` : '/login';
+      router.replace(returnTo);
+      return;
+    }
+    if (user && !hasStaffOrAdminRole(rbacUser ?? user)) {
       router.replace('/unauthorized');
     }
   }, [isLoading, isAuthenticated, user, rbacUser, router]);

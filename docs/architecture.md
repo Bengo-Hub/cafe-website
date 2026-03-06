@@ -14,7 +14,7 @@
 | Framework | Next.js 16.1.6 (App Router), React 19, TypeScript |
 | Styling | Tailwind CSS + Shadcn UI (Button, Card, Badge, Input, Label, Switch, Skeleton) |
 | State | Zustand (auth, theme) + TanStack Query (server data) |
-| Auth | NextAuth v5 (beta.30) with OIDC provider (`bengobox-auth`) |
+| Auth | SSO only (PKCE): redirect to auth-service, callback at `/auth/callback`, Zustand store |
 | Forms | React Hook Form + Zod |
 | Maps | Leaflet + react-leaflet |
 | Animations | Framer Motion |
@@ -40,8 +40,8 @@ The cafe-website is the **hub** for the BengoBox ecosystem. It follows a **displ
 
 Route groups (parentheses do not affect the URL):
 
-- **`(site)`** — **Public pages**. No auth required: home, menu, about, contact, events, careers, franchising, loyalty, services, login, signup, auth/bridge.
-- **`(dashboard)`** — **Dashboard (admin/staff) auth-only pages**. Protected by middleware; require SSO. Dashboard shell (sidebar, auth guard) and pages: dashboard, orders, menu (management), inventory, riders, shifts, analytics, team, settings, track-order. Resolve under `/dashboard/*` (e.g. `/dashboard`, `/dashboard/menu`, `/dashboard/orders`).
+- **`(site)`** — **Public pages**. No auth required: home, menu, about, contact, events, careers, franchising, loyalty, services. `/login` and `/signup` redirect to SSO; `/auth/bridge` redirects to `/login`.
+- **`(dashboard)`** — **Dashboard (admin/staff) auth-only pages**. Protected client-side (layout redirects to `/login` when unauthenticated); require SSO. Dashboard shell (sidebar, auth guard) and pages: dashboard, orders, menu (management), inventory, riders, shifts, analytics, team, settings, track-order. Resolve under `/dashboard/*`.
 
 ```
 src/
@@ -58,7 +58,7 @@ src/
         page.tsx                    -- Dashboard home
         orders/ menu/ inventory/ riders/ shifts/ analytics/ team/ settings/
         track-order/
-    api/auth/[...nextauth]/         -- NextAuth route handler
+    auth/callback/page.tsx         -- SSO callback (code exchange, store tokens)
   components/
     layout/                      -- Header, Footer, PageTransition
     providers/                   -- AppProviders, ThemeProvider
@@ -68,14 +68,15 @@ src/
   hooks/                         -- useAuth, useMenu, useMe (auth-api /me + RBAC)
   lib/
     api/                         -- client.ts, orders.ts, riders.ts, inventory.ts, catalog.ts
-    auth/config.ts               -- NextAuth OIDC config
+    auth/config.ts               -- SSO URL helpers
+    auth/sso-api.ts              -- buildAuthorizeUrl, exchangeCodeForTokens, fetchProfile
+    auth/pkce.ts                 -- PKCE helpers
     constants/menu-categories.ts
     dummy-data/                  -- menu, events, jobs, loyalty, orders, spaces, team, testimonials
     store/                       -- auth-store.ts, theme-store.ts
     utils/                       -- currency, date, string, schema
-  types/                         -- index.ts, next-auth.d.ts
-  auth.ts                        -- NextAuth instance
-  middleware.ts                  -- Route protection
+  types/                         -- index.ts
+  middleware.ts                  -- Public/auth route allowlist (dashboard protected client-side)
 ```
 
 ---
@@ -114,40 +115,37 @@ Post-MVP: outlet selector in dashboard header; API calls scoped by `X-Outlet-ID`
 
 ## Auth architecture
 
-### NextAuth v5 OIDC
+### SSO only (PKCE, no local login form)
 
-- Provider: `bengobox-auth` (custom OIDC)
-- Issuer: `NEXT_PUBLIC_AUTH_SERVICE_URL` (default `https://sso.codevertexitsolutions.com`)
-- Auth UI: `NEXT_PUBLIC_AUTH_UI_URL` (default `https://accounts.codevertexitsolutions.com`)
-- Client ID: `cafe-website`
+- **Client ID**: `cafe-website` (public client, PKCE)
+- **Auth service**: `NEXT_PUBLIC_AUTH_SERVICE_URL` (default `https://sso.codevertexitsolutions.com`)
+- **Callback**: `{origin}/auth/callback` (must be registered in auth-api OAuth client redirect_uris)
 
 ### Flow
 
-1. User clicks "Login" -> `signIn('bengobox-auth', { callbackUrl })`
-2. NextAuth redirects to auth-service authorize endpoint
-3. User authenticates at auth-ui (accounts.codevertexitsolutions.com)
-4. Callback to `/api/auth/callback/bengobox-auth`
-5. Bridge page (`/auth/bridge`) handles post-login routing:
-   - Staff/admin roles -> `/dashboard/orders`
-   - Customer roles -> `return_to` param or `/`
-6. JWT callback stores `access_token`, `refresh_token`, `expires_at`
-7. Token refresh via `refreshAccessToken()` when expired
+1. User clicks "Login" or "Get started" -> `redirectToSSO(returnTo)` from auth store
+2. App builds PKCE challenge/verifier, stores in sessionStorage, redirects to auth-service `/api/v1/authorize`
+3. User signs in at auth-service (or auth-ui)
+4. Auth-service redirects to `{origin}/auth/callback?code=...&state=...`
+5. Callback page exchanges `code` + `code_verifier` for tokens, fetches profile from `GET /api/v1/auth/me`, stores session + user in Zustand (persisted)
+6. Redirect to `return_to` (from sessionStorage) or `/`
+7. Logout: clear store and redirect to auth-service `/api/v1/auth/logout?post_logout_redirect_uri=...`
 
-### Profile mapping
+### Profile
 
-Claims mapped from OIDC profile: `sub`, `name`, `email`, `picture`, `role`, `roles`, `tenant_id`, `tenant_slug`, `phone`.
+User and roles/permissions from auth-api `GET /api/v1/auth/me` (Bearer token); stored in auth store and used by `useMe()` (TanStack Query).
 
 ### RBAC (roles and permissions)
 
 - **Source**: Auth-api `GET /api/v1/auth/me` returns user profile, `roles`, and `permissions` (cached with TanStack Query, staleTime 5 min via `useMe()` hook).
-- **Usage**: Dashboard layout uses `useMe()` for nav visibility and route protection; when `/me` data is available it takes precedence over session roles; otherwise falls back to NextAuth session.
+- **Usage**: Dashboard layout uses `useMe()` and auth store user for nav visibility and route protection.
 - **Helpers**: `hasRole(user, role)`, `hasStaffOrAdminRole(user)`, `hasPermission(user, permission)` in `lib/auth/roles.ts`.
 - **403**: Non-staff users visiting `/dashboard/*` are redirected to `/unauthorized`. A dedicated 403 page exists at `app/unauthorized/page.tsx`. 404 is handled by `app/not-found.tsx`.
 
-### Middleware route protection
+### Middleware
 
+- **Allowed**: Public routes, `/login`, `/signup`, `/auth/*` (callback). Dashboard routes are not protected in middleware; dashboard layout redirects unauthenticated users to `/login` (which redirects to SSO).
 - **Public**: `/`, `/about`, `/menu`, `/services`, `/services/*`, `/events`, `/careers`, `/franchising`, `/contact`, `/loyalty`, `/unauthorized` (403 page)
-- **Auth pages** (redirect if logged in): `/login`, `/signup`
 - **Protected** (redirect to `/login` if not authenticated): everything else, including `/dashboard/*`
 
 ---

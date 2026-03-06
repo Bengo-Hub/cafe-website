@@ -1,4 +1,4 @@
-export type StaffRole = 'admin' | 'staff' | 'manager';
+export type StaffRole = 'admin' | 'staff' | 'manager' | 'superuser';
 
 interface UserWithRole {
   role?: string;
@@ -17,7 +17,7 @@ export function hasRole(
   return Array.isArray(user.roles) && user.roles.includes(role);
 }
 
-const STAFF_ROLES: StaffRole[] = ['admin', 'staff', 'manager'];
+const STAFF_ROLES: StaffRole[] = ['admin', 'staff', 'manager', 'superuser'];
 
 /**
  * Returns true if the user has any staff or admin role (can access dashboard).

@@ -1,33 +1,33 @@
-import { auth } from "@/auth";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export default auth((req) => {
-  const isLoggedIn = !!req.auth;
-  const { nextUrl } = req;
+/**
+ * Middleware: allow public and auth routes. Dashboard protection is done client-side (layout redirects to /login).
+ * SSO flow: /login and /signup redirect to auth-service; /auth/callback receives code and exchanges for tokens.
+ */
+export function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
 
-  const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
-  const isPublicRoute = ["/", "/about", "/menu", "/services", "/events", "/careers", "/franchising", "/contact", "/loyalty", "/unauthorized"].includes(nextUrl.pathname)
-    || nextUrl.pathname.startsWith("/services/")
-    || nextUrl.pathname.startsWith("/events/");
-  const isAuthRoute = ["/login", "/signup"].includes(nextUrl.pathname);
+  const isAuthRoute = pathname === '/login' || pathname === '/signup' || pathname.startsWith('/auth/');
+  const isPublicRoute =
+    pathname === '/' ||
+    pathname === '/about' ||
+    pathname === '/menu' ||
+    pathname === '/contact' ||
+    pathname === '/loyalty' ||
+    pathname === '/unauthorized' ||
+    pathname.startsWith('/services/') ||
+    pathname.startsWith('/events/') ||
+    pathname === '/careers' ||
+    pathname === '/franchising';
 
-  if (isApiAuthRoute) {
-    return;
+  if (isAuthRoute || isPublicRoute) {
+    return NextResponse.next();
   }
 
-  if (isAuthRoute) {
-    if (isLoggedIn) {
-      return Response.redirect(new URL("/", nextUrl));
-    }
-    return;
-  }
-
-  if (!isLoggedIn && !isPublicRoute) {
-    return Response.redirect(new URL("/login", nextUrl));
-  }
-
-  return;
-});
+  return NextResponse.next();
+}
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|images|favicon.ico).*)"],
+  matcher: ['/((?!api|_next/static|_next/image|images|favicon.ico).*)'],
 };

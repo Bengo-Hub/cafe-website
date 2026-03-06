@@ -1,13 +1,11 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SessionProvider } from 'next-auth/react';
-import type { Session } from 'next-auth';
 import { useState } from 'react';
 import { TenantBrandProvider } from './TenantBrandProvider';
 import { ThemeProvider } from './ThemeProvider';
 
-export function Providers({ children, session }: { children: React.ReactNode; session?: Session | null }) {
+export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
@@ -17,14 +15,12 @@ export function Providers({ children, session }: { children: React.ReactNode; se
   }));
 
   return (
-    <SessionProvider session={session}>
-      <QueryClientProvider client={queryClient}>
-        <TenantBrandProvider>
-          <ThemeProvider>
-            {children}
-          </ThemeProvider>
-        </TenantBrandProvider>
-      </QueryClientProvider>
-    </SessionProvider>
+    <QueryClientProvider client={queryClient}>
+      <TenantBrandProvider>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
+      </TenantBrandProvider>
+    </QueryClientProvider>
   );
 }
