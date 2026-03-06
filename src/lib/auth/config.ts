@@ -103,15 +103,19 @@ export const authConfig: NextAuthConfig = {
 
 async function refreshAccessToken(token: JWT) {
   try {
-    const url = `${process.env.NEXT_PUBLIC_AUTH_SERVICE_URL}/token`;
+    const base = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || "https://sso.codevertexitsolutions.com";
+    const url = `${base.replace(/\/$/, "")}/api/v1/token`;
+    const params: Record<string, string> = {
+      client_id: process.env.AUTH_CLIENT_ID || "cafe-website",
+      grant_type: "refresh_token",
+      refresh_token: token.refreshToken as string,
+    };
+    if (process.env.AUTH_CLIENT_SECRET) {
+      params.client_secret = process.env.AUTH_CLIENT_SECRET;
+    }
     const response = await fetch(url, {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        client_id: process.env.AUTH_CLIENT_ID!,
-        client_secret: process.env.AUTH_CLIENT_SECRET!,
-        grant_type: "refresh_token",
-        refresh_token: token.refreshToken as string,
-      }),
+      body: new URLSearchParams(params),
       method: "POST",
     });
 

@@ -9,7 +9,6 @@ export const config = {
   },
   
   features: {
-    useDummyData: process.env.NEXT_PUBLIC_USE_DUMMY_DATA === 'true',
     enableRealTimeTracking: process.env.NEXT_PUBLIC_ENABLE_REAL_TIME_TRACKING === 'true',
     enablePayments: process.env.NEXT_PUBLIC_ENABLE_PAYMENTS === 'true',
   },

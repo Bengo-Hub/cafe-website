@@ -1,24 +1,26 @@
 'use client';
 
 import {
-  HeroCarousel,
-  MenuItemCard,
-  ServiceCard,
+    HeroCarousel,
+    MenuItemCard,
+    ServiceCard,
 } from '@/components/sections';
 import { Button, Card } from '@/components/ui';
-import { dummyEvents, dummyMenuItems, testimonials } from '@/lib/dummy-data';
+import { useMenu } from '@/hooks/use-menu';
+import { dummyEvents, testimonials } from '@/lib/dummy-data';
 import { generateLocalBusinessSchema } from '@/lib/utils/schema';
 import { motion } from 'framer-motion';
 import { ArrowRight, Calendar, Mail, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 export default function HomePage() {
   const localBusinessSchema = generateLocalBusinessSchema();
   const [email, setEmail] = useState('');
   const [isSubscribing, setIsSubscribing] = useState(false);
+  const { items: menuItems } = useMenu();
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +32,10 @@ export default function HomePage() {
     alert('Thank you for subscribing!');
   };
 
-  const featuredMenuItems = dummyMenuItems.filter((item) => item.featured).slice(0, 3);
+  const featuredMenuItems = useMemo(() => {
+    const featured = menuItems.filter((item) => item.featured);
+    return featured.length >= 3 ? featured.slice(0, 3) : menuItems.slice(0, 3);
+  }, [menuItems]);
   const upcomingEvents = dummyEvents.filter((event) => new Date(event.date) > new Date()).slice(0, 2);
 
   return (

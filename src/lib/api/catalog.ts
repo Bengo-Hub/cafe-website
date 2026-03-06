@@ -43,18 +43,21 @@ export interface MenuCategory {
   updated_at: string;
 }
 
+/** Catalog API item shape (ordering-backend may return camelCase). */
 export interface MenuItem {
   id: string;
-  category_id: string;
+  category_id?: string;
+  categoryId?: string;
   name: string;
   description?: string;
   sku: string;
   price: number;
   currency: string;
   image_url?: string;
+  imageUrl?: string;
   is_available: boolean;
-  is_featured: boolean;
-  sort_order: number;
+  is_featured?: boolean;
+  sort_order?: number;
   prep_time_minutes?: number;
   tags?: string[];
   allergens?: string[];
