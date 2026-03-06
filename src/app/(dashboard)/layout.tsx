@@ -3,35 +3,41 @@
 import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
 import { useAuth } from '@/hooks/use-auth';
 import { useMe } from '@/hooks/use-me';
-import { hasRole, hasStaffOrAdminRole } from '@/lib/auth/roles';
+import { hasPermission, hasRole, hasStaffOrAdminRole } from '@/lib/auth/roles';
 import {
-  BarChart3,
-  Bell,
-  Bike,
-  Box,
-  ChefHat,
-  Clock,
-  LayoutDashboard,
-  LogOut,
-  Menu,
-  Settings,
-  ShoppingBag,
-  Users,
-  X
+    BarChart3,
+    Bell,
+    Bike,
+    Box,
+    ChefHat,
+    Clock,
+    LayoutDashboard,
+    LogOut,
+    Menu,
+    Settings,
+    ShoppingBag,
+    Users,
+    X
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-const SIDEBAR_ITEMS = [
+const SIDEBAR_ITEMS: Array<{
+  label: string;
+  icon: typeof LayoutDashboard;
+  href: string;
+  adminOnly?: boolean;
+  permission?: string;
+}> = [
   { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-  { label: 'Orders', icon: ShoppingBag, href: '/dashboard/orders' },
-  { label: 'Menu', icon: ChefHat, href: '/dashboard/menu' },
-  { label: 'Inventory', icon: Box, href: '/dashboard/inventory' },
-  { label: 'Riders', icon: Bike, href: '/dashboard/riders', adminOnly: true },
+  { label: 'Orders', icon: ShoppingBag, href: '/dashboard/orders', permission: 'orders:read' },
+  { label: 'Menu', icon: ChefHat, href: '/dashboard/menu', permission: 'menu:read' },
+  { label: 'Inventory', icon: Box, href: '/dashboard/inventory', permission: 'inventory:read' },
+  { label: 'Riders', icon: Bike, href: '/dashboard/riders', adminOnly: true, permission: 'riders:read' },
   { label: 'Shifts', icon: Clock, href: '/dashboard/shifts' },
   { label: 'Analytics', icon: BarChart3, href: '/dashboard/analytics' },
-  { label: 'Team', icon: Users, href: '/dashboard/team', adminOnly: true },
+  { label: 'Team', icon: Users, href: '/dashboard/team', adminOnly: true, permission: 'users:read' },
   { label: 'Settings', icon: Settings, href: '/dashboard/settings' },
 ];
 
@@ -69,9 +75,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [isLoading, isAuthenticated, user, rbacUser, router]);
 
-  const visibleSidebarItems = SIDEBAR_ITEMS.filter(
-    (item) => !item.adminOnly || hasRole(rbacUser ?? user ?? undefined, 'admin')
-  );
+  const visibleSidebarItems = SIDEBAR_ITEMS.filter((item) => {
+    const u = rbacUser ?? user ?? undefined;
+    if (item.adminOnly && !hasRole(u, 'admin')) return false;
+    if (item.permission) {
+      const perms = (u as { permissions?: string[] } | undefined)?.permissions;
+      if (hasPermission({ permissions: perms }, item.permission)) return true;
+      if (hasStaffOrAdminRole(u) && (!perms || perms.length === 0)) return true;
+      return false;
+    }
+    return true;
+  });
 
   const canAccessDashboard = isLoading || !user || hasStaffOrAdminRole(rbacUser ?? user);
   if (!canAccessDashboard) {

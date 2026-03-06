@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function ProfilePage() {
-  const { user, isAuthenticated, isLoading, login } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
