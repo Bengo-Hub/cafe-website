@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     apple: '/images/logo/logo.jpeg',
   },
   description:
-    'Eat. Work. Connect. Experience. Premium cafe, business hub, and event space in Kiambu and Busia, Kenya. Specialty coffee, coworking spaces, and memorable events.',
+    'Eat. Work. Connect. Experience. Premium cafe, business hub, and event space in Busia, Kenya. Specialty coffee, coworking spaces, and memorable events.',
   keywords: [
     'cafe',
     'coffee shop',
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     'coworking space',
     'events venue',
     'Busia',
-    'Kiambu',
+    'Busia',
     'Kenya',
     'Urban Loft',
     'specialty coffee',

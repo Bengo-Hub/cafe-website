@@ -66,16 +66,16 @@ export default function AboutPage() {
     {
       year: '2023',
       title: 'The Beginning',
-      location: 'Kiambu',
+      location: 'Busia',
       description:
-        'Urban Loft Cafe opened its first location in Kiambu, bringing a fresh concept of cafe meets workspace to the community.',
+        'Urban Loft Cafe opened its doors in Busia, bringing a fresh concept of cafe meets workspace to the community.',
     },
     {
       year: '2024',
-      title: 'Expansion',
+      title: 'Growth',
       location: 'Busia',
       description:
-        'Due to overwhelming success, we expanded to Busia, bringing our unique blend of coffee, workspace, and community to a new region.',
+        'Building on our success, we expanded our offerings and cemented Busia as our flagship location for coffee, workspace, and community.',
     },
     {
       year: '2025',
