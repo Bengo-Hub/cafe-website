@@ -6,6 +6,7 @@ import {
 } from '@/components/sections';
 import { Badge, Button } from '@/components/ui';
 import { useMenu } from '@/hooks/use-menu';
+import { useTenantSlug } from '@/hooks/use-tenant-slug';
 import { generateMenuSchema } from '@/lib/utils/schema';
 import { MenuItem } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -42,6 +43,7 @@ export default function MenuPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   const { items, isLoading, categories } = useMenu();
+  const tenantSlug = useTenantSlug();
 
   const filteredItems = useMemo(() => {
     return items
@@ -79,9 +81,8 @@ export default function MenuPage() {
   };
 
   const handleRedirect = (item: MenuItem, action: 'add-to-cart' | 'view' | 'whitelist') => {
-    const tenant = process.env.NEXT_PUBLIC_TENANT_SLUG || 'urban-loft';
     const orderingUrl = process.env.NEXT_PUBLIC_ORDERING_SERVICE_URL || 'https://ordering.codevertexitsolutions.com';
-    const redirectUrl = `${orderingUrl}/${tenant}/menu?item_id=${item.id}&action=${action}`;
+    const redirectUrl = `${orderingUrl}/${tenantSlug}/menu?item_id=${item.id}&action=${action}`;
 
     window.location.href = redirectUrl;
   };

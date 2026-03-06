@@ -148,7 +148,7 @@ When reviewing code:
 ## Common Tasks
 
 ### Adding a New Page
-1. Create route in `src/app/`
+1. Create route in `src/app/`: use **`(site)/`** for public pages (menu, about, etc.) or **`(dashboard)/dashboard/`** for dashboard (admin/staff) auth pages (see [architecture](./docs/architecture.md)).
 2. Create component file
 3. Add to navigation (if needed)
 4. Add SEO meta tags

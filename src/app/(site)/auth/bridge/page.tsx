@@ -27,7 +27,7 @@ function BridgeContent() {
     // Route based on user role
     const roles: string[] = user.roles || [user.role || 'customer'];
     if (roles.includes('staff') || roles.includes('admin') || roles.includes('superuser')) {
-      router.replace('/staff/orders');
+      router.replace('/dashboard/orders');
     } else {
       router.replace(returnTo);
     }

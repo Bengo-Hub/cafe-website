@@ -22,15 +22,20 @@ function mapCatalogToDisplay(apiItems: CatalogItem[], categoryNames: Map<string,
 }
 
 async function fetchMenuItems(): Promise<MenuItem[]> {
-  const [catRes, itemsRes] = await Promise.all([
-    fetchCategories(),
-    fetchCatalogItems({ limit: 500 }),
-  ]);
-  const categories = catRes.data ?? [];
-  const result = itemsRes.data ?? { items: [], total: 0 };
-  const categoryNames = new Map<string, string>();
-  categories.forEach((c) => categoryNames.set(c.id, c.name));
-  return mapCatalogToDisplay(result.items, categoryNames);
+  try {
+    const [catRes, itemsRes] = await Promise.all([
+      fetchCategories(),
+      fetchCatalogItems({ limit: 500 }),
+    ]);
+    const categories = catRes.data ?? [];
+    const result = itemsRes.data ?? { items: [], total: 0 };
+    const categoryNames = new Map<string, string>();
+    categories.forEach((c) => categoryNames.set(c.id, c.name));
+    return mapCatalogToDisplay(result.items ?? [], categoryNames);
+  } catch (e) {
+    if (typeof console !== 'undefined') console.warn('Menu API failed, using empty list:', e);
+    return [];
+  }
 }
 
 export const useMenu = (category?: string) => {

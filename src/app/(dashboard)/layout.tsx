@@ -1,41 +1,77 @@
 'use client';
 
+import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
+import { useAuth } from '@/hooks/use-auth';
+import { useMe } from '@/hooks/use-me';
+import { hasRole, hasStaffOrAdminRole } from '@/lib/auth/roles';
 import {
-    BarChart3,
-    Bell,
-    Bike,
-    Box,
-    ChefHat,
-    Clock,
-    LayoutDashboard,
-    LogOut,
-    Menu,
-    Settings,
-    ShoppingBag,
-    Users,
-    X
+  BarChart3,
+  Bell,
+  Bike,
+  Box,
+  ChefHat,
+  Clock,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Settings,
+  ShoppingBag,
+  Users,
+  X
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useState } from 'react';
-import { useAuth } from '@/hooks/use-auth';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 const SIDEBAR_ITEMS = [
-  { label: 'Dashboard', icon: LayoutDashboard, href: '/staff' },
-  { label: 'Orders', icon: ShoppingBag, href: '/staff/orders' },
-  { label: 'Menu', icon: ChefHat, href: '/staff/menu' },
-  { label: 'Inventory', icon: Box, href: '/staff/inventory' },
-  { label: 'Riders', icon: Bike, href: '/staff/riders', adminOnly: true },
-  { label: 'Shifts', icon: Clock, href: '/staff/shifts' },
-  { label: 'Analytics', icon: BarChart3, href: '/staff/analytics' },
-  { label: 'Team', icon: Users, href: '/staff/team', adminOnly: true },
-  { label: 'Settings', icon: Settings, href: '/staff/settings' },
+  { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
+  { label: 'Orders', icon: ShoppingBag, href: '/dashboard/orders' },
+  { label: 'Menu', icon: ChefHat, href: '/dashboard/menu' },
+  { label: 'Inventory', icon: Box, href: '/dashboard/inventory' },
+  { label: 'Riders', icon: Bike, href: '/dashboard/riders', adminOnly: true },
+  { label: 'Shifts', icon: Clock, href: '/dashboard/shifts' },
+  { label: 'Analytics', icon: BarChart3, href: '/dashboard/analytics' },
+  { label: 'Team', icon: Users, href: '/dashboard/team', adminOnly: true },
+  { label: 'Settings', icon: Settings, href: '/dashboard/settings' },
 ];
 
-export default function StaffLayout({ children }: { children: React.ReactNode }) {
+/** User-like shape for RBAC: prefer roles from auth-api /me when available. */
+function effectiveUserForRbac(
+  sessionUser: { role?: string; roles?: string[] } | null | undefined,
+  meRoles: string[] | undefined
+) {
+  if (!sessionUser) return undefined;
+  const roles = (meRoles?.length ? meRoles : sessionUser.roles) ?? (sessionUser.role ? [sessionUser.role] : []);
+  return { ...sessionUser, roles, role: roles[0] ?? sessionUser.role };
+}
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const { logout, user } = useAuth();
+  const { logout, user, isAuthenticated, isLoading } = useAuth();
+  const { me, roles: meRoles } = useMe();
+  const { tenant } = useTenantBrand();
+  const brandLabel = tenant?.orgName ?? tenant?.name ?? 'URBAN LOFT';
+
+  const rbacUser = effectiveUserForRbac(user ?? undefined, me?.roles ?? meRoles);
+
+  // Redirect non-staff users (e.g. customer) to unauthorized page
+  useEffect(() => {
+    if (isLoading) return;
+    if (isAuthenticated && user && !hasStaffOrAdminRole(rbacUser ?? user)) {
+      router.replace('/unauthorized');
+    }
+  }, [isLoading, isAuthenticated, user, rbacUser, router]);
+
+  const visibleSidebarItems = SIDEBAR_ITEMS.filter(
+    (item) => !item.adminOnly || hasRole(rbacUser ?? user ?? undefined, 'admin')
+  );
+
+  const canAccessDashboard = isLoading || !user || hasStaffOrAdminRole(rbacUser ?? user);
+  if (!canAccessDashboard) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen section-blend-cream flex">
@@ -48,7 +84,12 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
         <div className="flex flex-col h-full p-8">
           <div className="flex items-center justify-between mb-12">
             <Link href="/" className="text-2xl font-black tracking-tighter">
-              URBAN<span className="text-brand-orange">LOFT</span>
+              {(() => {
+                const parts = brandLabel.trim().toUpperCase().split(/\s+/).filter(Boolean);
+                const first = parts[0] ?? '';
+                const rest = parts.slice(1).join('') || 'LOFT';
+                return <>{first}<span className="text-brand-orange">{rest}</span></>;
+              })()}
             </Link>
             <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden">
               <X className="h-6 w-6" />
@@ -56,7 +97,7 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
           </div>
 
           <nav className="flex-grow space-y-2">
-            {SIDEBAR_ITEMS.map((item) => (
+            {visibleSidebarItems.map((item) => (
               <Link 
                 key={item.href} 
                 href={item.href}
@@ -100,8 +141,8 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
             
             <div className="flex items-center gap-4 pl-6 border-l border-brand-beige/10">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-black text-primary-brand">{user?.name || 'Staff User'}</p>
-                <p className="text-[10px] font-black uppercase tracking-widest text-brand-orange">{user?.role || 'Staff'}</p>
+                <p className="text-sm font-black text-primary-brand">{user?.name || 'Dashboard User'}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-brand-orange">{user?.role || 'Admin'}</p>
               </div>
               <div className="h-12 w-12 rounded-2xl bg-brand-orange/20 border border-brand-orange/30 flex items-center justify-center text-brand-orange font-black">
                 {user?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}

@@ -1,11 +1,13 @@
 'use client';
 
 import { Button, Card, Input, Label, Switch } from '@/components/ui';
+import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
 import {
     Bell,
     Globe,
     Lock,
     Moon,
+    Palette,
     Save,
     User
 } from 'lucide-react';
@@ -14,6 +16,7 @@ import { useState } from 'react';
 export default function StaffSettings() {
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
+  const { tenant, isLoading: tenantLoading } = useTenantBrand();
 
   return (
     <div className="space-y-10">
@@ -23,6 +26,78 @@ export default function StaffSettings() {
       </header>
 
       <div className="grid gap-10 lg:grid-cols-3">
+        {/* Branding (tenant/brand config) */}
+        <div className="lg:col-span-2 space-y-8">
+          <Card className="p-8 magical-card border-none space-y-8">
+            <div className="flex items-center gap-4 border-b border-brand-beige/10 pb-6">
+              <div className="p-3 rounded-2xl bg-brand-orange/10 text-brand-orange">
+                <Palette className="h-6 w-6" />
+              </div>
+              <h2 className="text-xl font-black text-primary-brand">Branding</h2>
+            </div>
+            {tenantLoading ? (
+              <p className="text-sm text-secondary-brand">Loading brand settings…</p>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Organization name</Label>
+                  <Input
+                    readOnly
+                    value={tenant?.orgName ?? tenant?.name ?? '—'}
+                    className="bg-brand-beige/5 border-brand-beige/10"
+                  />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Logo URL</Label>
+                  <Input
+                    readOnly
+                    value={tenant?.logoUrl ?? '—'}
+                    placeholder="Set via tenant metadata in auth-service"
+                    className="bg-brand-beige/5 border-brand-beige/10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Primary color</Label>
+                  <div className="flex items-center gap-3">
+                    <Input
+                      readOnly
+                      value={tenant?.primaryColor ?? '—'}
+                      className="bg-brand-beige/5 border-brand-beige/10 flex-1"
+                    />
+                    {tenant?.primaryColor && (
+                      <div
+                        className="h-10 w-10 rounded-xl border border-brand-beige/20 shrink-0"
+                        style={{ backgroundColor: tenant.primaryColor }}
+                        title="Primary"
+                      />
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Secondary color</Label>
+                  <div className="flex items-center gap-3">
+                    <Input
+                      readOnly
+                      value={tenant?.secondaryColor ?? '—'}
+                      className="bg-brand-beige/5 border-brand-beige/10 flex-1"
+                    />
+                    {tenant?.secondaryColor && (
+                      <div
+                        className="h-10 w-10 rounded-xl border border-brand-beige/20 shrink-0"
+                        style={{ backgroundColor: tenant.secondaryColor }}
+                        title="Secondary"
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+            <p className="text-xs text-secondary-brand">
+              Brand data is loaded from auth-service (GET /api/v1/tenants/by-slug/…). Logo and colors can be set in tenant metadata.
+            </p>
+          </Card>
+        </div>
+
         {/* Profile Settings */}
         <div className="lg:col-span-2 space-y-8">
           <Card className="p-8 magical-card border-none space-y-8">

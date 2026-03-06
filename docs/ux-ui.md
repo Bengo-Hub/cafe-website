@@ -1,7 +1,7 @@
 # cafe-website -- UX/UI Specification
 
-**Target users**: Customers (public pages), staff/admins (staff portal)
-**Device targets**: Mobile-first (public), desktop-first (staff portal)
+**Target users**: Customers (public pages), staff/admins (dashboard)
+**Device targets**: Mobile-first (public), desktop-first (dashboard)
 **Design system**: Shadcn UI + Tailwind CSS + Framer Motion transitions
 
 ---
@@ -50,7 +50,7 @@
 
 ---
 
-## Staff portal (`/staff/*`)
+## Dashboard (`/dashboard/*`)
 
 ### Layout
 
@@ -63,7 +63,7 @@
 - **Header** (56px): Page title, breadcrumbs, tenant badge (`urban-loft`), notification bell (placeholder)
 - **Content**: Max-width 1280px, responsive padding
 
-### Dashboard (`/staff`)
+### Dashboard home (`/dashboard`)
 
 - **Stat cards** (4 columns): Total Orders Today, Revenue Today, Active Riders, Low Stock Items
 - **Recent orders table**: Last 10 orders with status, total, time
@@ -71,7 +71,7 @@
 
 **MVP**: Replace hardcoded stats with real data aggregated from ordering-service and logistics-service.
 
-### Orders (`/staff/orders`)
+### Orders (`/dashboard/orders`)
 
 - **Filters**: Status tabs (All, Pending, Preparing, Ready, Completed, Cancelled), date range picker, search by order number
 - **Data table**: Order number, customer name, type (delivery/pickup/dine-in), status badge, total, time, actions
@@ -80,7 +80,7 @@
 
 **Data source**: `fetchAdminOrders()` from ordering-service via `lib/api/orders.ts`
 
-### Menu management (`/staff/menu`)
+### Menu management (`/dashboard/menu`)
 
 - **Category sidebar** (left): List of categories with item count, "Add Category" button
 - **Item grid/list** (right): Items in selected category
@@ -98,7 +98,7 @@
 
 **Data source**: `fetchMenuItems()` + `fetchBulkAvailability()` from inventory-service via `lib/api/inventory.ts`
 
-### Riders (`/staff/riders`) -- admin only
+### Riders (`/dashboard/riders`) -- admin only
 
 - **Status tabs**: All, Pending, Active, Suspended
 - **Data table**: Name, phone, status badge, fleet, vehicle, joined date, actions
@@ -108,7 +108,7 @@
 
 **Data source**: `fetchRiders()`, `inviteRider()`, `approveRider()`, `suspendRider()`, `rejectRider()` from logistics-service via `lib/api/riders.ts`
 
-### Shifts (`/staff/shifts`)
+### Shifts (`/dashboard/shifts`)
 
 - **Current shift**: Clock in/out button, shift duration timer
 - **Shift history**: Table with date, clock in, clock out, duration, status
@@ -116,7 +116,7 @@
 
 **Data source**: Currently hardcoded. MVP: connect to pos-service shift endpoints if available, else keep static.
 
-### Analytics (`/staff/analytics`)
+### Analytics (`/dashboard/analytics`)
 
 - **Stat cards**: Revenue this week, orders this week, average order value, top selling item
 - **Charts placeholder**: "Analytics dashboard coming soon" with Superset embed placeholder
@@ -124,14 +124,14 @@
 
 **Data source**: Currently hardcoded. MVP: basic stats from ordering-service order aggregation.
 
-### Team (`/staff/team`) -- admin only
+### Team (`/dashboard/team`) -- admin only
 
 - **Staff directory**: Name, role, email, phone, status
-- **Invite staff**: Button to redirect to auth-ui admin panel
+- **Invite user**: Button to redirect to auth-ui admin panel
 
 **Data source**: Currently hardcoded. Post-MVP: auth-service user list.
 
-### Settings (`/staff/settings`)
+### Settings (`/dashboard/settings`)
 
 - **Tabs**: Profile, Security, Preferences
 - **Profile**: Name, email, phone (read-only from SSO)

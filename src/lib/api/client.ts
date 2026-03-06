@@ -1,4 +1,5 @@
 import { config } from '@/config/env';
+import { useAuthStore } from '@/lib/store/auth-store';
 
 export interface ApiResponse<T = any> {
   data?: T;
@@ -25,6 +26,12 @@ function tenantHeaders(): Record<string, string> {
   };
 }
 
+function authHeader(): Record<string, string> {
+  if (typeof window === 'undefined') return {};
+  const token = useAuthStore.getState().accessToken;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export async function apiClient<T = any>(
   url: string,
   options: RequestInit = {}
@@ -44,6 +51,7 @@ export async function apiClient<T = any>(
         headers: {
           'Content-Type': 'application/json',
           ...tenantHeaders(),
+          ...authHeader(),
           ...options.headers,
         },
       });

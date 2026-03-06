@@ -4,6 +4,8 @@
 **Status**: In Progress 🏗️  
 **Goal**: Implement the full operational Staff/Admin Portal with real-time service integrations and RBAC.
 
+**App structure**: Dashboard (admin/staff) pages are in the `(dashboard)/` route group (auth-only), under `/dashboard/*`; public site pages are in `(site)/`. See [architecture](../architecture.md#directory-layout).
+
 ---
 
 ## Tasks
@@ -62,7 +64,7 @@
 ## Definition of Done
 - [ ] Staff can manage orders in real-time with status updates
 - [ ] Admins can manage staff roles and permissions
-- [ ] RBAC is enforced across all `/staff` routes
+- [ ] RBAC is enforced across all `/dashboard` routes
 - [ ] Real-time notifications work for new orders
 - [ ] Inventory levels are reflected in the portal
 - [ ] Analytics dashboards are accessible to admins

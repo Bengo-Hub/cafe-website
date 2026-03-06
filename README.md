@@ -92,9 +92,8 @@ NEXT_PUBLIC_GA_TRACKING_ID=
 cafe-website/
 ├── src/
 │   ├── app/                 # Next.js 15 App Router pages
-│   │   ├── (auth)/         # Auth routes (login, callback)
-│   │   ├── (public)/       # Public routes (home, menu, about)
-│   │   ├── admin/          # Protected admin routes
+│   │   ├── (site)/         # Public pages (menu, about, contact, login, signup, etc.)
+│   │   ├── (dashboard)/    # Dashboard (admin/staff) auth-only; routes under /dashboard/*
 │   │   ├── layout.tsx      # Root layout
 │   │   └── page.tsx        # Home page
 │   ├── components/         # React components

@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  turbopack: {
+    // Resolve from project root so Turbopack finds next/package.json (fixes workspace root inference)
+    root: ".",
+  },
   images: {
     unoptimized: true,
     remotePatterns: [

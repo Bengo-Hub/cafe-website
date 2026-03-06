@@ -58,8 +58,9 @@
 - [ ] Add "My Bookings" link (future)
 
 ### 6. Protected Routes
+- **App structure**: Public pages live in `(site)/`; dashboard (admin/staff) auth-only pages live in `(dashboard)/` (under `/dashboard/*`).
 - [x] Protect `/admin/*` routes (Middleware)
-- [x] Protect `/staff/*` routes (Middleware)
+- [x] Protect `/dashboard/*` routes (Middleware)
 - [ ] Protect `/track-order` (optional)
 - [x] Protect `/loyalty` page (Middleware)
 - [x] Redirect unauthenticated users to login
@@ -192,7 +193,7 @@
 **Implementation Files:**
 - `src/lib/auth/config.ts` - `SSO_URLS.getLogoutUrl()` with `post_logout_redirect_uri`
 - `src/hooks/use-auth.ts` - `logout()` function with proper SSO redirect
-- `src/app/staff/layout.tsx` - Logout button wired to `useAuth().logout`
+- `src/app/(dashboard)/layout.tsx` - Logout button wired to `useAuth().logout`
 
 **2. Treasury Service API Verification** (Status: ⚠️ Needs Documentation)
 - [ ] Verify treasury-api endpoints match cafe-website expectations
@@ -207,7 +208,7 @@
 - [ ] Implement fallback to in-memory if Redis unavailable
 
 **4. Role-Based Access Control (RBAC)** (Status: 🏗️ In Progress)
-- [ ] Implement RBAC middleware for staff/admin routes
+- [ ] Implement RBAC middleware for dashboard (admin/staff) routes
 - [ ] Document role-to-permission mapping:
   - `customer`: Place orders, view loyalty, track orders
   - `staff`: Manage orders, view dashboard

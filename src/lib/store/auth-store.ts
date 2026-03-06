@@ -16,7 +16,10 @@ interface User {
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
+  accessToken: string | null;
+  refreshToken: string | null;
   login: (user: User) => void;
+  setTokens: (accessToken: string | null, refreshToken?: string | null) => void;
   logout: () => void;
 }
 
@@ -25,8 +28,21 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       isAuthenticated: false,
+      accessToken: null,
+      refreshToken: null,
       login: (user) => set({ user, isAuthenticated: true }),
-      logout: () => set({ user: null, isAuthenticated: false }),
+      setTokens: (accessToken, refreshToken = null) =>
+        set((state) => ({
+          accessToken,
+          refreshToken: refreshToken ?? state.refreshToken,
+        })),
+      logout: () =>
+        set({
+          user: null,
+          isAuthenticated: false,
+          accessToken: null,
+          refreshToken: null,
+        }),
     }),
     {
       name: 'cafe-auth-storage',

@@ -277,7 +277,7 @@ DEFAULT_TENANT_SLUG=urban-cafe
 |----------|--------|---------|---------------|
 | `/v1/{tenant}/tasks/{task_id}` | GET | Task details | Yes |
 | `/ws/track/{order_id}` | WebSocket | Real-time tracking | Yes |
-| `/v1/{tenant}/fleet-members` | GET | Rider list (staff portal) | Yes |
+| `/v1/{tenant}/fleet-members` | GET | Rider list (dashboard) | Yes |
 
 #### WebSocket Real-Time Tracking
 
@@ -576,7 +576,7 @@ logistics.task.completed (delivered)
 | `/loyalty` | Yes | Customer |
 | `/track-order` | No (redirect) | - |
 | `/admin/*` | Yes | Admin, Staff |
-| `/staff/*` | Yes | Staff |
+| `/dashboard/*` | Yes | Dashboard (admin/staff) |
 
 ### Security Best Practices
 
@@ -687,7 +687,7 @@ class ServiceErrorBoundary extends Component {
 ### Phase 5: Staff Portal (Sprint 6)
 
 - [ ] Implement RBAC checks
-- [ ] Create staff dashboard layout
+- [ ] Create dashboard layout (done: (dashboard)/layout.tsx)
 - [ ] Add service redirect links
 - [ ] Implement analytics embedding
 - [ ] Test role-based access

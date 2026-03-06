@@ -7,15 +7,18 @@ import { useEffect, useCallback } from 'react';
 
 export const useAuth = () => {
   const { data: session, status } = useSession();
-  const { login: setStoreUser, logout: clearStore } = useAuthStore();
+  const { login: setStoreUser, setTokens, logout: clearStore } = useAuthStore();
 
   useEffect(() => {
     if (session?.user) {
       setStoreUser(session.user as any);
+      const token = (session as { accessToken?: string; refreshToken?: string })?.accessToken ?? null;
+      const refresh = (session as { refreshToken?: string })?.refreshToken ?? null;
+      setTokens(token, refresh);
     } else if (status === 'unauthenticated') {
       clearStore();
     }
-  }, [session, status, setStoreUser, clearStore]);
+  }, [session, status, setStoreUser, setTokens, clearStore]);
 
   // SSO login - redirects to auth-service with optional return URL
   const login = useCallback((returnTo?: string) => {

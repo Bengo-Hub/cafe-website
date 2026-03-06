@@ -16,7 +16,7 @@
 - Loyalty program access
 - Theme switching (Light/Dark mode)
 - Auth-state aware navigation (Login/Signup/Profile)
-- **Staff/Admin Portal**: Centralized management for cafe operations, staff, and orders.
+- **Dashboard (admin/staff)**: Centralized management for cafe operations, staff, and orders at `/dashboard/*`.
 
 **Inspired By**:
 - https://artcaffemarket.co.ke/ - Modern café website design
@@ -55,6 +55,7 @@
 - Menu/catalog → ordering-service
 - **Microservice Switching**: This website acts as the central hub. It redirects users to specialized services for specific tasks (e.g., Ordering, Tracking, Rider Management) to avoid logic duplication. All services share SSO via `auth-service`.
 - **Display-Only Integration**: The cafe website pulls data (like sample dishes) for display purposes only. Any action that modifies state (adding to cart, updating an order, assigning a rider) is handled by redirecting the user to the owning microservice's UI.
+- **Tenant & branding**: Tenant slug comes from the route (`/t/[slug]`) or `NEXT_PUBLIC_TENANT_SLUG`. Tenant name and optional branding (logo URL, primary/secondary colors) are loaded from auth-service `GET /api/v1/tenants/by-slug/{slug}` (public). Brand colors are applied to the theme via CSS variables; Settings includes a Branding section for org name, logo URL, and colors.
 
 ---
 
@@ -722,11 +723,11 @@ https://ordering.codevertexitsolutions.com/track?id={order_id}&tenant={tenant}
 
 ---
 
-### 7. Staff/Admin Portal (`/staff`, `/admin`)
+### 7. Dashboard (`/dashboard`, `/admin`)
 
 **Features**:
 - Centralized dashboard for cafe operations.
-- **Service Redirection**: Any task requiring deep integration with a microservice (e.g., assigning a rider, managing inventory) redirects the staff member to the specific service's UI.
+- **Service Redirection**: Any task requiring deep integration with a microservice (e.g., assigning a rider, managing inventory) redirects the dashboard user to the specific service's UI.
 - **Unified SSO**: Seamless transitions between services without re-authentication.
 
 **Integration Points**:
@@ -792,7 +793,7 @@ See detailed sprint documents in [docs/sprints/](./sprints/) directory.
 - [x] Order Management UI with status workflow
 - [x] Team Management UI
 - [ ] Service redirection logic for order fulfillment and logistics
-- [ ] RBAC implementation (Staff vs Admin permissions)
+- [x] RBAC implementation (Staff vs Admin permissions) — roles/permissions from auth-api `/me`, nav/route/404/unauthorized by permission
 - [ ] Analytics dashboard (Superset embedding)
 - [ ] Staff shift and attendance tracking
 
@@ -827,7 +828,7 @@ See detailed sprint documents in [docs/sprints/](./sprints/) directory.
 - `src/hooks/use-auth.ts` - SSO login/logout hooks with proper session clearing
 - `src/app/login/page.tsx` - Redirects to SSO login
 - `src/app/signup/page.tsx` - Redirects to SSO signup with return URL
-- `src/app/staff/layout.tsx` - Staff portal with SSO logout integration
+- `src/app/(dashboard)/layout.tsx` - Dashboard with SSO logout integration
 
 **SSO Features:**
 - ✅ OIDC provider integration with auth-service

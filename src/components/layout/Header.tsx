@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui';
+import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
 import { useAuth } from '@/hooks/use-auth';
 import { useThemeStore } from '@/lib/store/theme-store';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -30,6 +31,9 @@ export function Header() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useThemeStore();
   const { isAuthenticated, user, login, logout } = useAuth();
+  const { tenant } = useTenantBrand();
+  const siteName = tenant?.orgName ?? tenant?.name ?? 'Urban Loft Cafe';
+  const logoSrc = tenant?.logoUrl ?? '/images/logo/logo.jpeg';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -78,19 +82,27 @@ export function Header() {
         <div className="flex h-16 md:h-20 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center flex-shrink-0">
-            <Link href="/" className="flex items-center gap-3 group" aria-label="Urban Loft Cafe Home">
+            <Link href="/" className="flex items-center gap-3 group" aria-label={`${siteName} Home`}>
               <div className="relative h-10 w-10 md:h-14 md:w-14 rounded-2xl overflow-hidden transition-all duration-500 group-hover:rotate-3 shadow-lg shadow-brand-orange/20">
-                <Image
-                  src="/images/logo/logo.jpeg"
-                  alt="Urban Loft Cafe logo"
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  priority
-                />
+                {logoSrc.startsWith('http') ? (
+                  <img
+                    src={logoSrc}
+                    alt={`${siteName} logo`}
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                ) : (
+                  <Image
+                    src={logoSrc}
+                    alt={`${siteName} logo`}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    priority
+                  />
+                )}
               </div>
               <div className="hidden sm:flex flex-col">
                 <span className="text-lg md:text-xl font-black text-brand-dark dark:text-brand-light tracking-tight group-hover:text-brand-orange transition-all duration-300">
-                  Urban Loft <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-gold">Café</span>
+                  {siteName}
                 </span>
                 <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-brand-brown dark:text-brand-orange/70 group-hover:text-brand-orange transition-colors">
                   Eat. Work. Connect. Experience
