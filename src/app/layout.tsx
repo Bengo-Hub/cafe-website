@@ -12,7 +12,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://urbanloftcafe.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://theurbanloftcafe.com'),
   title: {
     default: 'Urban Loft Cafe - Beyond Food',
     template: '%s | Urban Loft Cafe',

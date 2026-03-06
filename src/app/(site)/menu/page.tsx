@@ -1,8 +1,8 @@
 'use client';
 
 import {
-  MenuItemCard,
-  MenuItemModal
+    MenuItemCard,
+    MenuItemModal
 } from '@/components/sections';
 import { Badge, Button } from '@/components/ui';
 import { useMenu } from '@/hooks/use-menu';
@@ -11,18 +11,18 @@ import { generateMenuSchema } from '@/lib/utils/schema';
 import { MenuItem } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  ArrowUpDown,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Filter,
-  LayoutGrid,
-  List,
-  Search,
-  SlidersHorizontal,
-  Sparkles,
-  UtensilsCrossed,
-  X
+    ArrowUpDown,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    Filter,
+    LayoutGrid,
+    List,
+    Search,
+    SlidersHorizontal,
+    Sparkles,
+    UtensilsCrossed,
+    X
 } from 'lucide-react';
 import Image from 'next/image';
 import Script from 'next/script';
@@ -81,7 +81,7 @@ export default function MenuPage() {
   };
 
   const handleRedirect = (item: MenuItem, action: 'add-to-cart' | 'view' | 'whitelist') => {
-    const orderingUrl = process.env.NEXT_PUBLIC_ORDERING_SERVICE_URL || 'https://ordering.codevertexitsolutions.com';
+    const orderingUrl = process.env.NEXT_PUBLIC_ORDERING_SERVICE_URL || 'https://orderapi.codevertexitsolutions.com';
     const redirectUrl = `${orderingUrl}/${tenantSlug}/menu?item_id=${item.id}&action=${action}`;
 
     window.location.href = redirectUrl;

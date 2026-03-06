@@ -92,10 +92,10 @@ export function generateLocalBusinessSchema(): LocalBusinessSchema {
     '@type': 'Restaurant',
     name: 'Urban Loft Cafe',
     image: [
-      `${process.env.NEXT_PUBLIC_APP_URL}/images/hero/hero-food.jpg`,
-      `${process.env.NEXT_PUBLIC_APP_URL}/images/logo/logo.jpeg`,
+      `${process.env.NEXT_PUBLIC_APP_URL || 'https://theurbanloftcafe.com'}/images/hero/hero-food.jpg`,
+      `${process.env.NEXT_PUBLIC_APP_URL || 'https://theurbanloftcafe.com'}/images/logo/logo.jpeg`,
     ],
-    url: process.env.NEXT_PUBLIC_APP_URL || 'https://urbanloftcafe.com',
+    url: process.env.NEXT_PUBLIC_APP_URL || 'https://theurbanloftcafe.com',
     telephone: '+254-700-000-000',
     email: 'info@urbanloftcafe.com',
     address: {
@@ -160,7 +160,7 @@ export function generateEventSchema(event: {
         addressCountry: 'KE',
       },
     },
-    image: `${process.env.NEXT_PUBLIC_APP_URL}/images/events/placeholder-event.svg`,
+    image: `${process.env.NEXT_PUBLIC_APP_URL || 'https://theurbanloftcafe.com'}/images/events/placeholder-event.svg`,
     offers: {
       '@type': 'Offer',
       price: event.price?.toString() || '0',
@@ -170,7 +170,7 @@ export function generateEventSchema(event: {
     organizer: {
       '@type': 'Organization',
       name: 'Urban Loft Cafe',
-      url: process.env.NEXT_PUBLIC_APP_URL || 'https://urbanloftcafe.com',
+      url: process.env.NEXT_PUBLIC_APP_URL || 'https://theurbanloftcafe.com',
     },
   };
 }

@@ -1,6 +1,6 @@
 import { config } from '@/config/env';
 
-const INVENTORY_URL = process.env.NEXT_PUBLIC_INVENTORY_SERVICE_URL || 'http://localhost:4003';
+const INVENTORY_URL = process.env.NEXT_PUBLIC_INVENTORY_SERVICE_URL || 'https://inventoryapi.codevertexitsolutions.com';
 const TENANT = config.tenant.id || 'tenant-urban-loft';
 
 function authHeaders(): Record<string, string> {

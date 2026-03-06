@@ -1,15 +1,22 @@
 'use client';
 
+import { hasStaffOrAdminRole } from '@/lib/auth/roles';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef } from 'react';
+
+/** Default landing after login: dashboard for staff/admin, profile for others. */
+function getDefaultLandingPath(user: { role?: string; roles?: string[] } | null): string {
+  if (!user) return '/profile';
+  return hasStaffOrAdminRole(user) ? '/dashboard' : '/profile';
+}
 
 function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const code = searchParams?.get('code');
   const error = searchParams?.get('error');
-  const { handleSSOCallback, status, error: authError } = useAuthStore();
+  const { handleSSOCallback, status, error: authError, user } = useAuthStore();
   const hasStarted = useRef(false);
 
   useEffect(() => {
@@ -24,9 +31,12 @@ function AuthCallbackContent() {
     if (status === 'authenticated') {
       const returnTo = typeof window !== 'undefined' ? sessionStorage.getItem('sso_return_to') : null;
       sessionStorage.removeItem('sso_return_to');
-      router.replace(returnTo || '/');
+      // Use return_to when it was explicitly set and is a real path; otherwise role-based default
+      const isExplicitReturn = returnTo && returnTo !== '/' && returnTo !== '/login' && returnTo.startsWith('/');
+      const target = isExplicitReturn ? returnTo : getDefaultLandingPath(user);
+      router.replace(target);
     }
-  }, [status, router]);
+  }, [status, user, router]);
 
   if (error || authError) {
     return (

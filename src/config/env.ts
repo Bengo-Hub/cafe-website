@@ -1,11 +1,23 @@
+// Production base URLs (used when NEXT_PUBLIC_* are not set, e.g. Docker build without build-args)
+const PRODUCTION = {
+  auth: 'https://sso.codevertexitsolutions.com',
+  ordering: 'https://orderapi.codevertexitsolutions.com',
+  logistics: 'https://logisticsapi.codevertexitsolutions.com',
+  treasury: 'https://booksapi.codevertexitsolutions.com',
+  booking: 'https://booking.codevertexitsolutions.com',
+  notifications: 'https://notificationsapi.codevertexitsolutions.com',
+  inventory: 'https://inventoryapi.codevertexitsolutions.com',
+  site: 'https://theurbanloftcafe.com',
+};
+
 export const config = {
   services: {
-    auth: process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:8080',
-    ordering: process.env.NEXT_PUBLIC_ORDERING_SERVICE_URL || 'http://localhost:8081',
-    logistics: process.env.NEXT_PUBLIC_LOGISTICS_SERVICE_URL || 'http://localhost:8082',
-    treasury: process.env.NEXT_PUBLIC_TREASURY_SERVICE_URL || 'http://localhost:8083',
-    booking: process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL || 'http://localhost:8084',
-    notifications: process.env.NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL || 'http://localhost:8085',
+    auth: process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || PRODUCTION.auth,
+    ordering: process.env.NEXT_PUBLIC_ORDERING_SERVICE_URL || PRODUCTION.ordering,
+    logistics: process.env.NEXT_PUBLIC_LOGISTICS_SERVICE_URL || PRODUCTION.logistics,
+    treasury: process.env.NEXT_PUBLIC_TREASURY_SERVICE_URL || PRODUCTION.treasury,
+    booking: process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL || PRODUCTION.booking,
+    notifications: process.env.NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL || PRODUCTION.notifications,
   },
   
   features: {

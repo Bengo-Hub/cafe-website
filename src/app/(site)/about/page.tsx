@@ -12,8 +12,8 @@ export default function AboutPage() {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Urban Loft Cafe',
-    url: process.env.NEXT_PUBLIC_APP_URL || 'https://urbanloftcafe.com',
-    logo: `${process.env.NEXT_PUBLIC_APP_URL}/images/logo/logo.jpeg`,
+    url: process.env.NEXT_PUBLIC_APP_URL || 'https://theurbanloftcafe.com',
+    logo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://theurbanloftcafe.com'}/images/logo/logo.jpeg`,
     foundingDate: '2023',
     founders: teamMembers.map((member) => ({
       '@type': 'Person',
