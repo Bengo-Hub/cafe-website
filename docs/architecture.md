@@ -195,7 +195,7 @@ All API data fetching is done via TanStack Query (`useQuery` / `useMutation`). N
 |---------|-------------|---------|
 | Auth | `NEXT_PUBLIC_AUTH_SERVICE_URL` | `https://sso.codevertexitsolutions.com` |
 | Auth UI | `NEXT_PUBLIC_AUTH_UI_URL` | `https://accounts.codevertexitsolutions.com` |
-| Ordering | `NEXT_PUBLIC_ORDERING_SERVICE_URL` | `https://orderapi.codevertexitsolutions.com` |
+| Ordering | `NEXT_PUBLIC_ORDERING_SERVICE_URL` | `https://orderingapi.codevertexitsolutions.com` |
 | Ordering PWA | `NEXT_PUBLIC_ORDERING_PWA_URL` | `https://ordersapp.codevertexitsolutions.com` |
 | Logistics | `NEXT_PUBLIC_LOGISTICS_SERVICE_URL` | `https://logisticsapi.codevertexitsolutions.com` |
 | Inventory | `NEXT_PUBLIC_INVENTORY_SERVICE_URL` | (not set) |

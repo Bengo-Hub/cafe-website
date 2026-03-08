@@ -194,7 +194,7 @@ AUTH_JWKS_ENDPOINT=https://sso.codevertexitsolutions.com/api/v1/.well-known/jwks
 
 **Status**: ✅ **FULLY AVAILABLE**
 **Integration Priority**: 2 (HIGH)
-**Production URL**: `https://orderapi.codevertexitsolutions.com/`
+**Production URL**: `https://orderingapi.codevertexitsolutions.com/`
 **PWA URL**: `https://ordersapp.codevertexitsolutions.com/`
 
 #### Endpoints Used
@@ -260,7 +260,7 @@ Cafe Website                          Ordering Service
 
 ```env
 # Ordering Service Configuration
-ORDERING_API_URL=https://orderapi.codevertexitsolutions.com
+ORDERING_API_URL=https://orderingapi.codevertexitsolutions.com
 ORDERING_PWA_URL=https://ordersapp.codevertexitsolutions.com
 DEFAULT_TENANT_SLUG=urban-cafe
 ```
