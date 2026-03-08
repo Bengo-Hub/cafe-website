@@ -24,12 +24,33 @@
   /* Text colors for better contrast */
   --text-light: #1a0f01;  /* Very dark for light mode text */
   --text-dark: #f5f1ec;   /* Creamy for dark mode text */
+
+  /* Sidebar (theme-aware for dashboard) */
+  --sidebar-bg: #2c1a02;
+  --sidebar-foreground: #f5f1ec;
+  --sidebar-accent: #ea8022;
+  --sidebar-muted: rgba(245, 241, 236, 0.6);
+  --sidebar-border: rgba(255, 255, 255, 0.1);
 }
 
 .dark {
   /* Dark Mode */
   --foreground-rgb: 251, 252, 249;
   --background-rgb: 44, 26, 2;
+
+  --sidebar-bg: #1a0f01;
+  --sidebar-foreground: #f5f1ec;
+  --sidebar-accent: #ea8022;
+  --sidebar-muted: rgba(245, 241, 236, 0.5);
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+}
+
+.light {
+  --sidebar-bg: #2c1a02;
+  --sidebar-foreground: #f5f1ec;
+  --sidebar-accent: #ea8022;
+  --sidebar-muted: rgba(245, 241, 236, 0.6);
+  --sidebar-border: rgba(255, 255, 255, 0.1);
 }
 
 html {

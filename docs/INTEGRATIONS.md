@@ -4,7 +4,7 @@
 **Version**: 2.0
 **Purpose**: Comprehensive documentation of all microservice integrations for the Urban Loft Cafe Website, including communication patterns, integration order, and implementation details.
 
-**Progress (March 2026):** SSO callback, JWT in store, login/logout UI done. Public menu via `lib/api/public-menu.ts` (no auth); staff menu via `lib/api/catalog.ts`. Dashboard: orders, menu, inventory, riders wired to real APIs; profile + desktop logout added.
+**Progress (March 2026):** SSO callback, JWT in store, login/logout UI done. Public menu via `lib/api/public-menu.ts` (no auth); staff menu via `lib/api/catalog.ts`. Dashboard: orders, menu, inventory, **recipes**, riders wired to real APIs; profile + desktop logout added. **Supabase** used for Team, Shifts, Events, Bookings (see `supabase/schema.sql`). Menu items linked to inventory by **SKU**; recipe (BOM) managed in inventory-service.
 
 ---
 
@@ -71,10 +71,11 @@ Based on the [roadmap.md](../../../docs/roadmap.md) and service dependencies, in
 ### Phase 4: Staff Portal (Priority: LOW)
 | Order | Service | Integration Type | Status |
 |-------|---------|-----------------|--------|
-| 6 | **Inventory Service** | REST API (optional) | ⚠️ Optional |
+| 6 | **Inventory Service** | REST API (availability, BOM/recipes) | ✅ Available |
 | 7 | **POS Service** | Redirect | ⚠️ Optional |
+| 8 | **Supabase** | REST (Team, Shifts, Events, Bookings) | ✅ Available |
 
-**Why Last?**: Staff features can launch after core customer features.
+**Why Last?**: Staff features can launch after core customer features. Menu items use **SKU** to link to inventory; recipes (BOM) are configured in inventory-service so sales deduct components.
 
 ### Critical Gap: Booking Service
 | Service | Status | Mitigation |

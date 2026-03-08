@@ -24,8 +24,11 @@ jobs:
           _REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
           _REGISTRY_EMAIL: ${{ secrets.REGISTRY_EMAIL }}
           _KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+          _SUPABASE_PASSWORD: ${{ secrets.SUPABASE_PASSWORD }}
+          _SUPERBASE_PASSWORD: ${{ secrets.SUPERBASE_PASSWORD }}
         run: |
           REQUIRED_SECRETS="REGISTRY_USERNAME REGISTRY_PASSWORD REGISTRY_EMAIL KUBE_CONFIG"
+          # Optional: SUPABASE_PASSWORD or SUPERBASE_PASSWORD for Supabase connection (cafe-website)
 
           # Step 1: Delete any secrets that exist but have empty values.
           # gh secret list reports empty-value secrets as "existing", so the
@@ -224,6 +227,12 @@ jobs:
           APP_NAME: cafe-website
           GIT_USER: ${{ secrets.GIT_USER || 'Cafe Bot' }}
           GIT_EMAIL: ${{ secrets.GIT_EMAIL || 'dev@bengobox.com' }}
+          # Supabase (cafe-website): set in repo/git secrets; sync SUPERBASE_PASSWORD or SUPABASE_PASSWORD for DB connection
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://yjdqxbqkmbotujnuffni.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_PASSWORD: ${{ secrets.SUPABASE_PASSWORD }}
+          SUPERBASE_PASSWORD: ${{ secrets.SUPERBASE_PASSWORD }}
         run: |
           chmod +x build.sh
           ./build.sh

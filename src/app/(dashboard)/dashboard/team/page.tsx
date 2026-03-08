@@ -1,11 +1,11 @@
 'use client';
 
 import { Badge, Button, Card } from '@/components/ui';
+import { useTeam } from '@/hooks/use-team';
 import { motion } from 'framer-motion';
 import {
     Mail,
     MoreVertical,
-    Phone,
     Plus,
     Search,
     Shield,
@@ -13,46 +13,18 @@ import {
     Users
 } from 'lucide-react';
 
-const TEAM = [
-  { 
-    id: 1, 
-    name: 'Alice Johnson', 
-    role: 'Admin', 
-    email: 'alice@bengobox.cafe', 
-    phone: '+254 712 345 678',
-    status: 'Active',
-    avatar: 'AJ'
-  },
-  { 
-    id: 2, 
-    name: 'Bob Smith', 
-    role: 'Barista', 
-    email: 'bob@bengobox.cafe', 
-    phone: '+254 723 456 789',
-    status: 'Active',
-    avatar: 'BS'
-  },
-  { 
-    id: 3, 
-    name: 'Charlie Brown', 
-    role: 'Chef', 
-    email: 'charlie@bengobox.cafe', 
-    phone: '+254 734 567 890',
-    status: 'On Leave',
-    avatar: 'CB'
-  },
-  { 
-    id: 4, 
-    name: 'Diana Prince', 
-    role: 'Staff', 
-    email: 'diana@bengobox.cafe', 
-    phone: '+254 745 678 901',
-    status: 'Active',
-    avatar: 'DP'
-  },
-];
+function initials(name: string): string {
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+}
 
 export default function TeamManagement() {
+  const { data: teamMembers = [], isLoading, isError } = useTeam();
+
   return (
     <div className="space-y-10">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -75,7 +47,7 @@ export default function TeamManagement() {
           </div>
           <div>
             <p className="text-sm font-bold text-secondary-brand opacity-40 uppercase tracking-widest">Total Staff</p>
-            <p className="text-3xl font-black text-primary-brand">12</p>
+            <p className="text-3xl font-black text-primary-brand">{isLoading ? '—' : teamMembers.length}</p>
           </div>
         </Card>
         <Card className="magical-card border-none p-8 flex items-center gap-6">
@@ -84,7 +56,7 @@ export default function TeamManagement() {
           </div>
           <div>
             <p className="text-sm font-bold text-secondary-brand opacity-40 uppercase tracking-widest">Admins</p>
-            <p className="text-3xl font-black text-primary-brand">3</p>
+            <p className="text-3xl font-black text-primary-brand">{isLoading ? '—' : teamMembers.filter((m) => m.role?.toLowerCase().includes('admin')).length}</p>
           </div>
         </Card>
         <Card className="magical-card border-none p-8 flex items-center gap-6">
@@ -93,7 +65,7 @@ export default function TeamManagement() {
           </div>
           <div>
             <p className="text-sm font-bold text-secondary-brand opacity-40 uppercase tracking-widest">New Hires</p>
-            <p className="text-3xl font-black text-primary-brand">2</p>
+            <p className="text-3xl font-black text-primary-brand">—</p>
           </div>
         </Card>
       </div>
@@ -124,58 +96,70 @@ export default function TeamManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-brand-beige/10">
-              {TEAM.map((member) => (
-                <motion.tr 
-                  key={member.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="hover:bg-brand-beige/5 transition-colors"
-                >
-                  <td className="p-6">
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-xl bg-brand-orange/10 flex items-center justify-center text-brand-orange font-black text-sm">
-                        {member.avatar}
+              {isLoading ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-muted-foreground">Loading team…</td>
+                </tr>
+              ) : isError ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-destructive">Failed to load team. Check Supabase configuration.</td>
+                </tr>
+              ) : teamMembers.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-muted-foreground">No team members yet. Add your first member above.</td>
+                </tr>
+              ) : (
+                teamMembers.map((member) => (
+                  <motion.tr
+                    key={member.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="hover:bg-brand-beige/5 transition-colors"
+                  >
+                    <td className="p-6">
+                      <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 rounded-xl bg-brand-orange/10 flex items-center justify-center text-brand-orange font-black text-sm">
+                          {initials(member.name)}
+                        </div>
+                        <div>
+                          <p className="font-black text-primary-brand">{member.name}</p>
+                          <p className="text-xs text-secondary-brand opacity-60">ID: {member.id.slice(0, 8)}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-black text-primary-brand">{member.name}</p>
-                        <p className="text-xs text-secondary-brand opacity-60">ID: #STF-00{member.id}</p>
+                    </td>
+                    <td className="p-6">
+                      <Badge className={
+                        member.role?.toLowerCase().includes('admin') ? 'bg-brand-orange/10 text-brand-orange' :
+                        member.role?.toLowerCase().includes('barista') ? 'bg-brand-gold/10 text-brand-gold' :
+                        'bg-blue-500/10 text-blue-500'
+                      }>
+                        {member.role}
+                      </Badge>
+                    </td>
+                    <td className="p-6">
+                      <div className="space-y-1">
+                        {member.email && (
+                          <div className="flex items-center gap-2 text-xs text-secondary-brand">
+                            <Mail className="h-3 w-3 opacity-40" />
+                            {member.email}
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  </td>
-                  <td className="p-6">
-                    <Badge className={
-                      member.role === 'Admin' ? 'bg-brand-orange/10 text-brand-orange' : 
-                      member.role === 'Barista' ? 'bg-brand-gold/10 text-brand-gold' : 
-                      'bg-blue-500/10 text-blue-500'
-                    }>
-                      {member.role}
-                    </Badge>
-                  </td>
-                  <td className="p-6">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-xs text-secondary-brand">
-                        <Mail className="h-3 w-3 opacity-40" />
-                        {member.email}
+                    </td>
+                    <td className="p-6">
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-green-500" />
+                        <span className="text-sm font-bold text-primary-brand">Active</span>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-secondary-brand">
-                        <Phone className="h-3 w-3 opacity-40" />
-                        {member.phone}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-6">
-                    <div className="flex items-center gap-2">
-                      <div className={`h-2 w-2 rounded-full ${member.status === 'Active' ? 'bg-green-500' : 'bg-brand-gold'}`} />
-                      <span className="text-sm font-bold text-primary-brand">{member.status}</span>
-                    </div>
-                  </td>
-                  <td className="p-6 text-right">
-                    <Button variant="ghost" size="icon" className="text-secondary-brand hover:text-primary-brand">
-                      <MoreVertical className="h-5 w-5" />
-                    </Button>
-                  </td>
-                </motion.tr>
-              ))}
+                    </td>
+                    <td className="p-6 text-right">
+                      <Button variant="ghost" size="icon" className="text-secondary-brand hover:text-primary-brand">
+                        <MoreVertical className="h-5 w-5" />
+                      </Button>
+                    </td>
+                  </motion.tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

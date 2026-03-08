@@ -55,6 +55,7 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
+  const isDashboard = pathname?.startsWith('/dashboard') ?? false;
   const navigation = [
     { name: 'Home', href: '/' },
     { name: 'Menu', href: '/menu' },
@@ -114,7 +115,8 @@ export function Header() {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation - hidden on dashboard (dashboard has its own top bar) */}
+          {!isDashboard && (
           <div className="hidden lg:block">
             <div className="flex items-center space-x-1">
               {navigation.map((item) => {
@@ -143,10 +145,12 @@ export function Header() {
               })}
             </div>
           </div>
+          )}
 
           {/* Actions */}
           <div className="flex items-center gap-2 md:gap-4">
-            {/* Search & Cart Placeholders */}
+            {/* Search & Cart - hidden on dashboard */}
+            {!isDashboard && (
             <div className="hidden md:flex items-center gap-2">
               <button className="p-2 rounded-xl text-brand-muted dark:text-brand-beige/70 hover:bg-brand-orange/10 hover:text-brand-orange transition-all">
                 <Search className="h-5 w-5" />
@@ -156,6 +160,7 @@ export function Header() {
                 <span className="absolute top-1 right-1 h-4 w-4 bg-brand-orange text-white text-[10px] font-black flex items-center justify-center rounded-full">0</span>
               </Link>
             </div>
+            )}
 
             <div className="h-6 w-[1px] bg-brand-beige/20 dark:bg-brand-orange/10 hidden md:block" />
 

@@ -58,16 +58,16 @@ export default function StaffAnalytics() {
         ))}
       </div>
 
-      {/* Analytics Placeholder */}
+      {/* Analytics charts — wire to ordering-backend and/or Supabase for real data */}
       <div className="grid gap-10 lg:grid-cols-3">
         <Card className="lg:col-span-2 p-10 magical-card border-none min-h-[500px] flex flex-col items-center justify-center text-center space-y-6">
           <div className="h-24 w-24 rounded-full bg-brand-orange/10 flex items-center justify-center text-brand-orange">
             <BarChart3 className="h-12 w-12" />
           </div>
           <div className="max-w-md">
-            <h2 className="text-2xl font-black text-primary-brand">Superset Dashboard Integration</h2>
+            <h2 className="text-2xl font-black text-primary-brand">Revenue & orders over time</h2>
             <p className="text-secondary-brand mt-2 font-light">
-              This section will embed real-time interactive dashboards from Apache Superset once the analytics service is fully integrated.
+              Connect to ordering-backend analytics endpoints (e.g. orders summary, revenue by period) and Supabase (shifts, bookings) to display real charts here. Use Recharts or Chart.js for time-series and breakdowns.
             </p>
           </div>
           <div className="flex gap-4">

@@ -77,6 +77,11 @@ NEXT_PUBLIC_ENABLE_PAYMENTS=false
 NEXT_PUBLIC_TENANT_SLUG=urban-loft
 NEXT_PUBLIC_TENANT_ID=tenant-urban-loft
 
+# Supabase (Team, Shifts, Events, Bookings)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=your-anon-or-publishable-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key  # from Supabase dashboard → Settings → API
+
 # Maps
 NEXT_PUBLIC_MAP_PROVIDER=osm
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
@@ -151,6 +156,9 @@ pnpm test:e2e
 - ✅ **Notifications Service** - Email/SMS notifications
 - ⚠️ **Treasury Service** - Payment processing
 - ❌ **Booking Service** - Event/space bookings (not implemented yet)
+
+### Supabase (Team, Shifts, Events, Bookings)
+Dashboard data for Team, Shifts, Events, and Bookings is stored in Supabase. Run `supabase/schema.sql` in the Supabase SQL Editor to create tables. Set `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (or `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY`) in `.env.local`. To test the connection locally: run the app, open Dashboard → Team, and verify list/create; or use the Supabase dashboard to confirm tables `team`, `shifts`, `events`, `bookings` exist.
 
 ### Development Mode
 When `NEXT_PUBLIC_USE_DUMMY_DATA=true`, the website uses dummy data instead of real API calls. This allows development without running all backend services.

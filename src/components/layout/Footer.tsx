@@ -1,8 +1,33 @@
+'use client';
+
 import { ExternalLink, Facebook, Heart, Instagram, Mail, MapPin, Phone, Twitter } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export function Footer() {
+  const pathname = usePathname();
+  const isDashboard = pathname?.startsWith('/dashboard') ?? false;
+
+  if (isDashboard) {
+    return (
+      <footer className="border-t border-border bg-background py-4">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-muted-foreground">
+          <span>© {new Date().getFullYear()} Urban Loft Cafe. All rights reserved.</span>
+          <a
+            href="https://www.codevertexitsolutions.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Powered by <span className="font-semibold text-primary">CodeVertex</span>
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+        </div>
+      </footer>
+    );
+  }
+
   const footerLinks = {
     company: [
       { name: 'About Us', href: '/about' },

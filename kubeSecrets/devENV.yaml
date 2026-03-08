@@ -38,3 +38,13 @@ stringData:
   AUTH_SECRET: "bengobox-secret-key-1234567890"
   AUTH_CLIENT_ID: "cafe-website-client"
   AUTH_CLIENT_SECRET: "cafe-website-secret"
+
+  # ============================================
+  # SUPABASE (Team, Shifts, Events, Bookings)
+  # Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in production;
+  # use git secret SUPABASE_PASSWORD (or SUPERBASE_PASSWORD) for DB password in connection strings.
+  # ============================================
+  NEXT_PUBLIC_SUPABASE_URL: "https://yjdqxbqkmbotujnuffni.supabase.co"
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: "sb_publishable_Llifxl8kQgSpMqErTNjiGQ_RzHcP48y"
+  # SUPABASE_SERVICE_ROLE_KEY: set in production secrets (from Supabase dashboard → Settings → API)
+  # SUPABASE_PASSWORD / SUPERBASE_PASSWORD: set in git secrets for deploy; used to build connection string if needed

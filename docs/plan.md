@@ -16,7 +16,7 @@
 - Loyalty program access
 - Theme switching (Light/Dark mode)
 - Auth-state aware navigation (Login/Signup/Profile)
-- **Dashboard (admin/staff)**: Centralized management for cafe operations, staff, and orders at `/dashboard/*`.
+- **Dashboard (admin/staff)**: Centralized management for cafe operations, staff, and orders at `/dashboard/*`. Includes **Recipes** page (menu–inventory linkage by SKU); **Supabase** for Team, Shifts, Events, Bookings.
 
 **Inspired By**:
 - https://artcaffemarket.co.ke/ - Modern café website design

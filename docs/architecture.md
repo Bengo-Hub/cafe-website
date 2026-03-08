@@ -41,7 +41,7 @@ The cafe-website is the **hub** for the BengoBox ecosystem. It follows a **displ
 Route groups (parentheses do not affect the URL):
 
 - **`(site)`** — **Public pages**. No auth required: home, menu, about, contact, events, careers, franchising, loyalty, services. `/login` and `/signup` redirect to SSO; `/auth/bridge` redirects to `/login`.
-- **`(dashboard)`** — **Dashboard (admin/staff) auth-only pages**. Protected client-side (layout redirects to `/login` when unauthenticated); require SSO. Dashboard shell (sidebar, auth guard) and pages: dashboard, orders, menu (management), inventory, riders, shifts, analytics, team, settings, track-order. Resolve under `/dashboard/*`.
+- **`(dashboard)`** — **Dashboard (admin/staff) auth-only pages**. Protected client-side (layout redirects to `/login` when unauthenticated); require SSO. Dashboard shell (sidebar, auth guard) and pages: dashboard, orders, menu (management), **recipes** (menu–inventory SKU/BOM linkage), inventory, riders, shifts, analytics, team, settings, track-order. **Supabase** backs Team, Shifts, Events, Bookings (see `supabase/schema.sql`). Resolve under `/dashboard/*`.
 
 ```
 src/

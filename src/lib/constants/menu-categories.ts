@@ -7,9 +7,12 @@ export const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
   burgers: 'Burgers & Combos',
   pizzas: 'Pizzas',
   mains: 'Main Meals',
+  'main-courses': 'Main Courses',
   platters: 'Platters',
   salads: 'Salads & Sandwiches',
   sides: 'Sides & Snacks',
+  'hot-beverages': 'Hot Beverages',
+  'cold-beverages': 'Cold Beverages',
   'hot-coffee': 'Hot Coffee',
   tea: 'Tea & Hot Drinks',
   iced: 'Iced Coffee & Tea',
@@ -22,6 +25,9 @@ export const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
   wines: 'Wines',
   water: 'Water & Soda',
   retail: 'Retail',
+  pastries: 'Pastries & Bakery',
+  sandwiches: 'Sandwiches & Wraps',
+  'light-bites': 'Light Bites',
 };
 
 /**
@@ -33,10 +39,14 @@ export const CATEGORY_IMAGES: Record<string, string> = {
   burgers: '/images/menu/burger.jpg',
   pizzas: '/images/menu/margherita-pizza.jpg',
   mains: '/images/menu/main-course-1.jpg',
+  'main-courses': '/images/menu/main-course-1.jpg',
   platters: '/images/menu/main-course-2.jpg',
   salads: '/images/menu/salad.jpg',
+  'hot-beverages': '/images/menu/espresso.jpg',
   'hot-coffee': '/images/menu/espresso.jpg',
   desserts: '/images/menu/chocolate-lava-cake.jpg',
+  pastries: '/images/menu/chocolate-lava-cake.jpg',
+  sandwiches: '/images/menu/burger.jpg',
 };
 
 /** Images for menu hero slideshow - varied menu visuals */

@@ -2,27 +2,27 @@
 
 import { Badge, Button, Card } from '@/components/ui';
 import {
-  type MenuCategory,
-  type MenuItem,
-  createCategory,
-  createMenuItem,
-  deleteMenuItem,
-  fetchCategories,
-  fetchMenuItems,
-  updateMenuItem,
+    type MenuCategory,
+    type MenuItem,
+    createCategory,
+    createMenuItem,
+    deleteMenuItem,
+    fetchCategories,
+    fetchMenuItems,
+    updateMenuItem,
 } from '@/lib/api/catalog';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ChefHat,
-  Edit2,
-  Eye,
-  EyeOff,
-  Loader2,
-  Plus,
-  Search,
-  Star,
-  Trash2,
-  X,
+    ChefHat,
+    Edit2,
+    Eye,
+    EyeOff,
+    Loader2,
+    Plus,
+    Search,
+    Star,
+    Trash2,
+    X,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -331,6 +331,9 @@ export default function MenuManagement() {
                 onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
                 className="w-full rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
               />
+              <p className="text-xs text-secondary-brand">
+                SKU links this item to inventory for stock. When a recipe (BOM) is set in the inventory service for this SKU, sales will deduct recipe components per serving.
+              </p>
               <div className="grid grid-cols-2 gap-3">
                 <input
                   type="text"
@@ -397,6 +400,9 @@ export default function MenuManagement() {
               </button>
             </div>
             <div className="space-y-3">
+              <p className="text-xs text-secondary-brand">
+                SKU: <strong className="font-mono">{editingItem.sku}</strong> — links to inventory; configure recipe (BOM) in Inventory service for stock deduction on sale.
+              </p>
               <input
                 type="text"
                 placeholder="Item name"

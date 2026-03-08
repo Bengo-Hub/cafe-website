@@ -75,6 +75,9 @@ DOCKER_BUILDKIT=1 docker build . \
   --build-arg NEXT_PUBLIC_APP_URL="${NEXT_PUBLIC_APP_URL:-https://theurbanloftcafe.com}" \
   --build-arg NEXT_PUBLIC_TENANT_SLUG="${NEXT_PUBLIC_TENANT_SLUG:-urban-loft}" \
   --build-arg NEXT_PUBLIC_TENANT_ID="${NEXT_PUBLIC_TENANT_ID:-tenant-urban-loft}" \
+  --build-arg NEXT_PUBLIC_SUPABASE_URL="${NEXT_PUBLIC_SUPABASE_URL}" \
+  --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY="${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY:-}" \
+  --build-arg SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY:-}" \
   -t "${IMAGE_REPO}:${GIT_COMMIT_ID}"
 ok "Docker build complete"
 
