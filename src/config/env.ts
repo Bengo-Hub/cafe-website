@@ -28,7 +28,8 @@ export const config = {
   
   tenant: {
     slug: process.env.NEXT_PUBLIC_TENANT_SLUG || 'urban-loft',
-    id: process.env.NEXT_PUBLIC_TENANT_ID || 'tenant-urban-loft',
+    // Use UUID from auth/tenant API when available; omit or use valid UUID so public menu can resolve by slug (X-Tenant-Slug + URL path).
+    id: process.env.NEXT_PUBLIC_TENANT_ID || '',
   },
   
   maps: {

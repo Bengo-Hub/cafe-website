@@ -9,12 +9,17 @@ import { config } from '@/config/env';
 const ORDERING_URL = config.services.ordering;
 const TENANT = config.tenant.slug;
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function tenantHeaders(): Record<string, string> {
-  return {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'X-Tenant-Slug': TENANT,
-    ...(config.tenant.id ? { 'X-Tenant-ID': config.tenant.id } : {}),
   };
+  if (config.tenant.id && UUID_REGEX.test(config.tenant.id)) {
+    headers['X-Tenant-ID'] = config.tenant.id;
+  }
+  return headers;
 }
 
 /** Public category from ordering-backend GET /menu/categories */
