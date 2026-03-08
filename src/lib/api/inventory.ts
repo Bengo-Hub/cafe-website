@@ -1,7 +1,7 @@
 import { config } from '@/config/env';
 
-const INVENTORY_URL = process.env.NEXT_PUBLIC_INVENTORY_SERVICE_URL || 'https://inventoryapi.codevertexitsolutions.com';
-const TENANT = config.tenant.id || 'tenant-urban-loft';
+const INVENTORY_URL = config.services.inventory;
+const TENANT = config.tenant.slug;
 
 function authHeaders(): Record<string, string> {
   if (typeof window === 'undefined') return {};

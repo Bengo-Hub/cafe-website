@@ -2,26 +2,26 @@
 
 import { Badge, Button, Card } from '@/components/ui';
 import {
-  type OrderStatus,
-  cancelOrder,
-  fetchAdminOrders,
-  updateOrderStatus,
+    type OrderStatus,
+    cancelOrder,
+    fetchAdminOrders,
+    updateOrderStatus,
 } from '@/lib/api/orders';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
-  AlertTriangle,
-  CheckCircle2,
-  ChefHat,
-  Clock,
-  Loader2,
-  Package,
-  RefreshCw,
-  Search,
-  ShoppingBag,
-  Truck,
-  X,
-  XCircle,
+    AlertTriangle,
+    CheckCircle2,
+    ChefHat,
+    Clock,
+    Loader2,
+    Package,
+    RefreshCw,
+    Search,
+    ShoppingBag,
+    Truck,
+    X,
+    XCircle,
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
@@ -97,27 +97,36 @@ export default function OrderManagement() {
   const [statusFilter, setStatusFilter] = useState('');
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
+  const [page, setPage] = useState(1);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
 
   const handleSearch = useCallback(() => {
     setSearch(searchInput);
+    setPage(1);
   }, [searchInput]);
 
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ['admin-orders', statusFilter, search],
+    queryKey: ['admin-orders', statusFilter, search, page, dateFrom, dateTo],
     queryFn: () =>
       fetchAdminOrders({
         status: statusFilter || undefined,
         search: search || undefined,
-        limit: 50,
+        page,
+        limit: 20,
+        date_from: dateFrom || undefined,
+        date_to: dateTo || undefined,
       }),
     refetchInterval: 30_000,
   });
 
   const listResponse = data?.data;
   const orders = listResponse?.data ?? [];
+  const total = listResponse?.total ?? 0;
+  const totalPages = listResponse?.limit ? Math.ceil(total / listResponse.limit) : 1;
   const selectedOrder = orders.find((o) => o.id === selectedOrderId) ?? orders[0] ?? null;
 
   const statusMutation = useMutation({
@@ -181,7 +190,10 @@ export default function OrderManagement() {
           {/* Status filter */}
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
             className="h-10 rounded-xl border border-brand-beige/10 bg-brand-beige/5 px-3 text-sm text-primary-brand focus:border-brand-orange/50 focus:outline-none"
           >
             {STATUS_FILTERS.map((f) => (
@@ -190,6 +202,26 @@ export default function OrderManagement() {
               </option>
             ))}
           </select>
+
+          {/* Date range */}
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => {
+              setDateFrom(e.target.value);
+              setPage(1);
+            }}
+            className="h-10 rounded-xl border border-brand-beige/10 bg-brand-beige/5 px-3 text-sm text-primary-brand focus:border-brand-orange/50 focus:outline-none"
+          />
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => {
+              setDateTo(e.target.value);
+              setPage(1);
+            }}
+            className="h-10 rounded-xl border border-brand-beige/10 bg-brand-beige/5 px-3 text-sm text-primary-brand focus:border-brand-orange/50 focus:outline-none"
+          />
 
           {/* Refresh */}
           <Button
@@ -233,9 +265,9 @@ export default function OrderManagement() {
           <div className="space-y-3 lg:col-span-1">
             <p className="text-xs font-bold uppercase tracking-widest text-secondary-brand opacity-60">
               {orders.length} order{orders.length !== 1 && 's'}
-              {listResponse?.total && listResponse.total > orders.length && ` of ${listResponse.total}`}
+              {total > orders.length && ` of ${total}`}
             </p>
-            <div className="max-h-[70vh] space-y-3 overflow-y-auto pr-1">
+            <div className="max-h-[60vh] space-y-3 overflow-y-auto pr-1">
               {orders.map((order) => {
                 const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
                 const isSelected = selectedOrder?.id === order.id;
@@ -275,6 +307,32 @@ export default function OrderManagement() {
                 );
               })}
             </div>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-3 flex items-center justify-between border-t border-brand-beige/10 pt-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  Previous
+                </Button>
+                <span className="text-xs font-semibold text-secondary-brand">
+                  Page {page} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Order detail */}

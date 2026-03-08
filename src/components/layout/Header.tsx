@@ -1,13 +1,15 @@
 'use client';
 
-import { Button } from '@/components/ui';
 import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
+import { Button } from '@/components/ui';
 import { useAuth } from '@/hooks/use-auth';
 import { useThemeStore } from '@/lib/store/theme-store';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
+    ChevronDown,
     Facebook,
     Instagram,
+    LogOut,
     Menu,
     Moon,
     Phone,
@@ -25,6 +27,7 @@ import { useEffect, useState } from 'react';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -168,15 +171,60 @@ export function Header() {
             {/* Auth Section */}
             <div className="hidden md:block">
               {isAuthenticated ? (
-                <div className="flex items-center gap-3">
-                  <Link href="/profile" className="flex items-center gap-2 p-1 pr-3 rounded-full bg-brand-orange/5 border border-brand-orange/10 hover:border-brand-orange/30 transition-all group">
+                <div className="relative flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setUserMenuOpen((o) => !o)}
+                    className="flex items-center gap-2 p-1 pr-3 rounded-full bg-brand-orange/5 border border-brand-orange/10 hover:border-brand-orange/30 transition-all group"
+                    aria-expanded={userMenuOpen}
+                    aria-haspopup="true"
+                  >
                     <div className="h-8 w-8 rounded-full bg-brand-orange text-white flex items-center justify-center font-black text-xs">
                       {user?.name?.charAt(0) || <User className="h-4 w-4" />}
                     </div>
                     <span className="text-xs font-black uppercase tracking-widest text-brand-dark dark:text-white group-hover:text-brand-orange transition-colors">
                       {user?.name?.split(' ')[0]}
                     </span>
-                  </Link>
+                    <ChevronDown className={`h-4 w-4 text-brand-muted transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  <AnimatePresence>
+                    {userMenuOpen && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-40"
+                          aria-hidden="true"
+                          onClick={() => setUserMenuOpen(false)}
+                        />
+                        <motion.div
+                          initial={{ opacity: 0, y: -8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -8 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute right-0 top-full mt-2 z-50 min-w-[180px] py-1 rounded-xl bg-white dark:bg-brand-dark border border-brand-orange/10 shadow-xl"
+                        >
+                          <Link
+                            href="/profile"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-brand-dark dark:text-white hover:bg-brand-orange/10 transition-colors"
+                          >
+                            <User className="h-4 w-4" />
+                            Profile
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setUserMenuOpen(false);
+                              logout();
+                            }}
+                            className="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-semibold text-brand-dark dark:text-white hover:bg-brand-orange/10 transition-colors"
+                          >
+                            <LogOut className="h-4 w-4" />
+                            Logout
+                          </button>
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">

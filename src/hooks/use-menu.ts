@@ -1,37 +1,45 @@
 'use client';
 
-import { fetchMenuItems as fetchCatalogItems, fetchCategories, type MenuItem as CatalogItem } from '@/lib/api/catalog';
+import {
+    fetchPublicMenuCategories,
+    fetchPublicMenuItems,
+    type PublicMenuItemResponse,
+} from '@/lib/api/public-menu';
 import { MenuItem } from '@/types';
 import { useQuery } from '@tanstack/react-query';
 
-function mapCatalogToDisplay(apiItems: CatalogItem[], categoryNames: Map<string, string>): MenuItem[] {
-  return apiItems.map((item) => {
-    const categoryId = item.category_id ?? (item as { categoryId?: string }).categoryId ?? '';
-    return {
-      id: item.id,
-      name: item.name,
-      description: item.description ?? '',
-      price: item.price,
-      category: categoryNames.get(categoryId) ?? categoryId,
-      image: (item as { image_url?: string; imageUrl?: string }).image_url ?? (item as { imageUrl?: string }).imageUrl ?? '/images/menu/placeholder-food.svg',
-      available: item.is_available,
-      dietaryTags: item.tags as MenuItem['dietaryTags'],
-      featured: item.is_featured,
-    };
-  });
+function mapPublicToDisplay(
+  apiItems: PublicMenuItemResponse[],
+  categoryNames: Map<string, string>
+): MenuItem[] {
+  return apiItems.map((item) => ({
+    id: item.id,
+    name: item.name,
+    description: item.description ?? '',
+    price: item.basePrice,
+    category: categoryNames.get(item.categoryId) ?? item.categoryName ?? item.categoryId,
+    image: item.imageUrl ?? '/images/menu/placeholder-food.svg',
+    available: true,
+    dietaryTags: (item.dietaryTags as MenuItem['dietaryTags']) ?? [],
+    featured: false,
+  }));
 }
 
 async function fetchMenuItems(): Promise<MenuItem[]> {
   try {
-    const [catRes, itemsRes] = await Promise.all([
-      fetchCategories(),
-      fetchCatalogItems({ limit: 500 }),
+    const [categories, { items }] = await Promise.all([
+      fetchPublicMenuCategories(),
+      fetchPublicMenuItems({ limit: 500 }),
     ]);
-    const categories = catRes.data ?? [];
-    const result = itemsRes.data ?? { items: [], total: 0 };
     const categoryNames = new Map<string, string>();
-    categories.forEach((c) => categoryNames.set(c.id, c.name));
-    return mapCatalogToDisplay(result.items ?? [], categoryNames);
+    const flatten = (cats: { id: string; name: string; children?: unknown[] }[]) => {
+      cats.forEach((c) => {
+        categoryNames.set(c.id, c.name);
+        if (c.children?.length) flatten(c.children as { id: string; name: string; children?: unknown[] }[]);
+      });
+    };
+    flatten(categories);
+    return mapPublicToDisplay(items ?? [], categoryNames);
   } catch (e) {
     if (typeof console !== 'undefined') console.warn('Menu API failed, using empty list:', e);
     return [];

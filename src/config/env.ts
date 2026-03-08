@@ -18,6 +18,7 @@ export const config = {
     treasury: process.env.NEXT_PUBLIC_TREASURY_SERVICE_URL || PRODUCTION.treasury,
     booking: process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL || PRODUCTION.booking,
     notifications: process.env.NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL || PRODUCTION.notifications,
+    inventory: process.env.NEXT_PUBLIC_INVENTORY_SERVICE_URL || PRODUCTION.inventory,
   },
   
   features: {

@@ -89,12 +89,16 @@ export async function fetchAdminOrders(params?: {
   page?: number;
   limit?: number;
   search?: string;
+  date_from?: string; // ISO date or RFC3339
+  date_to?: string;
 }) {
   const query = new URLSearchParams();
   if (params?.status) query.set('status', params.status);
-  if (params?.page) query.set('page', String(params.page));
-  if (params?.limit) query.set('limit', String(params.limit));
+  if (params?.page != null) query.set('page', String(params.page));
+  if (params?.limit != null) query.set('limit', String(params.limit));
   if (params?.search) query.set('search', params.search);
+  if (params?.date_from) query.set('date_from', params.date_from);
+  if (params?.date_to) query.set('date_to', params.date_to);
 
   const qs = query.toString();
   const url = `${ORDERING_URL}/api/v1/${TENANT}/admin/orders${qs ? `?${qs}` : ''}`;
