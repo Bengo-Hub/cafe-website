@@ -1,8 +1,10 @@
 # Cafe Website - Complete Service Integrations Guide
 
-**Date**: January 2026
+**Date**: January 2026 (updated March 2026)
 **Version**: 2.0
 **Purpose**: Comprehensive documentation of all microservice integrations for the Urban Loft Cafe Website, including communication patterns, integration order, and implementation details.
+
+**Progress (March 2026):** SSO callback, JWT in store, login/logout UI done. Public menu via `lib/api/public-menu.ts` (no auth); staff menu via `lib/api/catalog.ts`. Dashboard: orders, menu, inventory, riders wired to real APIs; profile + desktop logout added.
 
 ---
 
@@ -647,21 +649,21 @@ class ServiceErrorBoundary extends Component {
 
 ### Phase 1: Authentication (Sprint 4)
 
-- [ ] Configure auth-service OIDC client
-- [ ] Implement `/auth/callback` route
-- [ ] Set up JWT validation middleware
+- [x] Configure auth-service OIDC client (cafe-website in seed, PKCE)
+- [x] Implement `/auth/callback` route
+- [x] Set up JWT validation (token in auth store, API client sends Authorization)
 - [ ] Implement token refresh flow
 - [ ] Configure Redis session storage
-- [ ] Add login/logout UI components
+- [x] Add login/logout UI components (navbar dropdown desktop, drawer mobile)
 - [ ] Test SSO flow end-to-end
 
 ### Phase 2: Menu Integration (Sprint 2)
 
-- [ ] Create API client for ordering-service
-- [ ] Implement menu fetching with caching
+- [x] Create API client for ordering-service (public: `lib/api/public-menu.ts`; staff: `lib/api/catalog.ts`)
+- [x] Implement menu fetching with caching (use-menu.ts, TanStack Query)
 - [ ] Add localization support (EN/SW)
-- [ ] Create menu page with filtering
-- [ ] Implement search functionality
+- [x] Create menu page with filtering
+- [x] Implement search functionality (category filter, search in use-menu)
 - [ ] Add "Order Now" redirect buttons
 - [ ] Test menu display on mobile
 
@@ -686,9 +688,9 @@ class ServiceErrorBoundary extends Component {
 
 ### Phase 5: Staff Portal (Sprint 6)
 
-- [ ] Implement RBAC checks
-- [ ] Create dashboard layout (done: (dashboard)/layout.tsx)
-- [ ] Add service redirect links
+- [x] Implement RBAC checks (useMe, hasRole, hasPermission; sidebar by role)
+- [x] Create dashboard layout ((dashboard)/layout.tsx)
+- [x] Add service redirect links (orders, menu, inventory, riders wired to APIs)
 - [ ] Implement analytics embedding
 - [ ] Test role-based access
 

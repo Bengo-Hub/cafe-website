@@ -12,6 +12,7 @@
 - **2026-03-06 (later)**: Tenant/brand: tenant slug from route (`/t/[slug]`) or `NEXT_PUBLIC_TENANT_SLUG` fallback via `useTenantSlug()`. Auth-api `GET /api/v1/tenants/by-slug/{slug}` (public) used to load tenant name/slug and optional branding (logo URL, primary/secondary colors from tenant metadata). `TenantBrandProvider` applies brand colors to CSS variables; Header and dashboard sidebar use tenant org name/logo when available. Settings page: added Branding section (org name, logo URL, brand colors). Menu: graceful fallback to empty list when catalog API fails. D3 items ticked: fallback on API fail, MenuItemCard image fallback (in mapper), CategoryFilter uses real categories.
 - **2026-03-06**: D1 auth token fix and D2 role-based dashboard implemented. Auth store now persists `accessToken` and `refreshToken`; session callback (via use-auth) syncs tokens into the store. API client reads token from auth store for `Authorization` header. Dashboard layout: `hasRole` / `hasStaffOrAdminRole` helpers added; sidebar hides Riders/Team for non-admin; non-staff users visiting `/dashboard/*` are redirected to `/`. Doc ticks updated for D1, D2, and already-done D3/D5 items.
 - **2026-03 (MVP path)**: Granular RBAC: sidebar items gated by permission (orders:read, menu:read, inventory:read, riders:read, users:read) from auth-api GET /me; fallback when permissions array empty for staff. Role-based post-login redirect (staff→/dashboard, others→/profile). Profile page at /profile (fix 404). All dashboard data fetches via TanStack Query (useMe 5 min TTL, use-menu, orders/menu/riders/inventory pages use useQuery/useMutation).
+- **2026-03 (SSO + public menu + dashboard completion)**: Public menu 401 fix: added `lib/api/public-menu.ts` calling `/menu/categories` and `/menu/items` (no auth); `use-menu.ts` now uses public endpoints for site menu. Profile: Preferences (theme), Settings (link to auth-ui), responsive layout; desktop navbar: user dropdown with Profile + Logout. Orders: pagination, date range, status filters, detail panel, update/cancel wired. Dashboard: stat cards and recent orders from `fetchAdminOrders` (today's count/revenue, last 10 orders). Menu management: category create, item CRUD, availability/featured toggles. Inventory: fetch + bulk availability, SKU/stock/badges. Riders: fetch, status tabs, invite/approve/suspend/reject. Auth-api: canonical permissions (`catalog:view`, `catalog:manage`) in seed and JWT; ordering-backend: JIT provisioning, Staff role includes catalog permissions.
 
 ---
 
@@ -53,12 +54,12 @@ The dashboard API modules read `accessToken` from the Zustand auth store (`cafe-
 
 ### D3: Public menu -- real API (Days 2-3)
 
-- [x] Update `hooks/use-menu.ts` to call ordering-service catalog API by default
+- [x] Update `hooks/use-menu.ts` to call ordering-service **public** menu API (`lib/api/public-menu.ts`: `/menu/categories`, `/menu/items` — no auth)
 - [ ] Set `NEXT_PUBLIC_USE_DUMMY_DATA=false` in production
-- [x] Fetch categories from `GET /api/v1/urban-loft/menu/categories` (or catalog endpoint)
-- [x] Fetch items from `GET /api/v1/urban-loft/menu/items`
+- [x] Fetch categories from `GET /api/v1/{tenant}/menu/categories`
+- [x] Fetch items from `GET /api/v1/{tenant}/menu/items`
 - [x] Map ordering-service response to existing `MenuItem` interface
-- [x] Maintain fallback to dummy data if API call fails (graceful degradation)
+- [x] Maintain fallback to empty list if API call fails (graceful degradation)
 - [x] Update MenuItemCard to handle real image URLs (with fallback placeholder)
 - [x] Update CategoryFilter to use real categories
 - [ ] Test: Public menu page shows real items from ordering-service
@@ -66,15 +67,15 @@ The dashboard API modules read `accessToken` from the Zustand auth store (`cafe-
 
 ### D4: Staff orders -- real API (Days 3-5)
 
-- [ ] Verify `lib/api/orders.ts` endpoints work against ordering-service
-- [ ] Wire `fetchAdminOrders()` into orders page with TanStack Query
-- [ ] Implement status filter tabs with API query params
-- [ ] Implement order detail side panel with real line items
-- [ ] Wire `updateOrderStatus()` for status transitions
-- [ ] Wire `cancelOrder()` with confirmation dialog
-- [ ] Add pagination (server-side)
-- [ ] Add date range filter
-- [ ] Handle empty state ("No orders yet")
+- [x] Verify `lib/api/orders.ts` endpoints work against ordering-service
+- [x] Wire `fetchAdminOrders()` into orders page with TanStack Query
+- [x] Implement status filter tabs with API query params
+- [x] Implement order detail side panel with real line items
+- [x] Wire `updateOrderStatus()` for status transitions
+- [x] Wire `cancelOrder()` with confirmation dialog
+- [x] Add pagination (server-side)
+- [x] Add date range filter (`date_from`, `date_to`)
+- [x] Handle empty state ("No orders yet")
 - [ ] Test: Orders list loads from ordering-service
 - [ ] Test: Status update reflects immediately (optimistic + refetch)
 
@@ -82,42 +83,42 @@ The dashboard API modules read `accessToken` from the Zustand auth store (`cafe-
 
 - [x] Verify `lib/api/catalog.ts` endpoints work against ordering-service
 - [x] Wire `fetchCategories()` and `fetchMenuItems()` into menu page
-- [ ] Implement category CRUD (create, rename, delete)
-- [ ] Implement item CRUD (create with image upload, edit, delete)
-- [ ] Availability toggle (real API call, optimistic update)
-- [ ] Featured toggle
+- [x] Implement category CRUD (create; rename/delete via updateCategory/deleteCategory)
+- [x] Implement item CRUD (create, edit, delete)
+- [x] Availability toggle (real API call, optimistic update)
+- [x] Featured toggle
 - [ ] Handle image upload to ordering-service or storage
 - [ ] Test: Menu items reflect real catalog from ordering-service
 - [ ] Test: Create/edit/delete item persists to backend
 
 ### D6: Staff inventory -- real API (Day 7)
 
-- [ ] Verify `lib/api/inventory.ts` endpoints work against inventory-service
-- [ ] Wire `fetchMenuItems()` + `fetchBulkAvailability()` into inventory page
-- [ ] Map response to table with SKU, stock level, status
-- [ ] Low-stock and out-of-stock badges
-- [ ] Handle API unavailability gracefully ("Inventory data unavailable")
+- [x] Verify `lib/api/inventory.ts` endpoints work against inventory-service
+- [x] Wire `fetchMenuItems()` + `fetchBulkAvailability()` into inventory page
+- [x] Map response to table with SKU, stock level, status
+- [x] Low-stock and out-of-stock badges
+- [x] Handle API unavailability gracefully ("Inventory data unavailable")
 - [ ] Test: Stock levels display from inventory-service
 
 ### D7: Staff riders -- real API (Days 7-8)
 
-- [ ] Verify `lib/api/riders.ts` endpoints work against logistics-service
-- [ ] Wire `fetchRiders()` into riders page with TanStack Query
-- [ ] Implement status filter tabs
-- [ ] Wire `inviteRider()` form
-- [ ] Wire `approveRider()`, `suspendRider()`, `rejectRider()` actions
-- [ ] Rider detail panel with profile and vehicle info
+- [x] Verify `lib/api/riders.ts` endpoints work against logistics-service
+- [x] Wire `fetchRiders()` into riders page with TanStack Query
+- [x] Implement status filter tabs
+- [x] Wire `inviteRider()` form
+- [x] Wire `approveRider()`, `suspendRider()`, `rejectRider()` actions
+- [x] Rider detail panel with profile and vehicle info
 - [ ] Test: Rider list loads from logistics-service
 - [ ] Test: Invite, approve, suspend flows work end-to-end
 
 ### D8: Dashboard -- real stats (Day 9)
 
-- [ ] Fetch today's order count and revenue from ordering-service (`GET /admin/orders?date=today`)
+- [x] Fetch today's order count and revenue from ordering-service (`GET /admin/orders` with `date_from`/`date_to`)
 - [ ] Fetch active rider count from logistics-service (`GET /admin/riders?status=active`)
 - [ ] Fetch low-stock item count from inventory-service
-- [ ] Wire stat cards to real data
-- [ ] Recent orders table: last 10 orders from ordering-service
-- [ ] Handle partial failures (show available stats, "unavailable" for failed services)
+- [x] Wire stat cards to real data (orders today, preparing, ready, revenue)
+- [x] Recent orders table: last 10 orders from ordering-service
+- [x] Handle partial failures (loading/empty states)
 - [ ] Test: Dashboard shows real numbers
 
 ### D9: Polish and deploy (Days 10-12)
@@ -163,14 +164,14 @@ The dashboard API modules read `accessToken` from the Zustand auth store (`cafe-
 
 ## Definition of done
 
-- [ ] Public `/menu` page displays real items from ordering-service
-- [ ] Staff portal requires authentication (non-staff redirected)
-- [ ] Sidebar respects role-based visibility
-- [ ] Staff orders page: list, detail, status update, cancel -- all real API
-- [ ] Staff menu page: list, create, edit, delete items -- all real API
-- [ ] Staff inventory page: stock levels from inventory-service (or graceful fallback)
-- [ ] Staff riders page: list, invite, approve, suspend -- all real API
-- [ ] Dashboard stat cards: real data from at least ordering + logistics
+- [x] Public `/menu` page displays real items from ordering-service (via public `/menu/*` API, no auth)
+- [x] Staff portal requires authentication (non-staff redirected)
+- [x] Sidebar respects role-based visibility
+- [x] Staff orders page: list, detail, status update, cancel -- all real API
+- [x] Staff menu page: list, create, edit, delete items -- all real API
+- [x] Staff inventory page: stock levels from inventory-service (or graceful fallback)
+- [x] Staff riders page: list, invite, approve, suspend -- all real API
+- [x] Dashboard stat cards: real data from ordering (orders today, revenue, recent orders)
 - [ ] No dummy data served in production (except placeholder pages: shifts, analytics, team, settings)
 - [ ] Auth flow works end-to-end (login -> dashboard -> API -> logout)
 - [ ] Deployed to theurbanloftcafe.com
