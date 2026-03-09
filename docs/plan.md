@@ -342,17 +342,23 @@ https://ordering.codevertexitsolutions.com/menu?item_id={id}&action=add-to-cart&
 
 ---
 
-### 11. Admin/Staff Dashboard (`/admin/*`)
+### 11. Admin/Staff Dashboard (`/dashboard`)
+
+**MVP shortcut**: The admin dashboard is the primary entry for staff to reach all service UIs (redirect only; no duplicate UIs). Permission-gated tiles/links on the dashboard:
+
+| Service   | URL (canonical) |
+|----------|------------------------------------------|
+| Inventory | https://inventory.codevertexitsolutions.com |
+| Ordering  | https://ordering.codevertexitsolutions.com  |
+| Logistics | https://logistics.codevertexitsolutions.com |
+| Treasury  | https://books.codevertexitsolutions.com    |
 
 **Features** (after SSO login):
-- Dashboard overview
-- Service navigation:
-  - Ordering Service Dashboard → Redirect to ordering-service admin
-  - Logistics Dashboard → Redirect to logistics-service admin
-  - POS Dashboard → Redirect to pos-service admin
-  - Treasury Dashboard → Redirect to treasury-service admin
-- Analytics summary
-- Quick actions
+- Dashboard overview with **Service shortcuts** (tiles to Inventory, Ordering, Logistics, Treasury)
+- Tiles are permission-gated (inventory:read, orders:read, riders:read; Treasury shown to staff); staff with no permissions see all tiles
+- Analytics summary (orders today, revenue)
+- Recent orders table
+- Redirect only — no duplicate UIs
 
 **SSO Integration**:
 - User logs in once via auth-service
@@ -726,8 +732,8 @@ https://ordering.codevertexitsolutions.com/track?id={order_id}&tenant={tenant}
 ### 7. Dashboard (`/dashboard`, `/admin`)
 
 **Features**:
-- Centralized dashboard for cafe operations.
-- **Service Redirection**: Any task requiring deep integration with a microservice (e.g., assigning a rider, managing inventory) redirects the dashboard user to the specific service's UI.
+- Centralized dashboard for cafe operations. **The dashboard is the MVP shortcut**: single entry for staff to reach Inventory, Ordering, Logistics, and Treasury UIs via permission-gated tiles (canonical URLs above).
+- **Service Redirection**: Any task requiring deep integration with a microservice (e.g., assigning a rider, managing inventory) redirects the dashboard user to the specific service's UI. Redirect only — no duplicate UIs.
 - **Unified SSO**: Seamless transitions between services without re-authentication.
 
 **Integration Points**:

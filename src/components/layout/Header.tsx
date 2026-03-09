@@ -6,19 +6,19 @@ import { useAuth } from '@/hooks/use-auth';
 import { useThemeStore } from '@/lib/store/theme-store';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-    ChevronDown,
-    Facebook,
-    Instagram,
-    LogOut,
-    Menu,
-    Moon,
-    Phone,
-    Search,
-    ShoppingBag,
-    Sun,
-    Twitter,
-    User,
-    X
+  ChevronDown,
+  Facebook,
+  Instagram,
+  LogOut,
+  Menu,
+  Moon,
+  Phone,
+  Search,
+  ShoppingBag,
+  Sun,
+  Twitter,
+  User,
+  X
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -42,7 +42,7 @@ export function Header() {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       setIsScrolled(currentScrollY > 50);
-      
+
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setIsVisible(false);
       } else {
@@ -73,14 +73,12 @@ export function Header() {
   ];
 
   return (
-    <header 
-      className={`sticky top-0 z-50 transition-all duration-500 ${
-        isVisible ? 'translate-y-0' : '-translate-y-full'
-      } ${
-        isScrolled 
-          ? 'py-2 bg-white/80 dark:bg-brand-dark/80 backdrop-blur-xl shadow-xl border-b border-brand-orange/10' 
+    <header
+      className={`sticky top-0 z-50 transition-all duration-500 ${isVisible ? 'translate-y-0' : '-translate-y-full'
+        } ${isScrolled
+          ? 'py-2 bg-white/80 dark:bg-brand-dark/80 backdrop-blur-xl shadow-xl border-b border-brand-orange/10'
           : 'py-4 bg-transparent'
-      }`}
+        }`}
     >
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 md:h-20 items-center justify-between">
@@ -117,49 +115,44 @@ export function Header() {
 
           {/* Desktop Navigation - hidden on dashboard (dashboard has its own top bar) */}
           {!isDashboard && (
-          <div className="hidden lg:block">
-            <div className="flex items-center space-x-1">
-              {navigation.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`relative px-4 py-2 text-sm font-bold uppercase tracking-widest transition-all duration-300 group ${
-                      isActive
+            <div className="hidden lg:block">
+              <div className="flex items-center space-x-1">
+                {navigation.map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`relative px-4 py-2 text-sm font-bold uppercase tracking-widest transition-all duration-300 group ${isActive
                         ? 'text-brand-orange'
                         : 'text-brand-muted dark:text-brand-beige/70 hover:text-brand-orange'
-                    }`}
-                  >
-                    <span className="relative z-10">{item.name}</span>
-                    {isActive && (
-                      <motion.div
-                        layoutId="nav-underline"
-                        className="absolute bottom-0 left-4 right-4 h-0.5 bg-gradient-to-r from-brand-orange to-brand-gold"
-                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-brand-orange/5 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300 -z-10" />
-                  </Link>
-                );
-              })}
+                        }`}
+                    >
+                      <span className="relative z-10">{item.name}</span>
+                      {isActive && (
+                        <motion.div
+                          layoutId="nav-underline"
+                          className="absolute bottom-0 left-4 right-4 h-0.5 bg-gradient-to-r from-brand-orange to-brand-gold"
+                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        />
+                      )}
+                      <div className="absolute inset-0 bg-brand-orange/5 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300 -z-10" />
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-          </div>
           )}
 
           {/* Actions */}
           <div className="flex items-center gap-2 md:gap-4">
             {/* Search & Cart - hidden on dashboard */}
             {!isDashboard && (
-            <div className="hidden md:flex items-center gap-2">
-              <button className="p-2 rounded-xl text-brand-muted dark:text-brand-beige/70 hover:bg-brand-orange/10 hover:text-brand-orange transition-all">
-                <Search className="h-5 w-5" />
-              </button>
-              <Link href="/menu" className="p-2 rounded-xl text-brand-muted dark:text-brand-beige/70 hover:bg-brand-orange/10 hover:text-brand-orange transition-all relative">
-                <ShoppingBag className="h-5 w-5" />
-                <span className="absolute top-1 right-1 h-4 w-4 bg-brand-orange text-white text-[10px] font-black flex items-center justify-center rounded-full">0</span>
-              </Link>
-            </div>
+              <div className="hidden md:flex items-center gap-2">
+                <button className="p-2 rounded-xl text-brand-muted dark:text-brand-beige/70 hover:bg-brand-orange/10 hover:text-brand-orange transition-all">
+                  <Search className="h-5 w-5" />
+                </button>
+              </div>
             )}
 
             <div className="h-6 w-[1px] bg-brand-beige/20 dark:bg-brand-orange/10 hidden md:block" />
@@ -233,22 +226,14 @@ export function Header() {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="sm"
                     onClick={() => login()}
                     className="font-black uppercase tracking-widest text-[10px] rounded-xl"
                   >
                     Login
                   </Button>
-                  <Link href="/signup">
-                    <Button 
-                      size="sm" 
-                      className="bg-brand-orange hover:bg-brand-burnt text-white rounded-xl font-black uppercase tracking-widest text-[10px] px-6 shadow-lg shadow-brand-orange/20"
-                    >
-                      Join
-                    </Button>
-                  </Link>
                 </div>
               )}
             </div>
@@ -330,11 +315,10 @@ export function Header() {
                         <Link
                           href={item.href}
                           onClick={() => setMobileMenuOpen(false)}
-                          className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 ${
-                            isActive
-                              ? 'bg-brand-orange text-white'
-                              : 'text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
-                          }`}
+                          className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 ${isActive
+                            ? 'bg-brand-orange text-white'
+                            : 'text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
+                            }`}
                         >
                           <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-white' : 'bg-brand-orange'}`} />
                           <span className="text-base font-semibold">{item.name}</span>

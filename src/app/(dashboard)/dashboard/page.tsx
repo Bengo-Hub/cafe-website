@@ -1,17 +1,31 @@
 'use client';
 
 import { Card } from '@/components/ui';
+import { hasPermission, hasStaffOrAdminRole } from '@/lib/auth/roles';
 import { fetchAdminOrders, type Order } from '@/lib/api/orders';
+import { useMe } from '@/hooks/use-me';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
+    BookOpen,
+    Box,
+    Bike,
     CheckCircle2,
     Clock,
+    ExternalLink,
     Loader2,
     Package,
     ShoppingBag,
 } from 'lucide-react';
 import Link from 'next/link';
+
+/** Canonical MVP service UI domains (redirect only; no duplicate UIs). */
+const SERVICE_LINKS = [
+  { label: 'Inventory', href: 'https://inventory.codevertexitsolutions.com', permission: 'inventory:read' as const, icon: Box },
+  { label: 'Ordering', href: 'https://ordering.codevertexitsolutions.com', permission: 'orders:read' as const, icon: ShoppingBag },
+  { label: 'Logistics', href: 'https://logistics.codevertexitsolutions.com', permission: 'riders:read' as const, icon: Bike },
+  { label: 'Treasury', href: 'https://books.codevertexitsolutions.com', permission: null, icon: BookOpen },
+] as const;
 
 function formatCurrency(amount: number, currency = 'KES') {
   return `${currency} ${amount.toLocaleString()}`;
@@ -30,8 +44,16 @@ function endOfTodayISO() {
 }
 
 export default function StaffDashboard() {
+  const { me } = useMe();
   const todayStart = todayISO();
   const todayEnd = endOfTodayISO();
+
+  const isStaff = hasStaffOrAdminRole(me);
+  const noPerms = !me?.permissions?.length;
+  const visibleServiceLinks = SERVICE_LINKS.filter((s) => {
+    if (s.permission) return hasPermission(me, s.permission) || (isStaff && noPerms);
+    return isStaff;
+  });
 
   const { data: ordersRes, isLoading } = useQuery({
     queryKey: ['dashboard-orders', todayStart, todayEnd],
@@ -70,6 +92,33 @@ export default function StaffDashboard() {
         <h1 className="text-4xl font-black text-primary-brand tracking-tight">Staff Dashboard</h1>
         <p className="text-secondary-brand font-light">Welcome back! Here&apos;s what&apos;s happening at Urban Loft today.</p>
       </header>
+
+      {/* Service shortcuts (permission-gated; redirect only to canonical UIs) */}
+      {visibleServiceLinks.length > 0 && (
+        <section className="space-y-4">
+          <h2 className="text-xl font-bold text-primary-brand">Services</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {visibleServiceLinks.map(({ label, href, icon: Icon }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-4 rounded-2xl border border-brand-beige/20 bg-white/50 p-5 transition-all hover:border-brand-orange/30 hover:shadow-md"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-orange/10 text-brand-orange">
+                  <Icon className="h-6 w-6" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-primary-brand">{label}</p>
+                  <p className="text-xs text-secondary-brand opacity-70">Open in new tab</p>
+                </div>
+                <ExternalLink className="h-4 w-4 text-secondary-brand opacity-60" />
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Stats Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
