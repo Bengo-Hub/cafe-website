@@ -46,6 +46,15 @@ next-env.d.ts
 /test-results/
 /playwright-report/
 /playwright/.cache/
+/cypress/
+/cypress/videos/
+/cypress/screenshots/
+/cypress/downloads/
+/cypress/logs/
+/cypress/reports/
+/cypress/fixtures/
+/cypress/plugins/
+/cypress/support/
 
 # IDEs
 .idea/
