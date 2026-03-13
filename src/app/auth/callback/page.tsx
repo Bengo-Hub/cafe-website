@@ -31,12 +31,19 @@ function AuthCallbackContent() {
     if (status === 'authenticated') {
       const returnTo = typeof window !== 'undefined' ? sessionStorage.getItem('sso_return_to') : null;
       sessionStorage.removeItem('sso_return_to');
+      
+      // Handle tenant-specific routing if tenant was forced
+      const forcedTenant = searchParams?.get('tenant');
+      if (forcedTenant && user?.tenant_slug !== forcedTenant) {
+        console.warn('Tenant mismatch in callback: expected', forcedTenant, 'got', user?.tenant_slug);
+      }
+
       // Use return_to when it was explicitly set and is a real path; otherwise role-based default
       const isExplicitReturn = returnTo && returnTo !== '/' && returnTo !== '/login' && returnTo.startsWith('/');
       const target = isExplicitReturn ? returnTo : getDefaultLandingPath(user);
       router.replace(target);
     }
-  }, [status, user, router]);
+  }, [status, user, router, searchParams]);
 
   if (error || authError) {
     return (
