@@ -3,27 +3,33 @@
 import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
 import { Button } from '@/components/ui';
 import { useAuth } from '@/hooks/use-auth';
+import type { UserProfile } from '@/lib/store/auth-store';
 import { useThemeStore } from '@/lib/store/theme-store';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  ChevronDown,
-  Facebook,
-  Instagram,
-  LogOut,
-  Menu,
-  Moon,
-  Phone,
-  Search,
-  ShoppingBag,
-  Sun,
-  Twitter,
-  User,
-  X
+    ChevronDown,
+    Facebook,
+    Instagram,
+    LogOut,
+    Menu,
+    Moon,
+    Phone,
+    Search,
+    ShoppingBag,
+    Sun,
+    Twitter,
+    User,
+    X
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+
+function displayName(user: UserProfile | null | undefined): string {
+  if (!user) return 'Account';
+  return user.name ?? user.fullName ?? user.email?.split('@')[0] ?? 'Account';
+}
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -178,10 +184,10 @@ export function Header() {
                     aria-haspopup="true"
                   >
                     <div className="h-8 w-8 rounded-full bg-brand-orange text-white flex items-center justify-center font-black text-xs">
-                      {user?.name?.charAt(0) || <User className="h-4 w-4" />}
+                      {(displayName(user))[0]?.toUpperCase() ?? <User className="h-4 w-4" />}
                     </div>
                     <span className="text-xs font-black uppercase tracking-widest text-brand-dark dark:text-white group-hover:text-brand-orange transition-colors">
-                      {user?.name?.split(' ')[0]}
+                      {displayName(user).split(' ')[0]}
                     </span>
                     <ChevronDown className={`h-4 w-4 text-brand-muted transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
                   </button>
@@ -377,11 +383,11 @@ export function Header() {
                 ) : (
                   <div className="flex items-center gap-3 mb-4 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
                     <div className="h-10 w-10 rounded-full bg-brand-orange text-white flex items-center justify-center font-bold">
-                      {user?.name?.charAt(0) || <User className="h-5 w-5" />}
+                      {(displayName(user))[0]?.toUpperCase() ?? <User className="h-5 w-5" />}
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-brand-dark dark:text-white">{user?.name || 'User'}</p>
-                      <p className="text-xs text-gray-500">Member</p>
+                      <p className="text-sm font-semibold text-brand-dark dark:text-white">{displayName(user)}</p>
+                      {user?.roles?.[0] ? <p className="text-xs text-gray-500 capitalize">{user.roles[0]}</p> : null}
                     </div>
                     <button
                       onClick={() => {

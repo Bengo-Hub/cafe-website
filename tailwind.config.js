@@ -66,8 +66,10 @@ module.exports = {
       },
       fontFamily: {
         sans: ['"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
+        sans: ['var(--font-geist-sans)', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-geist-mono)', 'monospace'],
         serif: ['var(--font-serif)', 'Georgia', 'serif'],
-        artistic: ['"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
+        artistic: ['"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif', 'Times New Roman', 'serif'],
       },
       screens: {
         xs: '475px',
