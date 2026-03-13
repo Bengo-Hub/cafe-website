@@ -1,12 +1,12 @@
-import { buildAuthorizeUrl, buildLogoutUrl, exchangeCodeForTokens, fetchProfile } from '@/lib/auth/sso-api';
 import {
-  consumeVerifier,
-  generateCodeChallenge,
-  generateCodeVerifier,
-  generateState,
-  storeState,
-  storeVerifier,
+    consumeVerifier,
+    generateCodeChallenge,
+    generateCodeVerifier,
+    generateState,
+    storeState,
+    storeVerifier,
 } from '@/lib/auth/pkce';
+import { buildAuthorizeUrl, buildLogoutUrl, exchangeCodeForTokens, fetchProfile } from '@/lib/auth/sso-api';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -18,6 +18,10 @@ export interface UserProfile {
   roles?: string[];
   role?: string;
   permissions?: string[];
+  /** Tenant UUID from auth-api /me (use for X-Tenant-ID header). */
+  tenant_id?: string;
+  /** Tenant slug from auth-api /me (use for X-Tenant-Slug header). */
+  tenant_slug?: string;
   profile?: Record<string, unknown>;
   [key: string]: unknown;
 }
@@ -124,6 +128,8 @@ export const useAuthStore = create<AuthState>()(
                 roles: user.roles ?? [],
                 role: (user.roles as string[])?.[0] ?? user.role,
                 permissions: user.permissions ?? [],
+                tenant_id: user.tenant_id,
+                tenant_slug: user.tenant_slug,
                 ...user,
               };
               set({ user: profile, status: 'authenticated' });
@@ -161,6 +167,8 @@ export const useAuthStore = create<AuthState>()(
             name: user.name ?? user.fullName,
             roles: user.roles ?? [],
             permissions: user.permissions ?? [],
+            tenant_id: user.tenant_id,
+            tenant_slug: user.tenant_slug,
             ...user,
           };
           set({ user: profile, status: 'authenticated' });

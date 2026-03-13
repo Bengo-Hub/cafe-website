@@ -1,7 +1,7 @@
 import { config } from '@/config/env';
+import { getTenantHeaders, getTenantSlug } from './client';
 
 const LOGISTICS_URL = config.services.logistics;
-const TENANT = config.tenant.slug;
 
 function authHeaders(): Record<string, string> {
   if (typeof window === 'undefined') return {};
@@ -18,8 +18,7 @@ function authHeaders(): Record<string, string> {
 function headers(): Record<string, string> {
   return {
     'Content-Type': 'application/json',
-    'X-Tenant-Slug': TENANT,
-    ...(config.tenant.id ? { 'X-Tenant-ID': config.tenant.id } : {}),
+    ...getTenantHeaders(),
     ...authHeaders(),
   };
 }
@@ -54,14 +53,14 @@ export async function fetchRiders(params?: {
   const query = new URLSearchParams();
   if (params?.status) query.set('status', params.status);
   const qs = query.toString();
-  const url = `${LOGISTICS_URL}/api/v1/${TENANT}/admin/riders${qs ? `?${qs}` : ''}`;
+  const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/admin/riders${qs ? `?${qs}` : ''}`;
   const resp = await fetch(url, { headers: headers() });
   if (!resp.ok) throw new Error(`Fetch riders failed: ${resp.statusText}`);
   return resp.json();
 }
 
 export async function fetchPendingRiders(): Promise<RiderListResponse> {
-  const url = `${LOGISTICS_URL}/api/v1/${TENANT}/admin/riders/pending`;
+  const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/admin/riders/pending`;
   const resp = await fetch(url, { headers: headers() });
   if (!resp.ok) throw new Error(`Fetch pending riders failed: ${resp.statusText}`);
   return resp.json();
@@ -73,7 +72,7 @@ export async function inviteRider(data: {
   phone?: string;
   vehicle_type?: string;
 }): Promise<{ message: string; member_id: string }> {
-  const url = `${LOGISTICS_URL}/api/v1/${TENANT}/admin/riders/invite`;
+  const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/admin/riders/invite`;
   const resp = await fetch(url, {
     method: 'POST',
     headers: headers(),
@@ -87,14 +86,14 @@ export async function inviteRider(data: {
 }
 
 export async function approveRider(memberId: string): Promise<{ message: string }> {
-  const url = `${LOGISTICS_URL}/api/v1/${TENANT}/admin/riders/${memberId}/approve`;
+  const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/admin/riders/${memberId}/approve`;
   const resp = await fetch(url, { method: 'POST', headers: headers() });
   if (!resp.ok) throw new Error(`Approve failed: ${resp.statusText}`);
   return resp.json();
 }
 
 export async function suspendRider(memberId: string): Promise<{ message: string }> {
-  const url = `${LOGISTICS_URL}/api/v1/${TENANT}/admin/riders/${memberId}/suspend`;
+  const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/admin/riders/${memberId}/suspend`;
   const resp = await fetch(url, { method: 'POST', headers: headers() });
   if (!resp.ok) throw new Error(`Suspend failed: ${resp.statusText}`);
   return resp.json();
@@ -104,7 +103,7 @@ export async function rejectRider(
   memberId: string,
   reason: string,
 ): Promise<{ message: string }> {
-  const url = `${LOGISTICS_URL}/api/v1/${TENANT}/admin/riders/${memberId}/reject`;
+  const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/admin/riders/${memberId}/reject`;
   const resp = await fetch(url, {
     method: 'POST',
     headers: headers(),

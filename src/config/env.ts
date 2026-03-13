@@ -2,6 +2,7 @@
 const PRODUCTION = {
   auth: 'https://sso.codevertexitsolutions.com',
   ordering: 'https://orderingapi.codevertexitsolutions.com',
+  orderingPwa: 'https://ordersapp.codevertexitsolutions.com',
   logistics: 'https://logisticsapi.codevertexitsolutions.com',
   treasury: 'https://booksapi.codevertexitsolutions.com',
   booking: 'https://booking.codevertexitsolutions.com',
@@ -14,6 +15,7 @@ export const config = {
   services: {
     auth: process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || PRODUCTION.auth,
     ordering: process.env.NEXT_PUBLIC_ORDERING_SERVICE_URL || PRODUCTION.ordering,
+    orderingPwa: process.env.NEXT_PUBLIC_ORDERING_PWA_URL || PRODUCTION.orderingPwa,
     logistics: process.env.NEXT_PUBLIC_LOGISTICS_SERVICE_URL || PRODUCTION.logistics,
     treasury: process.env.NEXT_PUBLIC_TREASURY_SERVICE_URL || PRODUCTION.treasury,
     booking: process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL || PRODUCTION.booking,

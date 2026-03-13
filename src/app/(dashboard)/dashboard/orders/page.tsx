@@ -6,7 +6,11 @@ import {
     cancelOrder,
     fetchAdminOrders,
     updateOrderStatus,
+    assignOrderRider,
 } from '@/lib/api/orders';
+import { fetchRiders } from '@/lib/api/riders';
+import { CrudModal } from '@/components/dashboard/CrudModal';
+import { AssignRiderForm } from '@/components/forms/AssignRiderForm';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
@@ -103,6 +107,8 @@ export default function OrderManagement() {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
+  const [assignRiderOpen, setAssignRiderOpen] = useState(false);
+  const [selectedRiderId, setSelectedRiderId] = useState('');
 
   const handleSearch = useCallback(() => {
     setSearch(searchInput);
@@ -146,6 +152,24 @@ export default function OrderManagement() {
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
     },
   });
+
+  const assignRiderMutation = useMutation({
+    mutationFn: ({ orderId, riderId }: { orderId: string; riderId: string }) =>
+      assignOrderRider(orderId, riderId),
+    onSuccess: () => {
+      setAssignRiderOpen(false);
+      setSelectedRiderId('');
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+    },
+  });
+
+  const { data: ridersRes } = useQuery({
+    queryKey: ['admin-riders', 'active'],
+    queryFn: () => fetchRiders({ status: 'active' }),
+    enabled: assignRiderOpen,
+  });
+
+  const activeRiders = ridersRes?.riders ?? [];
 
   const handleAdvanceStatus = () => {
     if (!selectedOrder) return;
@@ -489,6 +513,15 @@ export default function OrderManagement() {
                       {STATUS_CONFIG[NEXT_STATUS[selectedOrder.status]!].label}
                     </Button>
                   )}
+                  {selectedOrder.delivery_address && !['delivered', 'completed', 'cancelled', 'refunded'].includes(selectedOrder.status) && (
+                    <Button
+                      variant="outline"
+                      className="h-12 rounded-2xl border-brand-orange/20 bg-brand-orange/5 px-6 text-xs font-black uppercase tracking-widest text-brand-orange hover:bg-brand-orange/10"
+                      onClick={() => setAssignRiderOpen(true)}
+                    >
+                      Assign Rider
+                    </Button>
+                  )}
                   {!['cancelled', 'refunded', 'completed', 'delivered'].includes(
                     selectedOrder.status,
                   ) && (
@@ -500,6 +533,18 @@ export default function OrderManagement() {
                       Cancel Order
                     </Button>
                   )}
+                  {/* Status Override */}
+                  <select
+                    value={selectedOrder.status}
+                    onChange={(e) => statusMutation.mutate({ orderId: selectedOrder.id, status: e.target.value as OrderStatus })}
+                    className="h-12 rounded-2xl border border-brand-beige/10 bg-brand-beige/5 px-4 text-xs font-black uppercase tracking-widest text-primary-brand focus:border-brand-orange/50 focus:outline-none"
+                  >
+                    {Object.keys(STATUS_CONFIG).map((s) => (
+                      <option key={s} value={s}>
+                        {STATUS_CONFIG[s as OrderStatus].label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </Card>
             ) : (
@@ -564,6 +609,28 @@ export default function OrderManagement() {
           </div>
         </div>
       )}
+      {/* Assign Rider Dialog */}
+      <CrudModal
+        isOpen={assignRiderOpen}
+        onClose={() => setAssignRiderOpen(false)}
+        title="Assign Delivery Rider"
+        description="Select an active rider to fulfill this order"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (selectedOrder && selectedRiderId) {
+            assignRiderMutation.mutate({ orderId: selectedOrder.id, riderId: selectedRiderId });
+          }
+        }}
+        submitLabel="Assign Rider"
+        isSubmitting={assignRiderMutation.isPending}
+      >
+        <AssignRiderForm
+          orderNumber={selectedOrder?.order_number || ''}
+          riders={activeRiders}
+          selectedRiderId={selectedRiderId}
+          onRiderChange={setSelectedRiderId}
+        />
+      </CrudModal>
     </div>
   );
 }

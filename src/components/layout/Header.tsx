@@ -40,8 +40,8 @@ export function Header() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useThemeStore();
   const { isAuthenticated, user, login, logout } = useAuth();
-  const { tenant } = useTenantBrand();
-  const siteName = tenant?.orgName ?? tenant?.name ?? 'Urban Loft Cafe';
+  const { tenant, getServiceTitle } = useTenantBrand();
+  const siteName = getServiceTitle('Cafe');
   const logoSrc = tenant?.logoUrl ?? '/images/logo/logo.jpeg';
 
   useEffect(() => {

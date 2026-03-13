@@ -8,27 +8,39 @@ import {
     LogOut,
     MapPin
 } from 'lucide-react';
-import { useState } from 'react';
 
-const SHIFTS = [
-  { id: 1, date: 'Oct 24, 2023', time: '07:00 AM - 03:00 PM', role: 'Morning Shift', status: 'Completed', hours: '8h' },
-  { id: 2, date: 'Oct 25, 2023', time: '07:00 AM - 03:00 PM', role: 'Morning Shift', status: 'Completed', hours: '8h' },
-  { id: 3, date: 'Oct 26, 2023', time: '03:00 PM - 11:00 PM', role: 'Evening Shift', status: 'Upcoming', hours: '-' },
-  { id: 4, date: 'Oct 27, 2023', time: '03:00 PM - 11:00 PM', role: 'Evening Shift', status: 'Upcoming', hours: '-' },
-];
+import { useAuthStore } from '@/lib/store/auth-store';
+import { useShifts } from '@/hooks/use-shifts';
+import { format } from 'date-fns';
 
 export default function StaffShifts() {
-  const [isClockedIn, setIsClockedIn] = useState(false);
-  const [clockInTime, setClockInTime] = useState<string | null>(null);
+  const { user } = useAuthStore();
+  const staffId = user?.id || 'mock-staff-id';
+  const { shifts, clockIn, clockOut } = useShifts(staffId);
+
+  const ongoingShift = shifts?.find(s => s.status === 'Ongoing');
+  const isClockedIn = !!ongoingShift;
 
   const handleClockAction = () => {
     if (!isClockedIn) {
-      setIsClockedIn(true);
-      setClockInTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-    } else {
-      setIsClockedIn(false);
-      setClockInTime(null);
+      clockIn(staffId);
+    } else if (ongoingShift) {
+      clockOut(ongoingShift.id);
     }
+  };
+
+  const formatShiftTime = (shift: any) => {
+    const start = format(new Date(shift.clock_in), 'hh:mm a');
+    const end = shift.clock_out ? format(new Date(shift.clock_out), 'hh:mm a') : 'Ongoing';
+    return `${start} - ${end}`;
+  };
+
+  const calculateHours = (shift: any) => {
+    if (!shift.clock_out) return '-';
+    const start = new Date(shift.clock_in);
+    const end = new Date(shift.clock_out);
+    const diff = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+    return `${diff.toFixed(1)}h`;
   };
 
   return (
@@ -82,10 +94,12 @@ export default function StaffShifts() {
                 </div>
               </div>
 
-              {isClockedIn && (
+              {isClockedIn && ongoingShift && (
                 <div className="p-4 rounded-2xl bg-brand-orange/10 border border-brand-orange/20">
                   <p className="text-xs font-bold text-brand-orange uppercase tracking-widest">Clocked in at</p>
-                  <p className="text-xl font-black text-primary-brand mt-1">{clockInTime}</p>
+                  <p className="text-xl font-black text-primary-brand mt-1">
+                    {format(new Date(ongoingShift.clock_in), 'hh:mm a')}
+                  </p>
                 </div>
               )}
 
@@ -151,16 +165,18 @@ export default function StaffShifts() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-brand-beige/5">
-                  {SHIFTS.map((shift) => (
+                  {shifts?.map((shift) => (
                     <tr key={shift.id} className="group hover:bg-brand-orange/5 transition-colors">
-                      <td className="p-6 font-bold text-primary-brand">{shift.date}</td>
+                      <td className="p-6 font-bold text-primary-brand">
+                        {format(new Date(shift.clock_in), 'MMM dd, yyyy')}
+                      </td>
                       <td className="p-6 text-secondary-brand text-sm">
                         <div className="flex items-center gap-2">
                           <Clock className="h-3 w-3 opacity-40" />
-                          {shift.time}
+                          {formatShiftTime(shift)}
                         </div>
                       </td>
-                      <td className="p-6 text-secondary-brand font-medium">{shift.role}</td>
+                      <td className="p-6 text-secondary-brand font-medium">Staff Member</td>
                       <td className="p-6">
                         <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
                           shift.status === 'Completed' ? 'bg-green-500/10 text-green-500' : 'bg-brand-gold/10 text-brand-gold'
@@ -168,7 +184,7 @@ export default function StaffShifts() {
                           {shift.status}
                         </span>
                       </td>
-                      <td className="p-6 font-black text-primary-brand">{shift.hours}</td>
+                      <td className="p-6 font-black text-primary-brand">{calculateHours(shift)}</td>
                     </tr>
                   ))}
                 </tbody>

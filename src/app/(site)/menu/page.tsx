@@ -5,6 +5,7 @@ import {
     MenuItemModal
 } from '@/components/sections';
 import { Badge, Button } from '@/components/ui';
+import { config } from '@/config/env';
 import { useMenu } from '@/hooks/use-menu';
 import { useTenantSlug } from '@/hooks/use-tenant-slug';
 import { generateMenuSchema } from '@/lib/utils/schema';
@@ -81,8 +82,8 @@ export default function MenuPage() {
   };
 
   const handleRedirect = (item: MenuItem, action: 'add-to-cart' | 'view' | 'whitelist') => {
-    const orderingUrl = process.env.NEXT_PUBLIC_ORDERING_SERVICE_URL || 'https://orderingapi.codevertexitsolutions.com';
-    const redirectUrl = `${orderingUrl}/${tenantSlug}/menu?item_id=${item.id}&action=${action}`;
+    const orderingPwaUrl = config.services.orderingPwa || 'https://ordersapp.codevertexitsolutions.com';
+    const redirectUrl = `${orderingPwaUrl}/${tenantSlug}/menu?item_id=${item.id}&action=${action}`;
 
     window.location.href = redirectUrl;
   };

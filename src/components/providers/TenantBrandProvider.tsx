@@ -26,6 +26,7 @@ type TenantBrandContextValue = {
   tenant: TenantBrand | null;
   isLoading: boolean;
   error: Error | null;
+  getServiceTitle: (appName: string) => string;
 };
 
 const TenantBrandContext = createContext<TenantBrandContextValue>({
@@ -33,6 +34,7 @@ const TenantBrandContext = createContext<TenantBrandContextValue>({
   tenant: null,
   isLoading: true,
   error: null,
+  getServiceTitle: (s) => s,
 });
 
 const BRAND_CSS_VARS = [
@@ -78,14 +80,21 @@ export function TenantBrandProvider({ children }: { children: ReactNode }) {
     applyBrandColors(tenant ?? null);
   }, [tenant]);
 
+  const getServiceTitle = (appName: string) => {
+    const tenantName = effectiveBrand?.orgName || effectiveBrand?.name || '';
+    const firstWord = tenantName.split(' ')[0] || 'Codevertex';
+    return `${firstWord} ${appName}`;
+  };
+
   const value = useMemo<TenantBrandContextValue>(
     () => ({
       slug,
       tenant: effectiveBrand,
       isLoading,
       error: error as Error | null,
+      getServiceTitle,
     }),
-    [slug, effectiveBrand, isLoading, error]
+    [slug, effectiveBrand, isLoading, error, getServiceTitle]
   );
 
   return (

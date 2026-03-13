@@ -1,8 +1,7 @@
 import { config } from '@/config/env';
-import { apiClient } from './client';
+import { apiClient, getTenantHeaders, getTenantSlug } from './client';
 
 const ORDERING_URL = config.services.ordering;
-const TENANT = config.tenant.slug;
 
 function authHeaders(): Record<string, string> {
   if (typeof window === 'undefined') return {};
@@ -16,15 +15,8 @@ function authHeaders(): Record<string, string> {
   }
 }
 
-function tenantHeaders(): Record<string, string> {
-  return {
-    'X-Tenant-Slug': TENANT,
-    ...(config.tenant.id ? { 'X-Tenant-ID': config.tenant.id } : {}),
-  };
-}
-
 function headers(): Record<string, string> {
-  return { ...authHeaders(), ...tenantHeaders() };
+  return { ...authHeaders(), ...getTenantHeaders() };
 }
 
 // Types
@@ -68,7 +60,7 @@ export interface MenuItem {
 // Category API
 
 export async function fetchCategories() {
-  const url = `${ORDERING_URL}/api/v1/${TENANT}/catalog/categories`;
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/categories`;
   return apiClient<MenuCategory[]>(url, { headers: headers() });
 }
 
@@ -79,7 +71,7 @@ export async function createCategory(data: {
   parent_id?: string;
   image_url?: string;
 }) {
-  const url = `${ORDERING_URL}/api/v1/${TENANT}/catalog/categories`;
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/categories`;
   return apiClient<MenuCategory>(url, {
     method: 'POST',
     headers: headers(),
@@ -91,7 +83,7 @@ export async function updateCategory(
   categoryId: string,
   data: { name?: string; description?: string; sort_order?: number; image_url?: string },
 ) {
-  const url = `${ORDERING_URL}/api/v1/${TENANT}/catalog/categories/${categoryId}`;
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/categories/${categoryId}`;
   return apiClient<MenuCategory>(url, {
     method: 'PUT',
     headers: headers(),
@@ -100,7 +92,7 @@ export async function updateCategory(
 }
 
 export async function deleteCategory(categoryId: string) {
-  const url = `${ORDERING_URL}/api/v1/${TENANT}/catalog/categories/${categoryId}`;
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/categories/${categoryId}`;
   return apiClient(url, { method: 'DELETE', headers: headers() });
 }
 
@@ -121,7 +113,7 @@ export async function fetchMenuItems(params?: {
   if (params?.limit) query.set('limit', String(params.limit));
 
   const qs = query.toString();
-  const url = `${ORDERING_URL}/api/v1/${TENANT}/catalog/items${qs ? `?${qs}` : ''}`;
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/items${qs ? `?${qs}` : ''}`;
   return apiClient<{ items: MenuItem[]; total: number }>(url, { headers: headers() });
 }
 
@@ -139,7 +131,7 @@ export async function createMenuItem(data: {
   tags?: string[];
   allergens?: string[];
 }) {
-  const url = `${ORDERING_URL}/api/v1/${TENANT}/catalog/items`;
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/items`;
   return apiClient<MenuItem>(url, {
     method: 'POST',
     headers: headers(),
@@ -161,7 +153,7 @@ export async function updateMenuItem(
     allergens: string[];
   }>,
 ) {
-  const url = `${ORDERING_URL}/api/v1/${TENANT}/catalog/items/${itemId}`;
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/items/${itemId}`;
   return apiClient<MenuItem>(url, {
     method: 'PUT',
     headers: headers(),
@@ -170,6 +162,6 @@ export async function updateMenuItem(
 }
 
 export async function deleteMenuItem(itemId: string) {
-  const url = `${ORDERING_URL}/api/v1/${TENANT}/catalog/items/${itemId}`;
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/items/${itemId}`;
   return apiClient(url, { method: 'DELETE', headers: headers() });
 }

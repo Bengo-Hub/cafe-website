@@ -59,8 +59,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { logout, user, isAuthenticated, isLoading } = useAuth();
   const { me, roles: meRoles } = useMe();
-  const { tenant } = useTenantBrand();
-  const brandLabel = tenant?.orgName ?? tenant?.name ?? 'URBAN LOFT';
+  const { tenant, getServiceTitle } = useTenantBrand();
 
   const rbacUser = effectiveUserForRbac(user ?? undefined, me?.roles ?? meRoles);
 
@@ -108,15 +107,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         <div className="flex flex-col h-full p-8">
           <div className="flex items-center justify-between mb-12">
-            <Link href="/" className="text-2xl font-black tracking-tighter" style={{ color: 'var(--sidebar-foreground)' }}>
-              {(() => {
-                const parts = brandLabel.trim().toUpperCase().split(/\s+/).filter(Boolean);
-                const first = parts[0] ?? '';
-                const rest = parts.slice(1).join('') || 'LOFT';
-                return <>{first}<span style={{ color: 'var(--sidebar-accent)' }}>{rest}</span></>;
-              })()}
+            <Link href="/" className="flex items-center gap-2">
+              {tenant?.logoUrl ? (
+                <img src={tenant.logoUrl} alt={tenant.name} className="h-10 w-auto object-contain" />
+              ) : (
+                <div className="h-10 w-10 bg-brand-orange rounded-xl flex items-center justify-center text-white font-black text-xl shadow-glow-orange">
+                  {tenant?.name?.[0] || 'U'}
+                </div>
+              )}
             </Link>
-            <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden opacity-80 hover:opacity-100">
+            <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden opacity-80 hover:opacity-100 p-2">
               <X className="h-6 w-6" />
             </button>
           </div>
@@ -160,9 +160,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <main className="flex-grow flex flex-col min-w-0">
         {/* Top Header - theme-aware */}
         <header className="h-24 border-b border-border flex items-center justify-between px-8 lg:px-12 bg-background">
-          <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden text-foreground">
-            <Menu className="h-6 w-6" />
-          </button>
+          <div className="flex items-center gap-4">
+            <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden text-foreground">
+              <Menu className="h-6 w-6" />
+            </button>
+            <h1 className="text-xl font-black tracking-tight text-foreground hidden lg:block uppercase bg-gradient-to-r from-brand-orange to-brand-gold bg-clip-text text-transparent">
+              {getServiceTitle('Cafe')}
+            </h1>
+          </div>
 
           <div className="flex items-center gap-6 ml-auto">
             <button className="relative p-3 rounded-2xl bg-muted text-muted-foreground hover:bg-muted/80 transition-all" aria-label="Notifications">

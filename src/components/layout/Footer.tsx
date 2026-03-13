@@ -13,14 +13,14 @@ export function Footer() {
     return (
       <footer className="border-t border-border bg-background py-4">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-muted-foreground">
-          <span>© {new Date().getFullYear()} Urban Loft Cafe. All rights reserved.</span>
+          <span>All Rights Reserved. Urban Loft Cafe &copy; {new Date().getFullYear()}.</span>
           <a
-            href="https://www.codevertexitsolutions.com"
+            href="https://codevertexitsolutions.com"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
           >
-            Powered by <span className="font-semibold text-primary">CodeVertex</span>
+            Powered by <span className="font-semibold text-primary">Codevertex IT Solutions</span>
             <ExternalLink className="h-3.5 w-3.5" />
           </a>
         </div>
@@ -179,7 +179,7 @@ export function Footer() {
           {/* Copyright */}
           <div className="text-center md:text-left">
             <p className="text-xs font-bold uppercase tracking-widest text-brand-muted/60 dark:text-brand-beige/40">
-              © {new Date().getFullYear()} Urban Loft Café. All rights reserved.
+              All Rights Reserved. Urban Loft Café &copy; {new Date().getFullYear()}.
             </p>
             <p className="text-xs text-brand-muted/40 dark:text-brand-beige/30 mt-2 flex items-center justify-center md:justify-start gap-1.5">
               Made with <Heart className="h-3 w-3 text-brand-orange" /> in Busia, Kenya
@@ -202,13 +202,13 @@ export function Footer() {
 
           {/* Codevertex Branding */}
           <a
-            href="https://www.codevertexitsolutions.com"
+            href="https://codevertexitsolutions.com"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-brand-orange/20 to-brand-gold/20 border border-brand-orange/30 text-brand-muted dark:text-brand-beige/70 hover:text-brand-orange dark:hover:text-brand-orange hover:border-brand-orange/60 transition-all duration-300 group/codevertex hover:bg-brand-orange/30"
           >
             <span className="text-xs font-bold uppercase tracking-widest">Powered by</span>
-            <span className="text-xs font-black uppercase tracking-wider text-brand-orange group-hover/codevertex:text-brand-gold transition-colors">Codevertex</span>
+            <span className="text-xs font-black uppercase tracking-wider text-brand-orange group-hover/codevertex:text-brand-gold transition-colors">Codevertex IT Solutions</span>
             <ExternalLink className="h-3.5 w-3.5 text-brand-orange/60 group-hover/codevertex:text-brand-orange transition-colors" />
           </a>
         </div>

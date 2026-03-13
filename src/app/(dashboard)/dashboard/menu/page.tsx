@@ -22,9 +22,13 @@ import {
     Search,
     Star,
     Trash2,
-    X,
+    ExternalLink,
 } from 'lucide-react';
 import { useState } from 'react';
+import Link from 'next/link';
+import { CrudModal } from '@/components/dashboard/CrudModal';
+import { CategoryForm } from '@/components/forms/CategoryForm';
+import { MenuItemForm } from '@/components/forms/MenuItemForm';
 
 function formatCurrency(amount: number, currency = 'KES') {
   return `${currency} ${amount.toLocaleString()}`;
@@ -44,9 +48,9 @@ export default function MenuManagement() {
     name: '',
     description: '',
     sku: '',
-    price: '',
+    price: 0,
     category_id: '',
-    prep_time_minutes: '',
+    prep_time_minutes: 0,
   });
 
   const { data: categoriesRes, isLoading: loadingCategories } = useQuery({
@@ -101,15 +105,13 @@ export default function MenuManagement() {
         name: newItem.name,
         description: newItem.description || undefined,
         sku: newItem.sku,
-        price: parseFloat(newItem.price),
+        price: newItem.price,
         category_id: newItem.category_id || selectedCategoryId || '',
-        prep_time_minutes: newItem.prep_time_minutes
-          ? parseInt(newItem.prep_time_minutes)
-          : undefined,
+        prep_time_minutes: newItem.prep_time_minutes || undefined,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['catalog-items'] });
-      setNewItem({ name: '', description: '', sku: '', price: '', category_id: '', prep_time_minutes: '' });
+      setNewItem({ name: '', description: '', sku: '', price: 0, category_id: '', prep_time_minutes: 0 });
       setShowAddItem(false);
     },
   });
@@ -254,6 +256,13 @@ export default function MenuManagement() {
                 >
                   <Star className={`h-4 w-4 ${item.is_featured ? 'fill-yellow-400 text-yellow-400' : 'text-secondary-brand'}`} />
                 </button>
+                <Link
+                  href={`/dashboard/inventory?search=${item.sku}`}
+                  className="rounded-lg p-2 hover:bg-brand-orange/10 text-brand-orange"
+                  title="Manage Recipe / Stock"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                </Link>
                 <button onClick={() => setEditingItem({ ...item })} className="rounded-lg p-2 hover:bg-brand-beige/10" title="Edit">
                   <Edit2 className="h-4 w-4 text-secondary-brand" />
                 </button>
@@ -272,201 +281,68 @@ export default function MenuManagement() {
         </div>
       )}
 
-      {/* Add Category Dialog */}
-      {showAddCategory && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-brand-dark">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-black text-primary-brand">Add Category</h3>
-              <button onClick={() => setShowAddCategory(false)} className="rounded-lg p-1 hover:bg-brand-beige/10">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <input
-              type="text"
-              placeholder="Category name"
-              value={newCategoryName}
-              onChange={(e) => setNewCategoryName(e.target.value)}
-              className="mb-4 w-full rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm text-primary-brand focus:border-brand-orange/50 focus:outline-none"
-            />
-            <div className="flex gap-3">
-              <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setShowAddCategory(false)}>
-                Cancel
-              </Button>
-              <Button
-                className="flex-1 rounded-xl bg-brand-orange text-white"
-                onClick={() => addCategory.mutate(newCategoryName)}
-                disabled={!newCategoryName.trim() || addCategory.isPending}
-              >
-                {addCategory.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Add
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Add Category Modal */}
+      <CrudModal
+        isOpen={showAddCategory}
+        onClose={() => setShowAddCategory(false)}
+        title="Add Category"
+        description="Create a new menu category"
+        onSubmit={(e) => {
+          e.preventDefault();
+          addCategory.mutate(newCategoryName);
+        }}
+        submitLabel="Add Category"
+        isSubmitting={addCategory.isPending}
+      >
+        <CategoryForm
+          name={newCategoryName}
+          onChange={setNewCategoryName}
+        />
+      </CrudModal>
 
-      {/* Add Item Dialog */}
-      {showAddItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-brand-dark">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-black text-primary-brand">Add Menu Item</h3>
-              <button onClick={() => setShowAddItem(false)} className="rounded-lg p-1 hover:bg-brand-beige/10">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="space-y-3">
-              <input
-                type="text"
-                placeholder="Item name *"
-                value={newItem.name}
-                onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                className="w-full rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
-              />
-              <input
-                type="text"
-                placeholder="Description"
-                value={newItem.description}
-                onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-                className="w-full rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
-              />
-              <p className="text-xs text-secondary-brand">
-                SKU links this item to inventory for stock. When a recipe (BOM) is set in the inventory service for this SKU, sales will deduct recipe components per serving.
-              </p>
-              <div className="grid grid-cols-2 gap-3">
-                <input
-                  type="text"
-                  placeholder="SKU *"
-                  value={newItem.sku}
-                  onChange={(e) => setNewItem({ ...newItem, sku: e.target.value })}
-                  className="rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
-                />
-                <input
-                  type="number"
-                  placeholder="Price *"
-                  value={newItem.price}
-                  onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
-                  className="rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <select
-                  value={newItem.category_id || selectedCategoryId || ''}
-                  onChange={(e) => setNewItem({ ...newItem, category_id: e.target.value })}
-                  className="rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
-                >
-                  <option value="">Select category</option>
-                  {categories.map((c: MenuCategory) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  placeholder="Prep time (min)"
-                  value={newItem.prep_time_minutes}
-                  onChange={(e) => setNewItem({ ...newItem, prep_time_minutes: e.target.value })}
-                  className="rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
-                />
-              </div>
-            </div>
-            <div className="mt-4 flex gap-3">
-              <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setShowAddItem(false)}>
-                Cancel
-              </Button>
-              <Button
-                className="flex-1 rounded-xl bg-brand-orange text-white"
-                onClick={() => addItem.mutate()}
-                disabled={!newItem.name || !newItem.sku || !newItem.price || addItem.isPending}
-              >
-                {addItem.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Add Item
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Add Item Modal */}
+      <CrudModal
+        isOpen={showAddItem}
+        onClose={() => setShowAddItem(false)}
+        title="Add Menu Item"
+        description="Create a new item in the catalog"
+        onSubmit={(e) => {
+          e.preventDefault();
+          addItem.mutate();
+        }}
+        submitLabel="Add Item"
+        isSubmitting={addItem.isPending}
+        size="lg"
+      >
+        <MenuItemForm
+          data={{ ...newItem, category_id: newItem.category_id || selectedCategoryId || '' }}
+          categories={categories}
+          onChange={(data) => setNewItem(data)}
+        />
+      </CrudModal>
 
-      {/* Edit Item Dialog */}
+      {/* Edit Item Modal */}
       {editingItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-brand-dark">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-black text-primary-brand">Edit Item</h3>
-              <button onClick={() => setEditingItem(null)} className="rounded-lg p-1 hover:bg-brand-beige/10">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="space-y-3">
-              <p className="text-xs text-secondary-brand">
-                SKU: <strong className="font-mono">{editingItem.sku}</strong> — links to inventory; configure recipe (BOM) in Inventory service for stock deduction on sale.
-              </p>
-              <input
-                type="text"
-                placeholder="Item name"
-                value={editingItem.name}
-                onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
-                className="w-full rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
-              />
-              <input
-                type="text"
-                placeholder="Description"
-                value={editingItem.description || ''}
-                onChange={(e) => setEditingItem({ ...editingItem, description: e.target.value })}
-                className="w-full rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
-              />
-              <div className="grid grid-cols-2 gap-3">
-                <input
-                  type="number"
-                  placeholder="Price"
-                  value={editingItem.price}
-                  onChange={(e) => setEditingItem({ ...editingItem, price: parseFloat(e.target.value) || 0 })}
-                  className="rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
-                />
-                <input
-                  type="number"
-                  placeholder="Prep time (min)"
-                  value={editingItem.prep_time_minutes || ''}
-                  onChange={(e) => setEditingItem({ ...editingItem, prep_time_minutes: parseInt(e.target.value) || undefined })}
-                  className="rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
-                />
-              </div>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 text-sm text-primary-brand">
-                  <input
-                    type="checkbox"
-                    checked={editingItem.is_available}
-                    onChange={(e) => setEditingItem({ ...editingItem, is_available: e.target.checked })}
-                  />
-                  Available
-                </label>
-                <label className="flex items-center gap-2 text-sm text-primary-brand">
-                  <input
-                    type="checkbox"
-                    checked={editingItem.is_featured}
-                    onChange={(e) => setEditingItem({ ...editingItem, is_featured: e.target.checked })}
-                  />
-                  Featured
-                </label>
-              </div>
-            </div>
-            <div className="mt-4 flex gap-3">
-              <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setEditingItem(null)}>
-                Cancel
-              </Button>
-              <Button
-                className="flex-1 rounded-xl bg-brand-orange text-white"
-                onClick={() => saveEdit.mutate()}
-                disabled={saveEdit.isPending}
-              >
-                {saveEdit.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Save Changes
-              </Button>
-            </div>
-          </div>
-        </div>
+        <CrudModal
+          isOpen={!!editingItem}
+          onClose={() => setEditingItem(null)}
+          title="Edit Menu Item"
+          description={`Updating details for ${editingItem.name}`}
+          onSubmit={(e) => {
+            e.preventDefault();
+            saveEdit.mutate();
+          }}
+          submitLabel="Save Changes"
+          isSubmitting={saveEdit.isPending}
+          size="lg"
+        >
+        <MenuItemForm
+          data={editingItem}
+          categories={categories}
+          onChange={(data) => setEditingItem(data)}
+          isEdit
+        />
+        </CrudModal>
       )}
     </div>
   );

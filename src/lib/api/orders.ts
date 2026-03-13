@@ -1,8 +1,7 @@
 import { config } from '@/config/env';
-import { apiClient } from './client';
+import { apiClient, getTenantHeaders, getTenantSlug } from './client';
 
 const ORDERING_URL = config.services.ordering;
-const TENANT = config.tenant.slug;
 
 function authHeaders(): Record<string, string> {
   if (typeof window === 'undefined') return {};
@@ -16,15 +15,8 @@ function authHeaders(): Record<string, string> {
   }
 }
 
-function tenantHeaders(): Record<string, string> {
-  return {
-    'X-Tenant-Slug': TENANT,
-    ...(config.tenant.id ? { 'X-Tenant-ID': config.tenant.id } : {}),
-  };
-}
-
 function headers(): Record<string, string> {
-  return { ...authHeaders(), ...tenantHeaders() };
+  return { ...authHeaders(), ...getTenantHeaders() };
 }
 
 // Types matching ordering-backend responses
@@ -101,18 +93,18 @@ export async function fetchAdminOrders(params?: {
   if (params?.date_to) query.set('date_to', params.date_to);
 
   const qs = query.toString();
-  const url = `${ORDERING_URL}/api/v1/${TENANT}/admin/orders${qs ? `?${qs}` : ''}`;
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/admin/orders${qs ? `?${qs}` : ''}`;
 
   return apiClient<ListOrdersResponse>(url, { headers: headers() });
 }
 
 export async function fetchAdminOrder(orderId: string) {
-  const url = `${ORDERING_URL}/api/v1/${TENANT}/admin/orders/${orderId}`;
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/admin/orders/${orderId}`;
   return apiClient<Order>(url, { headers: headers() });
 }
 
 export async function updateOrderStatus(orderId: string, status: OrderStatus) {
-  const url = `${ORDERING_URL}/api/v1/${TENANT}/admin/orders/${orderId}/status`;
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/admin/orders/${orderId}/status`;
   return apiClient<Order>(url, {
     method: 'PUT',
     headers: headers(),
@@ -121,10 +113,19 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
 }
 
 export async function cancelOrder(orderId: string, reason: string) {
-  const url = `${ORDERING_URL}/api/v1/${TENANT}/admin/orders/${orderId}/cancel`;
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/admin/orders/${orderId}/cancel`;
   return apiClient<Order>(url, {
     method: 'POST',
     headers: headers(),
     body: JSON.stringify({ reason }),
+  });
+}
+
+export async function assignOrderRider(orderId: string, riderId: string) {
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/admin/orders/${orderId}/rider`;
+  return apiClient<Order>(url, {
+    method: 'PUT',
+    headers: headers(),
+    body: JSON.stringify({ rider_id: riderId }),
   });
 }

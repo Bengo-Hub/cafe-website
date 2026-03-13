@@ -1,6 +1,9 @@
 import { config } from '@/config/env';
 import { useAuthStore } from '@/lib/store/auth-store';
 
+/** Only send X-Tenant-ID when it is a valid UUID (from auth-api /me or env). */
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export interface ApiResponse<T = any> {
   data?: T;
   error?: string;
@@ -19,11 +22,40 @@ export class ApiError extends Error {
   }
 }
 
-function tenantHeaders(): Record<string, string> {
+/** Tenant slug for URL paths (from auth /me when available, else env). */
+export function getTenantSlug(): string {
+  if (typeof window !== 'undefined') {
+    const slug = useAuthStore.getState().user?.tenant_slug;
+    if (slug) return slug;
+  }
+  return config.tenant.slug;
+}
+
+/** Tenant headers using auth-api /me tenant_id (UUID) and tenant_slug. Only sends X-Tenant-ID when value is a valid UUID. Exported for use by orders, catalog, riders, inventory. */
+export function getTenantHeaders(): Record<string, string> {
+  const slug = getTenantSlug();
+  let tenantId: string | undefined;
+
+  if (typeof window !== 'undefined') {
+    const user = useAuthStore.getState().user;
+    if (user?.tenant_id && UUID_REGEX.test(user.tenant_id)) {
+      tenantId = user.tenant_id;
+    }
+    if (!tenantId && config.tenant.id && UUID_REGEX.test(config.tenant.id)) {
+      tenantId = config.tenant.id;
+    }
+  } else if (config.tenant.id && UUID_REGEX.test(config.tenant.id)) {
+    tenantId = config.tenant.id;
+  }
+
   return {
-    'X-Tenant-Slug': config.tenant.slug,
-    ...(config.tenant.id ? { 'X-Tenant-ID': config.tenant.id } : {}),
+    'X-Tenant-Slug': slug,
+    ...(tenantId ? { 'X-Tenant-ID': tenantId } : {}),
   };
+}
+
+function tenantHeaders(): Record<string, string> {
+  return getTenantHeaders();
 }
 
 function authHeader(): Record<string, string> {

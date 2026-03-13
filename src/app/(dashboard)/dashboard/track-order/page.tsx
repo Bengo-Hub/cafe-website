@@ -15,8 +15,9 @@ function TrackOrderContent() {
   const handleRedirect = (id: string) => {
     if (!id) return;
     setIsRedirecting(true);
-    const orderingUrl = process.env.NEXT_PUBLIC_ORDERING_SERVICE_URL || 'https://orderingapi.codevertexitsolutions.com';
-    const trackUrl = `${orderingUrl}/${tenant}/track/${id}`;
+    const logisticsUrl =
+      process.env.NEXT_PUBLIC_LOGISTICS_UI_URL || 'https://logistics.codevertexitsolutions.com';
+    const trackUrl = `${logisticsUrl}/${tenant}/tracking?orderId=${encodeURIComponent(id)}`;
     window.location.href = trackUrl;
   };
 

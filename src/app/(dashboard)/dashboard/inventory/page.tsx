@@ -3,21 +3,55 @@
 import { Badge, Button, Card } from '@/components/ui';
 import { fetchMenuItems, type MenuItem } from '@/lib/api/catalog';
 import { fetchBulkAvailability, type StockAvailability } from '@/lib/api/inventory';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
   ArrowDown,
   Box,
   Loader2,
   Package,
+  Plus,
   RefreshCw,
   Search,
+  Settings,
+  Trash2,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { CrudModal } from '@/components/dashboard/CrudModal';
+import { adjustStock, createInventoryItem, deleteInventoryItem, updateInventoryItem } from '@/lib/api/inventory';
+import { StockAdjustmentForm } from '@/components/forms/StockAdjustmentForm';
+import { InventoryItemForm } from '@/components/forms/InventoryItemForm';
 
 export default function InventoryOverview() {
+  const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
+  const skuParam = searchParams.get('search');
+
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'low' | 'out'>('all');
+
+  // Modals state
+  const [isAdjustmentModalOpen, setIsAdjustmentModalOpen] = useState(false);
+  const [isItemModalOpen, setIsItemModalOpen] = useState(false);
+  const [selectedSku, setSelectedSku] = useState<string | null>(null);
+  const [adjustmentValue, setAdjustmentValue] = useState('0');
+  const [adjustmentReason, setAdjustmentReason] = useState('Restock');
+  
+  const [newItem, setNewItem] = useState({
+    sku: '',
+    name: '',
+    unit: 'pcs',
+    initial_quantity: '0',
+  });
+
+  const [editingItem, setEditingItem] = useState<{sku: string, name: string, unit: string} | null>(null);
+
+  useEffect(() => {
+    if (skuParam) {
+      setSearch(skuParam);
+    }
+  }, [skuParam]);
 
   // Fetch all menu items to get SKUs
   const { data: itemsRes, isLoading: loadingItems } = useQuery({
@@ -73,6 +107,41 @@ export default function InventoryOverview() {
 
   const isLoading = loadingItems || loadingStock;
 
+  const adjustStockMutation = useMutation({
+    mutationFn: (data: { sku: string; adjustment: number; reason: string }) =>
+      adjustStock(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory-stock'] });
+      setIsAdjustmentModalOpen(false);
+      setAdjustmentValue('0');
+      setAdjustmentReason('Restock');
+    },
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (data: any) => createInventoryItem(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
+      setIsItemModalOpen(false);
+      setNewItem({ sku: '', name: '', unit: 'pcs', initial_quantity: '0' });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ sku, data }: { sku: string; data: any }) => updateInventoryItem(sku, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
+      setEditingItem(null);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (sku: string) => deleteInventoryItem(sku),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
+    },
+  });
+
   return (
     <div className="space-y-8">
       <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -84,13 +153,21 @@ export default function InventoryOverview() {
             Track stock levels and availability across your menu.
           </p>
         </div>
-        <Button
-          variant="outline"
-          className="h-10 rounded-xl border-brand-beige/10 text-primary-brand"
-          onClick={() => refetch()}
-        >
-          <RefreshCw className="mr-2 h-4 w-4" /> Refresh
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            className="h-10 rounded-xl border-brand-beige/10 text-primary-brand"
+            onClick={() => refetch()}
+          >
+            <RefreshCw className="mr-2 h-4 w-4" /> Refresh
+          </Button>
+          <Button
+            className="h-10 rounded-xl bg-brand-orange text-white"
+            onClick={() => setIsItemModalOpen(true)}
+          >
+            <Plus className="mr-2 h-4 w-4" /> Add Stock Item
+          </Button>
+        </div>
       </header>
 
       {/* Stats */}
@@ -196,7 +273,8 @@ export default function InventoryOverview() {
                 <th className="pb-3 pr-4">Price</th>
                 <th className="pb-3 pr-4">In Stock</th>
                 <th className="pb-3 pr-4">Reserved</th>
-                <th className="pb-3">Status</th>
+                <th className="pb-3 pr-4">Status</th>
+                <th className="pb-3">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -219,11 +297,11 @@ export default function InventoryOverview() {
                       <span
                         className={`font-black ${isOut ? 'text-red-500' : isLow ? 'text-yellow-600' : 'text-green-600'}`}
                       >
-                        {item.quantity}
+                        {item.quantity} {item.stock?.unit || 'pcs'}
                       </span>
                     </td>
                     <td className="py-3 pr-4 text-secondary-brand">{item.reserved}</td>
-                    <td className="py-3">
+                    <td className="py-3 pr-4">
                       {isOut ? (
                         <Badge className="bg-red-500/10 text-red-500">Out of Stock</Badge>
                       ) : isLow ? (
@@ -232,12 +310,118 @@ export default function InventoryOverview() {
                         <Badge className="bg-green-500/10 text-green-600">In Stock</Badge>
                       )}
                     </td>
+                    <td className="py-3">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            setSelectedSku(item.sku);
+                            setIsAdjustmentModalOpen(true);
+                          }}
+                          className="p-2 rounded-lg hover:bg-brand-orange/10 text-brand-orange"
+                          title="Adjust Stock"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => setEditingItem({ sku: item.sku, name: item.name, unit: item.stock?.unit || 'pcs' })}
+                          className="p-2 rounded-lg hover:bg-brand-beige/10 text-secondary-brand"
+                          title="Edit Details"
+                        >
+                          <Settings className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm(`Delete inventory record for ${item.sku}?`)) {
+                              deleteMutation.mutate(item.sku);
+                            }
+                          }}
+                          className="p-2 rounded-lg hover:bg-red-500/10 text-red-400"
+                          title="Delete"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
         </div>
+      )}
+
+      {/* Adjustment Modal */}
+      <CrudModal
+        isOpen={isAdjustmentModalOpen}
+        onClose={() => setIsAdjustmentModalOpen(false)}
+        title="Adjust Stock Levels"
+        description={`Update inventory for SKU: ${selectedSku}`}
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (selectedSku) {
+            adjustStockMutation.mutate({
+              sku: selectedSku,
+              adjustment: parseFloat(adjustmentValue),
+              reason: adjustmentReason,
+            });
+          }
+        }}
+        submitLabel="Update Inventory"
+        isSubmitting={adjustStockMutation.isPending}
+      >
+        <StockAdjustmentForm
+          adjustmentValue={adjustmentValue}
+          adjustmentReason={adjustmentReason}
+          onValueChange={setAdjustmentValue}
+          onReasonChange={setAdjustmentReason}
+        />
+      </CrudModal>
+
+      {/* Add Item Modal */}
+      <CrudModal
+        isOpen={isItemModalOpen}
+        onClose={() => setIsItemModalOpen(false)}
+        title="Add Inventory Item"
+        description="Registry a new product SKU in the inventory system"
+        onSubmit={(e) => {
+          e.preventDefault();
+          createMutation.mutate({
+            ...newItem,
+            initial_quantity: parseFloat(newItem.initial_quantity),
+          });
+        }}
+        submitLabel="Create Item"
+        isSubmitting={createMutation.isPending}
+      >
+        <InventoryItemForm
+          data={newItem}
+          onChange={(data) => setNewItem(data)}
+        />
+      </CrudModal>
+
+      {/* Edit Item Modal */}
+      {editingItem && (
+        <CrudModal
+          isOpen={!!editingItem}
+          onClose={() => setEditingItem(null)}
+          title="Edit Inventory Details"
+          description={`Updating record for ${editingItem.sku}`}
+          onSubmit={(e) => {
+            e.preventDefault();
+            updateMutation.mutate({
+              sku: editingItem.sku,
+              data: { name: editingItem.name, unit: editingItem.unit }
+            });
+          }}
+          submitLabel="Save Changes"
+          isSubmitting={updateMutation.isPending}
+        >
+        <InventoryItemForm
+          data={editingItem}
+          onChange={(data) => setEditingItem(data)}
+          isEdit
+        />
+        </CrudModal>
       )}
     </div>
   );

@@ -5,21 +5,15 @@
  */
 
 import { config } from '@/config/env';
+import { getTenantHeaders, getTenantSlug } from './client';
 
 const ORDERING_URL = config.services.ordering;
-const TENANT = config.tenant.slug;
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function tenantHeaders(): Record<string, string> {
-  const headers: Record<string, string> = {
+  return {
     'Content-Type': 'application/json',
-    'X-Tenant-Slug': TENANT,
+    ...getTenantHeaders(),
   };
-  if (config.tenant.id && UUID_REGEX.test(config.tenant.id)) {
-    headers['X-Tenant-ID'] = config.tenant.id;
-  }
-  return headers;
 }
 
 /** Public category from ordering-backend GET /menu/categories */
@@ -69,7 +63,7 @@ async function fetchPublic<T>(url: string): Promise<T> {
 
 /** Fetch public menu categories (no auth). */
 export async function fetchPublicMenuCategories(): Promise<PublicMenuCategory[]> {
-  const url = `${ORDERING_URL}/api/v1/${TENANT}/menu/categories`;
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/menu/categories`;
   const data = await fetchPublic<PublicMenuCategory[] | ListResponse<PublicMenuCategory>>(url);
   if (Array.isArray(data)) return data;
   return (data as ListResponse<PublicMenuCategory>).data ?? [];
@@ -88,7 +82,7 @@ export async function fetchPublicMenuItems(params?: {
   if (params?.category_id) search.set('category_id', params.category_id);
   if (params?.search) search.set('search', params.search);
   const qs = search.toString();
-  const url = `${ORDERING_URL}/api/v1/${TENANT}/menu/items${qs ? `?${qs}` : ''}`;
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/menu/items${qs ? `?${qs}` : ''}`;
   const data = await fetchPublic<ListResponse<PublicMenuItemResponse>>(url);
   return {
     items: data.data ?? [],
