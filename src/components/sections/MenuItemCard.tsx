@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Eye, ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
+import { getMediaUrl } from '@/lib/utils';
 import { Badge, Card } from '../ui';
 
 interface MenuItemCardProps {
@@ -36,7 +37,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({
         {showImage && (
           <div className="relative h-60 w-full shrink-0 overflow-hidden">
             <Image
-              src={item.image || '/images/menu/placeholder-food.svg'}
+              src={getMediaUrl(item.image) || '/images/menu/placeholder-food.svg'}
               alt={item.name}
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-110"

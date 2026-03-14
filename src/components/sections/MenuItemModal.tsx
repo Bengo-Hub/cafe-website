@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
+import { getMediaUrl } from '@/lib/utils';
 import { Badge, Button } from '../ui';
 
 interface MenuItemModalProps {
@@ -64,7 +65,7 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
               {/* Image Section */}
               <div className="relative h-64 w-full bg-brand-cream md:h-80">
                 <Image
-                  src={item.image || '/images/menu/placeholder-food.svg'}
+                  src={getMediaUrl(item.image) || '/images/menu/placeholder-food.svg'}
                   alt={item.name}
                   fill
                   className="object-cover"

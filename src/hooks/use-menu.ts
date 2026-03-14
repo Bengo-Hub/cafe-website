@@ -6,6 +6,7 @@ import {
     type PublicMenuItemResponse,
 } from '@/lib/api/public-menu';
 import { MenuItem } from '@/types';
+import { getMediaUrl } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 
 function mapPublicToDisplay(
@@ -18,7 +19,7 @@ function mapPublicToDisplay(
     description: item.description ?? '',
     price: item.basePrice,
     category: categoryNames.get(item.categoryId) ?? item.categoryName ?? item.categoryId,
-    image: item.imageUrl ?? '/images/menu/placeholder-food.svg',
+    image: getMediaUrl(item.imageUrl) || '/images/menu/placeholder-food.svg',
     available: true,
     dietaryTags: (item.dietaryTags as MenuItem['dietaryTags']) ?? [],
     featured: false,
