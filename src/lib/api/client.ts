@@ -81,7 +81,7 @@ export async function apiClient<T = any>(
         ...options,
         signal: controller.signal,
         headers: {
-          'Content-Type': 'application/json',
+          ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
           ...tenantHeaders(),
           ...authHeader(),
           ...options.headers,
@@ -119,14 +119,14 @@ export const api = {
     apiClient<T>(url, {
       ...options,
       method: 'POST',
-      body: body ? JSON.stringify(body) : undefined,
+      body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
     }),
 
   put: <T = any>(url: string, body?: any, options?: RequestInit) =>
     apiClient<T>(url, {
       ...options,
       method: 'PUT',
-      body: body ? JSON.stringify(body) : undefined,
+      body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
     }),
 
   delete: <T = any>(url: string, options?: RequestInit) =>

@@ -4,6 +4,7 @@ import React from 'react';
 import { MenuCategory } from '@/lib/api/catalog';
 import Link from 'next/link';
 import { BookOpen } from 'lucide-react';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 
 interface MenuItemFormProps {
   data: any; // Allow flexible data for form state
@@ -20,6 +21,13 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
 }) => {
   return (
     <div className="space-y-4">
+      <div className="w-full max-w-[240px]">
+        <ImageUpload
+          label="Item Photo"
+          value={data.image_url || data.imageUrl || ''}
+          onChange={(url) => onChange({ ...data, image_url: url, imageUrl: url })}
+        />
+      </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase tracking-widest text-secondary-brand opacity-60">
