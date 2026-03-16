@@ -126,3 +126,28 @@ export async function deleteInventoryItem(sku: string) {
   if (!resp.ok) throw new Error(`Delete inventory item failed: ${resp.statusText}`);
   return resp.json();
 }
+
+// Unit API
+export interface Unit {
+  id: string;
+  name: string;
+  abbreviation?: string;
+}
+
+export async function fetchUnits(): Promise<Unit[]> {
+  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/units`;
+  const resp = await fetch(url, { headers: headers() });
+  if (!resp.ok) throw new Error(`Fetch units failed: ${resp.statusText}`);
+  return resp.json();
+}
+
+export async function createUnit(data: { name: string; abbreviation?: string }): Promise<Unit> {
+  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/units`;
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: headers(),
+    body: JSON.stringify(data),
+  });
+  if (!resp.ok) throw new Error(`Create unit failed: ${resp.statusText}`);
+  return resp.json();
+}

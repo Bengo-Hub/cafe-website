@@ -148,6 +148,45 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
           </label>
         </div>
       )}
+      {/* Recipe / Inventory Integration - Simplified for Creation */}
+      {!isEdit && (
+        <div className="pt-4 border-t border-brand-beige/10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4 text-brand-orange" />
+              <h3 className="text-sm font-black uppercase tracking-widest text-primary-brand">Quick Recipe Setup</h3>
+            </div>
+            <p className="text-[10px] font-bold text-secondary-brand uppercase tracking-wider opacity-60">Optional</p>
+          </div>
+          <p className="text-xs text-secondary-brand mb-4">
+            Optionally define the output quantity and base unit if this item requires inventory tracking.
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brand opacity-60">
+                Output Quantity
+              </label>
+              <input
+                type="number"
+                value={data.recipe_output_qty ?? 1}
+                onChange={(e) => onChange({ ...data, recipe_output_qty: parseFloat(e.target.value) || 1 })}
+                className="w-full h-10 rounded-xl border border-brand-beige/10 bg-brand-beige/5 px-4 text-sm focus:border-brand-orange/50 focus:outline-none"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-secondary-brand opacity-60">
+                Recipe Unit (e.g. PORTION)
+              </label>
+              <input
+                type="text"
+                value={data.recipe_unit ?? 'PORTION'}
+                onChange={(e) => onChange({ ...data, recipe_unit: e.target.value })}
+                className="w-full h-10 rounded-xl border border-brand-beige/10 bg-brand-beige/5 px-4 text-sm focus:border-brand-orange/50 focus:outline-none"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

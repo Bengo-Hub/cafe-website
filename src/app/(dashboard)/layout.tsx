@@ -121,7 +121,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </button>
           </div>
 
-          <nav className="flex-grow space-y-2">
+          <nav className="flex-grow space-y-2 overflow-y-auto pr-2 custom-scrollbar">
             {visibleSidebarItems.map((item) => (
               <Link
                 key={item.href}
@@ -177,10 +177,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             <div className="flex items-center gap-4 pl-6 border-l border-border">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-semibold text-foreground">{user?.name || 'Dashboard User'}</p>
-                <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">{user?.role || 'Admin'}</p>
+                <p className="text-sm font-black text-foreground leading-tight uppercase tracking-tight">{user?.name || 'Dashboard User'}</p>
+                <p className="text-[10px] font-bold text-secondary-brand break-all">{user?.email || 'admin@codevertex.com'}</p>
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-brand-orange/60 mt-0.5">{user?.role || 'Admin Account'}</p>
               </div>
-              <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold">
+              <div className="h-12 w-12 rounded-2xl bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center text-brand-orange font-black shadow-inner">
                 {user?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
               </div>
             </div>
