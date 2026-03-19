@@ -11,6 +11,7 @@ import {
     BookOpen,
     Box,
     ChefHat,
+    ChevronDown,
     Clock,
     LayoutDashboard,
     LogOut,
@@ -22,7 +23,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const SIDEBAR_ITEMS: Array<{
   label: string;
@@ -56,10 +57,13 @@ function effectiveUserForRbac(
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
   const { logout, user, isAuthenticated, isLoading } = useAuth();
   const { me, roles: meRoles } = useMe();
   const { tenant, getServiceTitle } = useTenantBrand();
+  const displayName = user?.name ?? user?.fullName ?? user?.email?.split('@')[0] ?? 'User';
 
   const rbacUser = effectiveUserForRbac(user ?? undefined, me?.roles ?? meRoles);
 
@@ -95,9 +99,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen section-blend-cream flex">
-      {/* Sidebar - theme-aware via CSS variables */}
+      {/* Sidebar mobile overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+          aria-hidden
+        />
+      )}
+
+      {/* Sidebar — theme-aware via CSS variables */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 transition-transform duration-300 lg:relative lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 flex flex-col transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:z-auto lg:translate-x-0 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         style={{
@@ -116,7 +129,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </div>
               )}
             </Link>
-            <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden opacity-80 hover:opacity-100 p-2">
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="lg:hidden opacity-80 hover:opacity-100 p-2 rounded-xl hover:bg-white/10 transition-colors"
+              aria-label="Close menu"
+            >
               <X className="h-6 w-6" />
             </button>
           </div>
@@ -126,6 +143,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={() => setIsSidebarOpen(false)}
                 className={`flex items-center gap-4 px-6 py-4 rounded-2xl transition-all ${
                   pathname === item.href
                     ? 'shadow-lg'
@@ -146,7 +164,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="mt-auto pt-8 border-t" style={{ borderColor: 'var(--sidebar-border)' }}>
             <button
               onClick={logout}
-              className="flex items-center gap-4 px-6 py-4 w-full opacity-70 hover:opacity-100 hover:text-red-400 transition-colors"
+              className="flex items-center gap-4 px-6 py-4 w-full opacity-70 hover:opacity-100 hover:text-red-400 transition-colors rounded-2xl"
               style={{ color: 'var(--sidebar-muted)' }}
             >
               <LogOut className="h-5 w-5" />
@@ -158,38 +176,91 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Main Content */}
       <main className="flex-grow flex flex-col min-w-0">
-        {/* Top Header - theme-aware */}
-        <header className="h-24 border-b border-border flex items-center justify-between px-8 lg:px-12 bg-background">
+        {/* Top Header — theme-aware */}
+        <header className="h-20 border-b border-border flex items-center justify-between px-4 sm:px-8 bg-background sticky top-0 z-30">
           <div className="flex items-center gap-4">
-            <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden text-foreground">
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="lg:hidden p-2 rounded-xl text-foreground hover:bg-muted transition-colors"
+              aria-label="Open menu"
+            >
               <Menu className="h-6 w-6" />
             </button>
-            <h1 className="text-xl font-black tracking-tight text-foreground hidden lg:block uppercase bg-gradient-to-r from-brand-orange to-brand-gold bg-clip-text text-transparent">
+            <h1 className="text-lg font-black tracking-tight text-foreground hidden lg:block uppercase bg-gradient-to-r from-brand-orange to-brand-gold bg-clip-text text-transparent">
               {getServiceTitle('Cafe')}
             </h1>
           </div>
 
-          <div className="flex items-center gap-6 ml-auto">
-            <button className="relative p-3 rounded-2xl bg-muted text-muted-foreground hover:bg-muted/80 transition-all" aria-label="Notifications">
+          <div className="flex items-center gap-2 sm:gap-4 ml-auto">
+            <button className="relative p-2.5 rounded-xl bg-muted text-muted-foreground hover:bg-muted/80 transition-all" aria-label="Notifications">
               <Bell className="h-5 w-5" />
-              <span className="absolute top-3 right-3 h-2 w-2 bg-primary rounded-full border-2 border-background" />
+              <span className="absolute top-2.5 right-2.5 h-2 w-2 bg-primary rounded-full border-2 border-background" />
             </button>
 
-            <div className="flex items-center gap-4 pl-6 border-l border-border">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-black text-foreground leading-tight uppercase tracking-tight">{user?.name || 'Dashboard User'}</p>
-                <p className="text-[10px] font-bold text-secondary-brand break-all">{user?.email || 'admin@codevertex.com'}</p>
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-brand-orange/60 mt-0.5">{user?.role || 'Admin Account'}</p>
-              </div>
-              <div className="h-12 w-12 rounded-2xl bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center text-brand-orange font-black shadow-inner">
-                {user?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
-              </div>
+            <div className="h-8 w-[1px] bg-border hidden sm:block" />
+
+            {/* Profile dropdown */}
+            <div className="relative" ref={profileRef}>
+              <button
+                type="button"
+                onClick={() => setProfileOpen((v) => !v)}
+                className="flex items-center gap-3 rounded-2xl hover:bg-muted p-1 pr-2 transition-all group"
+                aria-expanded={profileOpen}
+                aria-haspopup="true"
+                aria-label="Open profile menu"
+              >
+                <div className="h-9 w-9 rounded-xl bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center text-brand-orange font-black text-xs shadow-inner">
+                  {displayName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 'U'}
+                </div>
+                <div className="hidden sm:block text-left">
+                  <p className="text-xs font-black text-foreground truncate max-w-[120px] uppercase tracking-tight">{displayName.split(' ')[0]}</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{(rbacUser as any)?.role || 'Admin'}</p>
+                </div>
+                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${profileOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {profileOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" aria-hidden="true" onClick={() => setProfileOpen(false)} />
+                  <div className="absolute right-0 top-full mt-2 z-50 w-56 rounded-2xl p-3 shadow-2xl border border-border bg-background overflow-hidden">
+                    <div className="mb-2 px-3 py-2">
+                      <p className="text-sm font-black text-foreground">{displayName}</p>
+                      <p className="text-[10px] text-muted-foreground truncate font-bold uppercase tracking-widest mt-0.5">{user?.email}</p>
+                    </div>
+                    <div className="h-[1px] bg-border my-2 mx-1" />
+                    <div className="grid gap-1">
+                      <Link
+                        href="/dashboard/settings"
+                        onClick={() => setProfileOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-foreground hover:bg-muted transition-all group"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center group-hover:text-brand-orange transition-colors">
+                          <Settings className="h-4 w-4" />
+                        </div>
+                        Settings
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setProfileOpen(false);
+                          logout();
+                        }}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all group w-full"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center transition-colors">
+                          <LogOut className="h-4 w-4" />
+                        </div>
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <div className="p-8 lg:p-12 overflow-y-auto">
+        <div className="p-6 lg:p-10 overflow-y-auto flex-1">
           {children}
         </div>
       </main>

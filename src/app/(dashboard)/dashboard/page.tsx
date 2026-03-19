@@ -22,7 +22,7 @@ import Link from 'next/link';
 /** Canonical MVP service UI domains (redirect only; no duplicate UIs). */
 const SERVICE_LINKS = [
   { label: 'Inventory', href: 'https://inventory.codevertexitsolutions.com', permission: 'inventory:read' as const, icon: Box },
-  { label: 'Ordering', href: 'https://ordering.codevertexitsolutions.com', permission: 'orders:read' as const, icon: ShoppingBag },
+  { label: 'Ordering', href: 'https://ordersapp.codevertexitsolutions.com', permission: 'orders:read' as const, icon: ShoppingBag },
   { label: 'Logistics', href: 'https://logistics.codevertexitsolutions.com', permission: 'riders:read' as const, icon: Bike },
   { label: 'Treasury', href: 'https://books.codevertexitsolutions.com', permission: null, icon: BookOpen },
 ] as const;

@@ -7,6 +7,7 @@ import {
     storeVerifier,
 } from '@/lib/auth/pkce';
 import { buildAuthorizeUrl, buildLogoutUrl, exchangeCodeForTokens, fetchProfile } from '@/lib/auth/sso-api';
+import { checkSubscription } from '@/lib/auth/subscription';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -33,7 +34,7 @@ interface Session {
 }
 
 interface AuthState {
-  status: 'idle' | 'loading' | 'authenticated' | 'error' | 'syncing';
+  status: 'idle' | 'loading' | 'authenticated' | 'error' | 'syncing' | 'subscription_required';
   user: UserProfile | null;
   session: Session | null;
   error: string | null;
@@ -132,6 +133,18 @@ export const useAuthStore = create<AuthState>()(
                 tenant_slug: user.tenant_slug,
                 ...user,
               };
+              // Subscription enforcement: platform owner (codevertex) bypasses check
+              if (profile.tenant_slug !== 'codevertex' && profile.tenant_id) {
+                const active = await checkSubscription(
+                  profile.tenant_id as string,
+                  profile.tenant_slug as string ?? '',
+                  session.accessToken,
+                );
+                if (!active) {
+                  set({ status: 'subscription_required' });
+                  return;
+                }
+              }
               set({ user: profile, status: 'authenticated' });
               return;
             } catch {
