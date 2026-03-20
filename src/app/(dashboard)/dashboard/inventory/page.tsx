@@ -59,7 +59,7 @@ export default function InventoryOverview() {
     queryFn: () => fetchMenuItems({ limit: 200 }),
   });
 
-  const items = itemsRes?.data?.items ?? [];
+  const items = itemsRes?.data?.data ?? [];
   const skus = items.map((i: MenuItem) => i.sku).filter(Boolean);
 
   // Fetch stock availability for all SKUs
@@ -291,7 +291,7 @@ export default function InventoryOverview() {
                     </td>
                     <td className="py-3 pr-4 font-mono text-xs text-secondary-brand">{item.sku}</td>
                     <td className="py-3 pr-4 font-black text-primary-brand">
-                      {item.currency} {item.price.toLocaleString()}
+                      {item.currency} {item.basePrice.toLocaleString()}
                     </td>
                     <td className="py-3 pr-4">
                       <span

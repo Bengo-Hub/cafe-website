@@ -47,7 +47,7 @@ export default function RecipesPage() {
     },
   });
 
-  const items = itemsRes?.data?.items ?? [];
+  const items = itemsRes?.data?.data ?? [];
   const recipeMap = new Map(recipes?.map(r => [r.sku, r]));
 
   const openModal = (recipe?: Recipe) => {
