@@ -208,7 +208,7 @@ All Services Validate JWT:
 ```
 Website → Ordering Service API → Fetch Sample Dishes (Display Only)
 User Action (Add to Cart) → Redirect to:
-https://ordering.codevertexitsolutions.com/menu?item_id={id}&action=add-to-cart&tenant={tenant}
+https://ordersapp.codevertexitsolutions.com/menu?item_id={id}&action=add-to-cart&tenant={tenant}
 ```
 
 ---
@@ -292,7 +292,7 @@ https://ordering.codevertexitsolutions.com/menu?item_id={id}&action=add-to-cart&
 - Seamless transition via shared SSO.
 
 **Integration Points**:
-- Redirect URL: `https://ordering.codevertexitsolutions.com/track?id={order_id}&tenant={tenant_slug}`
+- Redirect URL: `https://ordersapp.codevertexitsolutions.com/track?id={order_id}&tenant={tenant_slug}`
 
 ---
 
@@ -349,7 +349,7 @@ https://ordering.codevertexitsolutions.com/menu?item_id={id}&action=add-to-cart&
 | Service   | URL (canonical) |
 |----------|------------------------------------------|
 | Inventory | https://inventory.codevertexitsolutions.com |
-| Ordering  | https://ordering.codevertexitsolutions.com  |
+| Ordering  | https://ordersapp.codevertexitsolutions.com  |
 | Logistics | https://logistics.codevertexitsolutions.com |
 | Treasury  | https://books.codevertexitsolutions.com    |
 
@@ -724,7 +724,7 @@ workbox.routing.registerRoute(
 **Data Flow**:
 ```
 User enters Order ID → Redirect to:
-https://ordering.codevertexitsolutions.com/track?id={order_id}&tenant={tenant}
+https://ordersapp.codevertexitsolutions.com/track?id={order_id}&tenant={tenant}
 ```
 
 ---
