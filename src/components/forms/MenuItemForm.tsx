@@ -24,8 +24,8 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
       <div className="w-full max-w-[240px]">
         <ImageUpload
           label="Item Photo"
-          value={data.image_url || data.imageUrl || ''}
-          onChange={(url) => onChange({ ...data, image_url: url, imageUrl: url })}
+          value={data.imageUrl || data.image_url || ''}
+          onChange={(url) => onChange({ ...data, imageUrl: url })}
         />
       </div>
       <div className="grid grid-cols-2 gap-4">
@@ -86,8 +86,8 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
           </label>
           <input
             type="number"
-            value={data.price ?? ''}
-            onChange={(e) => onChange({ ...data, price: parseFloat(e.target.value) || 0 })}
+            value={data.price ?? data.basePrice ?? ''}
+            onChange={(e) => onChange({ ...data, price: parseFloat(e.target.value) || 0, basePrice: parseFloat(e.target.value) || 0 })}
             className="w-full h-12 rounded-2xl border border-brand-beige/10 bg-brand-beige/5 px-4 text-sm focus:border-brand-orange/50 focus:outline-none"
             required
           />
@@ -97,8 +97,8 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
             Category *
           </label>
           <select
-            value={data.category_id || ''}
-            onChange={(e) => onChange({ ...data, category_id: e.target.value })}
+            value={data.category_id || data.categoryId || ''}
+            onChange={(e) => onChange({ ...data, category_id: e.target.value, categoryId: e.target.value })}
             className="w-full h-12 rounded-2xl border border-brand-beige/10 bg-brand-beige/5 px-4 text-sm focus:border-brand-orange/50 focus:outline-none"
             required
           >
@@ -116,8 +116,8 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
           </label>
           <input
             type="number"
-            value={data.prep_time_minutes ?? ''}
-            onChange={(e) => onChange({ ...data, prep_time_minutes: parseInt(e.target.value) || 0 })}
+            value={data.prep_time_minutes ?? data.leadTimeMinutes ?? ''}
+            onChange={(e) => onChange({ ...data, prep_time_minutes: parseInt(e.target.value) || 0, leadTimeMinutes: parseInt(e.target.value) || 0 })}
             className="w-full h-12 rounded-2xl border border-brand-beige/10 bg-brand-beige/5 px-4 text-sm focus:border-brand-orange/50 focus:outline-none"
           />
         </div>
@@ -127,8 +127,8 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
           <label className="flex items-center gap-3 cursor-pointer group">
             <input
               type="checkbox"
-              checked={data.is_available || false}
-              onChange={(e) => onChange({ ...data, is_available: e.target.checked })}
+              checked={data.is_available ?? data.isAvailable ?? false}
+              onChange={(e) => onChange({ ...data, is_available: e.target.checked, isAvailable: e.target.checked })}
               className="h-5 w-5 rounded-lg border-brand-beige/10 bg-brand-beige/5 text-brand-orange focus:ring-brand-orange/20"
             />
             <span className="text-sm font-bold text-primary-brand group-hover:text-brand-orange transition-colors">
@@ -138,8 +138,8 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
           <label className="flex items-center gap-3 cursor-pointer group">
             <input
               type="checkbox"
-              checked={data.is_featured || false}
-              onChange={(e) => onChange({ ...data, is_featured: e.target.checked })}
+              checked={data.is_featured ?? data.isFeatured ?? false}
+              onChange={(e) => onChange({ ...data, is_featured: e.target.checked, isFeatured: e.target.checked })}
               className="h-5 w-5 rounded-lg border-brand-beige/10 bg-brand-beige/5 text-brand-orange focus:ring-brand-orange/20"
             />
             <span className="text-sm font-bold text-primary-brand group-hover:text-brand-orange transition-colors">

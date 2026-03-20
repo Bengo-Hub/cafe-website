@@ -6,6 +6,7 @@ import {
     type MenuItem,
     fetchCategories,
     fetchMenuItems,
+    fetchOutlets,
     createCategory,
     createMenuItem,
     updateMenuItem,
@@ -58,6 +59,12 @@ export default function MenuManagement() {
     recipe_unit: 'PORTION',
   });
 
+  const { data: outletsRes } = useQuery({
+    queryKey: ['catalog-outlets'],
+    queryFn: fetchOutlets,
+  });
+  const defaultOutletId = (outletsRes?.data ?? [])[0]?.id ?? '';
+
   const { data: categoriesRes, isLoading: loadingCategories } = useQuery({
     queryKey: ['catalog-categories'],
     queryFn: fetchCategories,
@@ -77,17 +84,17 @@ export default function MenuManagement() {
   });
 
   const itemsData = itemsRes?.data;
-  const items = itemsData?.items ?? [];
+  const items = itemsData?.data ?? [];
 
   const toggleAvailability = useMutation({
     mutationFn: ({ id, available }: { id: string; available: boolean }) =>
-      updateMenuItem(id, { is_available: available }),
+      updateMenuItem(id, { isAvailable: available }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['catalog-items'] }),
   });
 
   const toggleFeatured = useMutation({
     mutationFn: ({ id, featured }: { id: string; featured: boolean }) =>
-      updateMenuItem(id, { is_featured: featured }),
+      updateMenuItem(id, { isFeatured: featured }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['catalog-items'] }),
   });
 
@@ -97,7 +104,7 @@ export default function MenuManagement() {
   });
 
   const addCategory = useMutation({
-    mutationFn: (name: string) => createCategory({ name }),
+    mutationFn: (name: string) => createCategory({ name, outletId: defaultOutletId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['catalog-categories'] });
       setNewCategoryName('');
@@ -107,25 +114,30 @@ export default function MenuManagement() {
 
   const addItem = useMutation({
     mutationFn: async () => {
-      // 1. Create Recipe first
-      await recipesApi.create({
-        name: newItem.name,
-        sku: newItem.sku,
-        output_qty: newItem.recipe_output_qty,
-        unit_of_measure: newItem.recipe_unit,
-        ingredients: [], // Initial empty ingredients
-        is_active: true,
-      });
+      // 1. Create Recipe first (if inventory-api is available)
+      try {
+        await recipesApi.create({
+          name: newItem.name,
+          sku: newItem.sku,
+          output_qty: newItem.recipe_output_qty,
+          unit_of_measure: newItem.recipe_unit,
+          ingredients: [],
+          is_active: true,
+        });
+      } catch {
+        // Recipe creation is optional — continue with menu item
+      }
 
-      // 2. Create Menu Item with recipe reference
+      // 2. Create Menu Item
       return createMenuItem({
-        ...newItem,
-        category_id: newItem.category_id || (categories[0]?.id as any),
-        price: Number(newItem.price),
-        prep_time_minutes: Number(newItem.prep_time_minutes),
-        // Note: MenuItem type doesn't have recipe_id in the interface yet, 
-        // but we'll include it in the payload if supported by backend.
-      } as any);
+        categoryId: newItem.category_id || (categories[0]?.id ?? ''),
+        outletId: defaultOutletId,
+        name: newItem.name,
+        description: newItem.description,
+        sku: newItem.sku,
+        basePrice: Number(newItem.price),
+        leadTimeMinutes: Number(newItem.prep_time_minutes),
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['catalog-items'] });
@@ -149,9 +161,9 @@ export default function MenuManagement() {
       return updateMenuItem(editingItem.id, {
         name: editingItem.name,
         description: editingItem.description,
-        price: Number(editingItem.price),
-        is_available: editingItem.is_available,
-        is_featured: editingItem.is_featured,
+        basePrice: Number(editingItem.basePrice),
+        isAvailable: editingItem.isAvailable,
+        isFeatured: editingItem.isFeatured,
       });
     },
     onSuccess: () => {
@@ -270,9 +282,9 @@ export default function MenuManagement() {
                 <tr key={item.id} className="group hover:bg-brand-beige/5 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      {item.image_url || item.imageUrl ? (
+                      {item.imageUrl ? (
                         <div className="h-10 w-10 rounded-lg overflow-hidden border border-brand-beige/10">
-                          <img src={item.image_url || item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
+                          <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
                         </div>
                       ) : (
                         <div className="h-10 w-10 rounded-lg bg-brand-beige/10 flex items-center justify-center text-lg">
@@ -287,37 +299,37 @@ export default function MenuManagement() {
                   </td>
                   <td className="px-6 py-4">
                     <Badge className="bg-brand-beige/10 text-secondary-brand whitespace-nowrap">
-                      {categories.find((c: MenuCategory) => c.id === (item.category_id || item.categoryId))?.name || 'Uncategorized'}
+                      {categories.find((c: MenuCategory) => c.id === item.categoryId)?.name || 'Uncategorized'}
                     </Badge>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <span className="font-black text-brand-orange whitespace-nowrap">
-                      {formatCurrency(item.price, item.currency)}
+                      {formatCurrency(item.basePrice, item.currency)}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex gap-2">
-                       <Badge className={item.is_available ? 'bg-green-500/10 text-green-600' : 'bg-red-500/10 text-red-500'}>
-                        {item.is_available ? 'Available' : 'Unavailable'}
+                       <Badge className={item.isAvailable ? 'bg-green-500/10 text-green-600' : 'bg-red-500/10 text-red-500'}>
+                        {item.isAvailable ? 'Available' : 'Unavailable'}
                        </Badge>
-                      {item.is_featured && <Badge className="bg-yellow-500/10 text-yellow-600">Featured</Badge>}
+                      {item.isFeatured && <Badge className="bg-yellow-500/10 text-yellow-600">Featured</Badge>}
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-1">
                       <button
-                        onClick={() => toggleAvailability.mutate({ id: item.id, available: !item.is_available })}
+                        onClick={() => toggleAvailability.mutate({ id: item.id, available: !item.isAvailable })}
                         className="rounded-lg p-2 hover:bg-brand-beige/10 transition-colors"
-                        title={item.is_available ? 'Mark unavailable' : 'Mark available'}
+                        title={item.isAvailable ? 'Mark unavailable' : 'Mark available'}
                       >
-                        {item.is_available ? <EyeOff className="h-4 w-4 text-red-400" /> : <Eye className="h-4 w-4 text-green-500" />}
+                        {item.isAvailable ? <EyeOff className="h-4 w-4 text-red-400" /> : <Eye className="h-4 w-4 text-green-500" />}
                       </button>
                       <button
-                        onClick={() => toggleFeatured.mutate({ id: item.id, featured: !item.is_featured })}
+                        onClick={() => toggleFeatured.mutate({ id: item.id, featured: !item.isFeatured })}
                         className="rounded-lg p-2 hover:bg-brand-beige/10 transition-colors"
-                        title={item.is_featured ? 'Unfeature' : 'Feature'}
+                        title={item.isFeatured ? 'Unfeature' : 'Feature'}
                       >
-                        <Star className={`h-4 w-4 ${item.is_featured ? 'fill-yellow-400 text-yellow-400' : 'text-secondary-brand'}`} />
+                        <Star className={`h-4 w-4 ${item.isFeatured ? 'fill-yellow-400 text-yellow-400' : 'text-secondary-brand'}`} />
                       </button>
                       <Link
                         href={`/dashboard/inventory?search=${item.sku}`}

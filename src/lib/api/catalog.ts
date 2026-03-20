@@ -19,69 +19,84 @@ function headers(): Record<string, string> {
   return { ...authHeaders(), ...getTenantHeaders() };
 }
 
-// Types
+// Types — aligned with ordering-backend camelCase JSON tags
 
 export interface MenuCategory {
   id: string;
   name: string;
   description?: string;
-  slug: string;
-  sort_order: number;
-  parent_id?: string;
-  image_url?: string;
-  is_active: boolean;
-  item_count?: number;
-  created_at: string;
-  updated_at: string;
+  slug?: string;
+  imageUrl?: string;
+  displayOrder: number;
+  parentId?: string;
+  isActive: boolean;
+  itemCount?: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
-/** Catalog API item shape (ordering-backend may return camelCase). */
 export interface MenuItem {
   id: string;
-  category_id?: string;
-  categoryId?: string;
+  categoryId: string;
   name: string;
   description?: string;
   sku: string;
-  price: number;
+  basePrice: number;
   currency: string;
-  image_url?: string;
   imageUrl?: string;
-  is_available: boolean;
-  is_featured?: boolean;
-  sort_order?: number;
-  prep_time_minutes?: number;
-  tags?: string[];
-  allergens?: string[];
-  created_at: string;
-  updated_at: string;
+  isAvailable: boolean;
+  isFeatured?: boolean;
+  displayOrder?: number;
+  leadTimeMinutes?: number;
+  dietaryTags?: Array<{ code: string; label: string }>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Backend list response shape. */
+interface ListResponse<T> {
+  data: T[];
+  total: number;
+  limit: number;
+  page: number;
 }
 
 // Category API
 
 export async function fetchCategories() {
   const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/categories`;
-  return apiClient<MenuCategory[]>(url, { headers: headers() });
+  const res = await apiClient<ListResponse<MenuCategory>>(url, { headers: headers() });
+  return { ...res, data: res.data?.data ?? [] };
 }
 
 export async function createCategory(data: {
   name: string;
   description?: string;
-  sort_order?: number;
-  parent_id?: string;
-  image_url?: string;
+  displayOrder?: number;
+  parentId?: string;
+  imageUrl?: string;
+  outletId: string;
+  isActive?: boolean;
 }) {
   const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/categories`;
   return apiClient<MenuCategory>(url, {
     method: 'POST',
     headers: headers(),
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      name: data.name,
+      description: data.description,
+      displayOrder: data.displayOrder ?? 0,
+      parentId: data.parentId,
+      imageUrl: data.imageUrl,
+      outletId: data.outletId,
+      isActive: data.isActive ?? true,
+    }),
   });
 }
 
 export async function updateCategory(
   categoryId: string,
-  data: { name?: string; description?: string; sort_order?: number; image_url?: string },
+  data: { name?: string; description?: string; displayOrder?: number; imageUrl?: string },
 ) {
   const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/categories/${categoryId}`;
   return apiClient<MenuCategory>(url, {
@@ -108,34 +123,46 @@ export async function fetchMenuItems(params?: {
   const query = new URLSearchParams();
   if (params?.category_id) query.set('category_id', params.category_id);
   if (params?.search) query.set('search', params.search);
-  if (params?.available_only) query.set('available_only', 'true');
+  if (params?.available_only) query.set('is_available', 'true');
   if (params?.page) query.set('page', String(params.page));
   if (params?.limit) query.set('limit', String(params.limit));
 
   const qs = query.toString();
   const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/items${qs ? `?${qs}` : ''}`;
-  return apiClient<{ items: MenuItem[]; total: number }>(url, { headers: headers() });
+  const res = await apiClient<ListResponse<MenuItem>>(url, { headers: headers() });
+  return { ...res, data: { data: res.data?.data ?? [], total: res.data?.total ?? 0 } };
 }
 
 export async function createMenuItem(data: {
-  category_id: string;
+  categoryId: string;
+  outletId: string;
   name: string;
   description?: string;
   sku: string;
-  price: number;
+  basePrice: number;
   currency?: string;
-  image_url?: string;
-  is_available?: boolean;
-  is_featured?: boolean;
-  prep_time_minutes?: number;
-  tags?: string[];
-  allergens?: string[];
+  imageUrl?: string;
+  isAvailable?: boolean;
+  isFeatured?: boolean;
+  leadTimeMinutes?: number;
 }) {
   const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/items`;
   return apiClient<MenuItem>(url, {
     method: 'POST',
     headers: headers(),
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      categoryId: data.categoryId,
+      outletId: data.outletId,
+      name: data.name,
+      description: data.description,
+      sku: data.sku,
+      basePrice: data.basePrice,
+      currency: data.currency ?? 'KES',
+      imageUrl: data.imageUrl,
+      isAvailable: data.isAvailable ?? true,
+      isFeatured: data.isFeatured ?? false,
+      leadTimeMinutes: data.leadTimeMinutes ?? 0,
+    }),
   });
 }
 
@@ -144,13 +171,12 @@ export async function updateMenuItem(
   data: Partial<{
     name: string;
     description: string;
-    price: number;
-    image_url: string;
-    is_available: boolean;
-    is_featured: boolean;
-    prep_time_minutes: number;
-    tags: string[];
-    allergens: string[];
+    basePrice: number;
+    currency: string;
+    imageUrl: string;
+    isAvailable: boolean;
+    isFeatured: boolean;
+    leadTimeMinutes: number;
   }>,
 ) {
   const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/items/${itemId}`;
@@ -164,4 +190,18 @@ export async function updateMenuItem(
 export async function deleteMenuItem(itemId: string) {
   const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/items/${itemId}`;
   return apiClient(url, { method: 'DELETE', headers: headers() });
+}
+
+// Outlets API
+
+export interface OutletSummary {
+  id: string;
+  name: string;
+  imageUrl?: string;
+}
+
+export async function fetchOutlets() {
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/cafes`;
+  const res = await apiClient<ListResponse<OutletSummary>>(url, { headers: headers() });
+  return { ...res, data: res.data?.data ?? [] };
 }
