@@ -31,8 +31,15 @@ export function getTenantSlug(): string {
   return config.tenant.slug;
 }
 
-/** Tenant headers using auth-api /me tenant_id (UUID) and tenant_slug. Only sends X-Tenant-ID when value is a valid UUID. Exported for use by orders, catalog, riders, inventory. */
+/** Tenant headers using auth-api /me tenant_id (UUID) and tenant_slug. Only sends X-Tenant-ID when value is a valid UUID. Exported for use by orders, catalog, riders, inventory. Platform owners skip tenant headers — scope resolved from JWT. */
 export function getTenantHeaders(): Record<string, string> {
+  if (typeof window !== 'undefined') {
+    const user = useAuthStore.getState().user;
+    if (user?.is_platform_owner || user?.tenant_slug === 'codevertex') {
+      return {};
+    }
+  }
+
   const slug = getTenantSlug();
   let tenantId: string | undefined;
 
