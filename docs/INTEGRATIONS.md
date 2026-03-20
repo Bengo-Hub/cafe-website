@@ -673,7 +673,7 @@ class ServiceErrorBoundary extends Component {
 - [ ] Create order tracking page
 - [ ] Implement WebSocket connection
 - [ ] Add polling fallback
-- [ ] Integrate Mapbox/Google Maps
+- [ ] Integrate self-hosted map stack (logistics-service provides routing via Valhalla, tiles via TileServer-GL, frontend uses @bengo-hub/maps)
 - [ ] Show rider location and ETA
 - [ ] Handle connection errors gracefully
 - [ ] Test on slow networks
