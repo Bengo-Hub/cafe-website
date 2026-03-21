@@ -15,6 +15,7 @@ import {
 import { recipesApi } from '@/lib/api/recipes';
 import { getMediaUrl } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
     ChefHat,
     Edit2,
@@ -90,18 +91,30 @@ export default function MenuManagement() {
   const toggleAvailability = useMutation({
     mutationFn: ({ id, available }: { id: string; available: boolean }) =>
       updateMenuItem(id, { isAvailable: available }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['catalog-items'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['catalog-items'] });
+      toast.success('Availability updated');
+    },
+    onError: (err: Error) => toast.error(`Failed: ${err.message}`),
   });
 
   const toggleFeatured = useMutation({
     mutationFn: ({ id, featured }: { id: string; featured: boolean }) =>
       updateMenuItem(id, { isFeatured: featured }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['catalog-items'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['catalog-items'] });
+      toast.success('Featured status updated');
+    },
+    onError: (err: Error) => toast.error(`Failed: ${err.message}`),
   });
 
   const removeItem = useMutation({
     mutationFn: (id: string) => deleteMenuItem(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['catalog-items'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['catalog-items'] });
+      toast.success('Item deleted');
+    },
+    onError: (err: Error) => toast.error(`Failed to delete: ${err.message}`),
   });
 
   const addCategory = useMutation({
@@ -110,7 +123,9 @@ export default function MenuManagement() {
       queryClient.invalidateQueries({ queryKey: ['catalog-categories'] });
       setNewCategoryName('');
       setShowAddCategory(false);
+      toast.success('Category created');
     },
+    onError: (err: Error) => toast.error(`Failed to create category: ${err.message}`),
   });
 
   const addItem = useMutation({
@@ -153,7 +168,9 @@ export default function MenuManagement() {
         recipe_output_qty: 1,
         recipe_unit: 'PORTION',
       });
+      toast.success('Menu item created');
     },
+    onError: (err: Error) => toast.error(`Failed to create item: ${err.message}`),
   });
 
   const saveEdit = useMutation({
@@ -170,7 +187,9 @@ export default function MenuManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['catalog-items'] });
       setEditingItem(null);
+      toast.success('Item updated');
     },
+    onError: (err: Error) => toast.error(`Failed to update: ${err.message}`),
   });
 
   return (

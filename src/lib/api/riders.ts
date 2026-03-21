@@ -1,114 +1,109 @@
 import { config } from '@/config/env';
-import { getTenantHeaders, getTenantSlug } from './client';
+import { api, getTenantSlug } from './client';
 
 const LOGISTICS_URL = config.services.logistics;
 
-function authHeaders(): Record<string, string> {
-  if (typeof window === 'undefined') return {};
-  const stored = localStorage.getItem('cafe-auth-storage');
-  if (!stored) return {};
-  try {
-    const { state } = JSON.parse(stored);
-    return state?.accessToken ? { Authorization: `Bearer ${state.accessToken}` } : {};
-  } catch {
-    return {};
-  }
-}
+// Types matching the logistics-api FleetMember ent schema
 
-function headers(): Record<string, string> {
-  return {
-    'Content-Type': 'application/json',
-    ...getTenantHeaders(),
-    ...authHeaders(),
+export type RiderStatus = 'pending' | 'approved' | 'active' | 'suspended';
+
+export interface FleetMember {
+  id: string;
+  tenant_id: string;
+  fleet_id: string;
+  user_id: string;
+  driver_code?: string;
+  id_number?: string;
+  license_no?: string;
+  status: RiderStatus;
+  id_passport_attachment?: string;
+  rider_photo?: string;
+  vehicle_id?: string;
+  joined_at: string;
+  suspended_at?: string;
+  metadata?: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+  // Edges (populated when WithVehicle / WithUser)
+  edges?: {
+    vehicle?: any;
+    user?: any;
   };
 }
 
-// Types
+/** @deprecated Use FleetMember instead */
+export type Rider = FleetMember;
 
-export type RiderStatus = 'pending' | 'active' | 'suspended' | 'inactive';
+// --- Fleet ---
 
-export interface Rider {
-  id: string;
-  user_id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  status: RiderStatus;
-  vehicle_type?: string;
-  license_plate?: string;
-  joined_at: string;
-  metadata?: Record<string, string>;
+export async function fetchFleet() {
+  const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/fleet`;
+  const resp = await api.get(url);
+  return resp.data;
 }
 
-export interface RiderListResponse {
-  riders: Rider[];
-  total: number;
-}
+// --- Fleet Members (Riders) ---
 
-// API functions
-
+/**
+ * List fleet members, optionally filtered by status.
+ * GET /api/v1/{tenant}/fleet/members?status=pending|active|suspended
+ */
 export async function fetchRiders(params?: {
   status?: string;
-}): Promise<RiderListResponse> {
+}): Promise<FleetMember[]> {
   const query = new URLSearchParams();
   if (params?.status) query.set('status', params.status);
   const qs = query.toString();
-  const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/admin/riders${qs ? `?${qs}` : ''}`;
-  const resp = await fetch(url, { headers: headers() });
-  if (!resp.ok) throw new Error(`Fetch riders failed: ${resp.statusText}`);
-  return resp.json();
+  const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/fleet/members${qs ? `?${qs}` : ''}`;
+  const resp = await api.get<FleetMember[]>(url);
+  return resp.data ?? [];
 }
 
-export async function fetchPendingRiders(): Promise<RiderListResponse> {
-  const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/admin/riders/pending`;
-  const resp = await fetch(url, { headers: headers() });
-  if (!resp.ok) throw new Error(`Fetch pending riders failed: ${resp.statusText}`);
-  return resp.json();
+/**
+ * Get a single fleet member by ID.
+ * GET /api/v1/{tenant}/fleet/members/{memberId}
+ */
+export async function fetchRider(memberId: string): Promise<FleetMember> {
+  const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/fleet/members/${memberId}`;
+  const resp = await api.get<FleetMember>(url);
+  return resp.data!;
 }
 
+/**
+ * Invite a rider to the fleet. Creates a FleetMember in "pending" status.
+ * POST /api/v1/{tenant}/fleet/members
+ *
+ * The backend expects: { user_id, fleet_id?, id_number?, license_no? }
+ * - user_id is required (UUID of an existing user in the identity system)
+ * - fleet_id is optional (auto-resolved to the tenant's default fleet)
+ */
 export async function inviteRider(data: {
-  email: string;
-  name?: string;
-  phone?: string;
-  vehicle_type?: string;
-}): Promise<{ message: string; member_id: string }> {
-  const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/admin/riders/invite`;
-  const resp = await fetch(url, {
-    method: 'POST',
-    headers: headers(),
-    body: JSON.stringify(data),
-  });
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({}));
-    throw new Error(err.error || `Invite failed: ${resp.statusText}`);
-  }
-  return resp.json();
+  user_id: string;
+  fleet_id?: string;
+  id_number?: string;
+  license_no?: string;
+}): Promise<FleetMember> {
+  const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/fleet/members`;
+  const resp = await api.post<FleetMember>(url, data);
+  return resp.data!;
 }
 
-export async function approveRider(memberId: string): Promise<{ message: string }> {
-  const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/admin/riders/${memberId}/approve`;
-  const resp = await fetch(url, { method: 'POST', headers: headers() });
-  if (!resp.ok) throw new Error(`Approve failed: ${resp.statusText}`);
-  return resp.json();
+/**
+ * Approve a pending fleet member → sets status to "active".
+ * POST /api/v1/{tenant}/fleet/members/{memberId}/approve
+ */
+export async function approveRider(memberId: string): Promise<FleetMember> {
+  const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/fleet/members/${memberId}/approve`;
+  const resp = await api.post<FleetMember>(url);
+  return resp.data!;
 }
 
-export async function suspendRider(memberId: string): Promise<{ message: string }> {
-  const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/admin/riders/${memberId}/suspend`;
-  const resp = await fetch(url, { method: 'POST', headers: headers() });
-  if (!resp.ok) throw new Error(`Suspend failed: ${resp.statusText}`);
-  return resp.json();
-}
-
-export async function rejectRider(
-  memberId: string,
-  reason: string,
-): Promise<{ message: string }> {
-  const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/admin/riders/${memberId}/reject`;
-  const resp = await fetch(url, {
-    method: 'POST',
-    headers: headers(),
-    body: JSON.stringify({ reason }),
-  });
-  if (!resp.ok) throw new Error(`Reject failed: ${resp.statusText}`);
-  return resp.json();
+/**
+ * Suspend an active fleet member.
+ * POST /api/v1/{tenant}/fleet/members/{memberId}/suspend
+ */
+export async function suspendRider(memberId: string): Promise<FleetMember> {
+  const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/fleet/members/${memberId}/suspend`;
+  const resp = await api.post<FleetMember>(url);
+  return resp.data!;
 }

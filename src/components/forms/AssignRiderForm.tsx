@@ -1,13 +1,20 @@
 'use client';
 
 import React from 'react';
-import { Rider } from '@/lib/api/riders';
+import { type FleetMember } from '@/lib/api/riders';
 
 interface AssignRiderFormProps {
   orderNumber: string;
-  riders: Rider[];
+  riders: FleetMember[];
   selectedRiderId: string;
   onRiderChange: (id: string) => void;
+}
+
+function riderDisplayName(rider: FleetMember): string {
+  // Try user edge first, then driver_code, then truncated user_id
+  if (rider.edges?.user?.name) return rider.edges.user.name;
+  if (rider.driver_code) return `Rider ${rider.driver_code}`;
+  return `Rider ${rider.user_id.substring(0, 8)}`;
 }
 
 export const AssignRiderForm: React.FC<AssignRiderFormProps> = ({
@@ -34,7 +41,7 @@ export const AssignRiderForm: React.FC<AssignRiderFormProps> = ({
           <option value="">Choose a rider...</option>
           {riders.map((rider) => (
             <option key={rider.id} value={rider.id}>
-              {rider.name} ({rider.vehicle_type || 'No vehicle'})
+              {riderDisplayName(rider)} {rider.license_no ? `(${rider.license_no})` : ''}
             </option>
           ))}
         </select>

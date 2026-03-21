@@ -2,12 +2,11 @@
 
 import { Badge, Button, Card, Pagination } from '@/components/ui';
 import {
-  type Rider,
+  type FleetMember,
   type RiderStatus,
   approveRider,
   fetchRiders,
   inviteRider,
-  rejectRider,
   suspendRider,
 } from '@/lib/api/riders';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -17,13 +16,10 @@ import {
   Bike,
   Check,
   Loader2,
-  Mail,
-  Phone,
   RefreshCw,
   UserCheck,
   UserPlus,
   X,
-  XCircle,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -31,17 +27,17 @@ const RIDERS_PAGE_SIZE = 15;
 
 const STATUS_CONFIG: Record<RiderStatus, { label: string; color: string; bg: string }> = {
   pending: { label: 'Pending', color: 'text-yellow-600', bg: 'bg-yellow-500/10' },
+  approved: { label: 'Approved', color: 'text-blue-600', bg: 'bg-blue-500/10' },
   active: { label: 'Active', color: 'text-green-600', bg: 'bg-green-500/10' },
   suspended: { label: 'Suspended', color: 'text-red-500', bg: 'bg-red-500/10' },
-  inactive: { label: 'Inactive', color: 'text-gray-500', bg: 'bg-gray-500/10' },
 };
 
 const STATUS_FILTERS = [
   { value: '', label: 'All Riders' },
   { value: 'pending', label: 'Pending' },
+  { value: 'approved', label: 'Approved' },
   { value: 'active', label: 'Active' },
   { value: 'suspended', label: 'Suspended' },
-  { value: 'inactive', label: 'Inactive' },
 ];
 
 export default function RiderManagement() {
@@ -49,30 +45,25 @@ export default function RiderManagement() {
   const [riderPage, setRiderPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
   const [showInvite, setShowInvite] = useState(false);
-  const [showReject, setShowReject] = useState<string | null>(null);
-  const [rejectReason, setRejectReason] = useState('');
-  const [inviteForm, setInviteForm] = useState({ email: '', name: '', phone: '', vehicle_type: '' });
+  const [inviteForm, setInviteForm] = useState({ user_id: '', id_number: '', license_no: '' });
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data: riders = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['admin-riders', statusFilter],
     queryFn: () => fetchRiders({ status: statusFilter || undefined }),
     refetchInterval: 30_000,
   });
 
-  const riders = data?.riders ?? [];
-
   const invite = useMutation({
     mutationFn: () =>
       inviteRider({
-        email: inviteForm.email,
-        name: inviteForm.name || undefined,
-        phone: inviteForm.phone || undefined,
-        vehicle_type: inviteForm.vehicle_type || undefined,
+        user_id: inviteForm.user_id,
+        id_number: inviteForm.id_number || undefined,
+        license_no: inviteForm.license_no || undefined,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-riders'] });
       setShowInvite(false);
-      setInviteForm({ email: '', name: '', phone: '', vehicle_type: '' });
+      setInviteForm({ user_id: '', id_number: '', license_no: '' });
     },
   });
 
@@ -84,16 +75,6 @@ export default function RiderManagement() {
   const suspend = useMutation({
     mutationFn: (memberId: string) => suspendRider(memberId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-riders'] }),
-  });
-
-  const reject = useMutation({
-    mutationFn: ({ memberId, reason }: { memberId: string; reason: string }) =>
-      rejectRider(memberId, reason),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-riders'] });
-      setShowReject(null);
-      setRejectReason('');
-    },
   });
 
   const pendingCount = riders.filter((r) => r.status === 'pending').length;
@@ -193,29 +174,27 @@ export default function RiderManagement() {
         </div>
       ) : (
         <div className="space-y-3">
-          {paginatedRiders.map((rider: Rider) => {
+          {paginatedRiders.map((rider: FleetMember) => {
             const cfg = STATUS_CONFIG[rider.status] || STATUS_CONFIG.pending;
             return (
               <Card key={rider.id} className="flex flex-col gap-4 border border-brand-beige/10 p-5 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-orange/10 font-black text-brand-orange">
-                    {rider.name?.[0]?.toUpperCase() || '?'}
+                    {rider.driver_code?.[0]?.toUpperCase() || rider.user_id?.[0]?.toUpperCase() || '?'}
                   </div>
                   <div>
-                    <p className="font-black text-primary-brand">{rider.name || 'Unnamed'}</p>
+                    <p className="font-black text-primary-brand">
+                      {rider.driver_code || rider.user_id.slice(0, 8)}
+                    </p>
                     <div className="flex flex-wrap items-center gap-3 text-xs text-secondary-brand">
-                      <span className="flex items-center gap-1">
-                        <Mail className="h-3 w-3" /> {rider.email}
-                      </span>
-                      {rider.phone && (
-                        <span className="flex items-center gap-1">
-                          <Phone className="h-3 w-3" /> {rider.phone}
-                        </span>
+                      {rider.id_number && (
+                        <span>ID: {rider.id_number}</span>
                       )}
-                      {rider.vehicle_type && (
-                        <span className="flex items-center gap-1">
-                          <Bike className="h-3 w-3" /> {rider.vehicle_type}
-                        </span>
+                      {rider.license_no && (
+                        <span>License: {rider.license_no}</span>
+                      )}
+                      {rider.joined_at && (
+                        <span>Joined: {new Date(rider.joined_at).toLocaleDateString()}</span>
                       )}
                     </div>
                   </div>
@@ -225,24 +204,14 @@ export default function RiderManagement() {
                   <Badge className={`${cfg.bg} ${cfg.color}`}>{cfg.label}</Badge>
 
                   {rider.status === 'pending' && (
-                    <>
-                      <Button
-                        size="sm"
-                        className="h-8 rounded-lg bg-green-500 px-3 text-xs text-white hover:bg-green-600"
-                        onClick={() => approve.mutate(rider.id)}
-                        disabled={approve.isPending}
-                      >
-                        <Check className="mr-1 h-3 w-3" /> Approve
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-8 rounded-lg border-red-500/20 px-3 text-xs text-red-500 hover:bg-red-500/10"
-                        onClick={() => setShowReject(rider.id)}
-                      >
-                        <XCircle className="mr-1 h-3 w-3" /> Reject
-                      </Button>
-                    </>
+                    <Button
+                      size="sm"
+                      className="h-8 rounded-lg bg-green-500 px-3 text-xs text-white hover:bg-green-600"
+                      onClick={() => approve.mutate(rider.id)}
+                      disabled={approve.isPending}
+                    >
+                      <Check className="mr-1 h-3 w-3" /> Approve
+                    </Button>
                   )}
 
                   {rider.status === 'active' && (
@@ -295,39 +264,26 @@ export default function RiderManagement() {
             </div>
             <div className="space-y-3">
               <input
-                type="email"
-                placeholder="Email address *"
-                value={inviteForm.email}
-                onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
+                type="text"
+                placeholder="User ID (UUID) *"
+                value={inviteForm.user_id}
+                onChange={(e) => setInviteForm({ ...inviteForm, user_id: e.target.value })}
                 className="w-full rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
               />
               <input
                 type="text"
-                placeholder="Full name"
-                value={inviteForm.name}
-                onChange={(e) => setInviteForm({ ...inviteForm, name: e.target.value })}
+                placeholder="ID / Passport Number"
+                value={inviteForm.id_number}
+                onChange={(e) => setInviteForm({ ...inviteForm, id_number: e.target.value })}
                 className="w-full rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
               />
-              <div className="grid grid-cols-2 gap-3">
-                <input
-                  type="tel"
-                  placeholder="Phone"
-                  value={inviteForm.phone}
-                  onChange={(e) => setInviteForm({ ...inviteForm, phone: e.target.value })}
-                  className="rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
-                />
-                <select
-                  value={inviteForm.vehicle_type}
-                  onChange={(e) => setInviteForm({ ...inviteForm, vehicle_type: e.target.value })}
-                  className="rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
-                >
-                  <option value="">Vehicle type</option>
-                  <option value="motorcycle">Motorcycle</option>
-                  <option value="bicycle">Bicycle</option>
-                  <option value="car">Car</option>
-                  <option value="walk">On foot</option>
-                </select>
-              </div>
+              <input
+                type="text"
+                placeholder="Driving License Number"
+                value={inviteForm.license_no}
+                onChange={(e) => setInviteForm({ ...inviteForm, license_no: e.target.value })}
+                className="w-full rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
+              />
             </div>
             <div className="mt-4 flex gap-3">
               <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setShowInvite(false)}>
@@ -336,7 +292,7 @@ export default function RiderManagement() {
               <Button
                 className="flex-1 rounded-xl bg-brand-orange text-white"
                 onClick={() => invite.mutate()}
-                disabled={!inviteForm.email.trim() || invite.isPending}
+                disabled={!inviteForm.user_id.trim() || invite.isPending}
               >
                 {invite.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Send Invite
@@ -349,52 +305,6 @@ export default function RiderManagement() {
         </div>
       )}
 
-      {/* Reject Dialog */}
-      {showReject && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-brand-dark">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-black text-primary-brand">Reject Rider</h3>
-              <button
-                onClick={() => {
-                  setShowReject(null);
-                  setRejectReason('');
-                }}
-                className="rounded-lg p-1 hover:bg-brand-beige/10"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <textarea
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="Reason for rejection..."
-              rows={3}
-              className="mb-4 w-full rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
-            />
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                className="flex-1 rounded-xl"
-                onClick={() => {
-                  setShowReject(null);
-                  setRejectReason('');
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                className="flex-1 rounded-xl bg-red-500 text-white hover:bg-red-600"
-                onClick={() => reject.mutate({ memberId: showReject, reason: rejectReason })}
-                disabled={!rejectReason.trim() || reject.isPending}
-              >
-                {reject.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Reject
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

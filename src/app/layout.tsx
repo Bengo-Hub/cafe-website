@@ -3,6 +3,7 @@ import PageTransition from '@/components/layout/PageTransition';
 import { Providers } from '@/components/providers/Providers';
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { Toaster } from 'sonner';
 import './globals.css';
 
 const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist-sans' });
@@ -109,6 +110,7 @@ export default function RootLayout({
             </main>
             <Footer />
           </div>
+          <Toaster position="top-right" richColors closeButton />
         </Providers>
       </body>
     </html>

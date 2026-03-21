@@ -1,22 +1,25 @@
 'use client';
 
 import { useState } from 'react';
-import { Badge, Button, Card } from '@/components/ui';
+import { Badge, Button, Card, Pagination } from '@/components/ui';
 import { fetchMenuItems, type MenuItem } from '@/lib/api/catalog';
 import { recipesApi, type Recipe } from '@/lib/api/recipes';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { BookOpen, Link2, Loader2, Plus, Edit2, Trash2, X } from 'lucide-react';
 import RecipeForm from '@/components/forms/RecipeForm';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 
 export default function RecipesPage() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
 
   const { data: itemsRes, isLoading: itemsLoading } = useQuery({
-    queryKey: ['catalog-items-recipes'],
-    queryFn: () => fetchMenuItems({ limit: 500 }),
+    queryKey: ['catalog-items-recipes', page],
+    queryFn: () => fetchMenuItems({ limit: pageSize, page }),
   });
 
   const { data: recipes, isLoading: recipesLoading } = useQuery({
@@ -29,7 +32,9 @@ export default function RecipesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] });
       closeModal();
+      toast.success('Recipe created');
     },
+    onError: (err: Error) => toast.error(`Failed to create recipe: ${err.message}`),
   });
 
   const updateMutation = useMutation({
@@ -37,14 +42,18 @@ export default function RecipesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] });
       closeModal();
+      toast.success('Recipe updated');
     },
+    onError: (err: Error) => toast.error(`Failed to update recipe: ${err.message}`),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => recipesApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] });
+      toast.success('Recipe deleted');
     },
+    onError: (err: Error) => toast.error(`Failed to delete: ${err.message}`),
   });
 
   const items = itemsRes?.data?.data ?? [];
@@ -184,6 +193,15 @@ export default function RecipesPage() {
           </div>
         )}
       </section>
+
+      {/* Pagination */}
+      <Pagination
+        page={page}
+        pageSize={pageSize}
+        total={itemsRes?.data?.total ?? 0}
+        onPageChange={setPage}
+        itemLabel="items"
+      />
 
       {/* CRUD Modal */}
       <AnimatePresence>

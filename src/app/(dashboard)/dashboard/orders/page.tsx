@@ -168,7 +168,7 @@ export default function OrderManagement() {
     enabled: assignRiderOpen,
   });
 
-  const activeRiders = ridersRes?.riders ?? [];
+  const activeRiders = ridersRes ?? [];
 
   const handleAdvanceStatus = () => {
     if (!selectedOrder) return;

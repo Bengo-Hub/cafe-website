@@ -3,6 +3,7 @@
 import { Badge, Button, Card, Pagination } from '@/components/ui';
 import { fetchMenuItems, type MenuItem } from '@/lib/api/catalog';
 import { fetchBulkAvailability, type StockAvailability } from '@/lib/api/inventory';
+import { toast } from 'sonner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
@@ -40,14 +41,21 @@ export default function InventoryOverview() {
   const [adjustmentValue, setAdjustmentValue] = useState('0');
   const [adjustmentReason, setAdjustmentReason] = useState('Restock');
   
-  const [newItem, setNewItem] = useState({
+  const [newItem, setNewItem] = useState<{
+    sku: string;
+    name: string;
+    unit: string;
+    description?: string;
+    type?: string;
+    initial_quantity?: string | number;
+  }>({
     sku: '',
     name: '',
     unit: 'pcs',
     initial_quantity: '0',
   });
 
-  const [editingItem, setEditingItem] = useState<{sku: string, name: string, unit: string} | null>(null);
+  const [editingItem, setEditingItem] = useState<{sku: string; name: string; unit: string; description?: string; type?: string} | null>(null);
 
   useEffect(() => {
     if (skuParam) {
@@ -117,7 +125,9 @@ export default function InventoryOverview() {
       setIsAdjustmentModalOpen(false);
       setAdjustmentValue('0');
       setAdjustmentReason('Restock');
+      toast.success('Stock adjusted successfully');
     },
+    onError: (err: Error) => toast.error(`Stock adjustment failed: ${err.message}`),
   });
 
   const createMutation = useMutation({
@@ -126,7 +136,9 @@ export default function InventoryOverview() {
       queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
       setIsItemModalOpen(false);
       setNewItem({ sku: '', name: '', unit: 'pcs', initial_quantity: '0' });
+      toast.success('Inventory item created');
     },
+    onError: (err: Error) => toast.error(`Failed to create item: ${err.message}`),
   });
 
   const updateMutation = useMutation({
@@ -134,14 +146,18 @@ export default function InventoryOverview() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
       setEditingItem(null);
+      toast.success('Item updated');
     },
+    onError: (err: Error) => toast.error(`Failed to update: ${err.message}`),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (sku: string) => deleteInventoryItem(sku),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
+      toast.success('Item deleted');
     },
+    onError: (err: Error) => toast.error(`Failed to delete: ${err.message}`),
   });
 
   return (
@@ -398,7 +414,7 @@ export default function InventoryOverview() {
           e.preventDefault();
           createMutation.mutate({
             ...newItem,
-            initial_quantity: parseFloat(newItem.initial_quantity),
+            initial_quantity: parseFloat(String(newItem.initial_quantity ?? '0')),
           });
         }}
         submitLabel="Create Item"
