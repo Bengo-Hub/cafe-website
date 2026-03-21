@@ -201,7 +201,7 @@ export interface OutletSummary {
 }
 
 export async function fetchOutlets() {
-  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/cafes`;
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/outlets`;
   const res = await apiClient<ListResponse<OutletSummary>>(url, { headers: headers() });
   return { ...res, data: res.data?.data ?? [] };
 }

@@ -1,6 +1,6 @@
 /**
- * Public menu API — no authentication required.
- * Uses ordering-backend /menu/categories and /menu/items (not /catalog/*).
+ * Public catalog API — no authentication required.
+ * Uses ordering-backend /catalog/categories and /catalog/items.
  * For dashboard menu management, use catalog.ts (auth required).
  */
 
@@ -16,7 +16,7 @@ function tenantHeaders(): Record<string, string> {
   };
 }
 
-/** Public category from ordering-backend GET /menu/categories */
+/** Public category from ordering-backend GET /catalog/categories */
 export interface PublicMenuCategory {
   id: string;
   name: string;
@@ -26,7 +26,7 @@ export interface PublicMenuCategory {
   children?: PublicMenuCategory[];
 }
 
-/** Public menu item from ordering-backend GET /menu/items (camelCase) */
+/** Public catalog item from ordering-backend GET /catalog/items (camelCase) */
 export interface PublicMenuItemResponse {
   id: string;
   categoryId: string;
@@ -63,7 +63,7 @@ async function fetchPublic<T>(url: string): Promise<T> {
 
 /** Fetch public menu categories (no auth). */
 export async function fetchPublicMenuCategories(): Promise<PublicMenuCategory[]> {
-  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/menu/categories`;
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/categories`;
   const data = await fetchPublic<PublicMenuCategory[] | ListResponse<PublicMenuCategory>>(url);
   if (Array.isArray(data)) return data;
   return (data as ListResponse<PublicMenuCategory>).data ?? [];
@@ -82,7 +82,7 @@ export async function fetchPublicMenuItems(params?: {
   if (params?.category_id) search.set('category_id', params.category_id);
   if (params?.search) search.set('search', params.search);
   const qs = search.toString();
-  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/menu/items${qs ? `?${qs}` : ''}`;
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/items${qs ? `?${qs}` : ''}`;
   const data = await fetchPublic<ListResponse<PublicMenuItemResponse>>(url);
   return {
     items: data.data ?? [],

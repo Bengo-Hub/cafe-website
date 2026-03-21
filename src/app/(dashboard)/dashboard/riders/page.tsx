@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, Button, Card } from '@/components/ui';
+import { Badge, Button, Card, Pagination } from '@/components/ui';
 import {
   type Rider,
   type RiderStatus,
@@ -25,7 +25,9 @@ import {
   X,
   XCircle,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+
+const RIDERS_PAGE_SIZE = 15;
 
 const STATUS_CONFIG: Record<RiderStatus, { label: string; color: string; bg: string }> = {
   pending: { label: 'Pending', color: 'text-yellow-600', bg: 'bg-yellow-500/10' },
@@ -44,6 +46,7 @@ const STATUS_FILTERS = [
 
 export default function RiderManagement() {
   const queryClient = useQueryClient();
+  const [riderPage, setRiderPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
   const [showInvite, setShowInvite] = useState(false);
   const [showReject, setShowReject] = useState<string | null>(null);
@@ -95,6 +98,12 @@ export default function RiderManagement() {
 
   const pendingCount = riders.filter((r) => r.status === 'pending').length;
   const activeCount = riders.filter((r) => r.status === 'active').length;
+
+  // Client-side pagination
+  const paginatedRiders = useMemo(() => {
+    const start = (riderPage - 1) * RIDERS_PAGE_SIZE;
+    return riders.slice(start, start + RIDERS_PAGE_SIZE);
+  }, [riders, riderPage]);
 
   return (
     <div className="space-y-8">
@@ -184,7 +193,7 @@ export default function RiderManagement() {
         </div>
       ) : (
         <div className="space-y-3">
-          {riders.map((rider: Rider) => {
+          {paginatedRiders.map((rider: Rider) => {
             const cfg = STATUS_CONFIG[rider.status] || STATUS_CONFIG.pending;
             return (
               <Card key={rider.id} className="flex flex-col gap-4 border border-brand-beige/10 p-5 md:flex-row md:items-center md:justify-between">
@@ -264,6 +273,15 @@ export default function RiderManagement() {
           })}
         </div>
       )}
+
+      {/* Riders pagination */}
+      <Pagination
+        page={riderPage}
+        pageSize={RIDERS_PAGE_SIZE}
+        total={riders.length}
+        onPageChange={setRiderPage}
+        itemLabel="riders"
+      />
 
       {/* Invite Dialog */}
       {showInvite && (

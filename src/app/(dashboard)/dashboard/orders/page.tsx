@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, Button, Card } from '@/components/ui';
+import { Badge, Button, Card, Pagination } from '@/components/ui';
 import {
     type OrderStatus,
     cancelOrder,
@@ -132,7 +132,6 @@ export default function OrderManagement() {
   const listResponse = data?.data;
   const orders = listResponse?.data ?? [];
   const total = listResponse?.total ?? 0;
-  const totalPages = listResponse?.limit ? Math.ceil(total / listResponse.limit) : 1;
   const selectedOrder = orders.find((o) => o.id === selectedOrderId) ?? orders[0] ?? null;
 
   const statusMutation = useMutation({
@@ -332,31 +331,13 @@ export default function OrderManagement() {
               })}
             </div>
             {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="mt-3 flex items-center justify-between border-t border-brand-beige/10 pt-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-xl"
-                  disabled={page <= 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                >
-                  Previous
-                </Button>
-                <span className="text-xs font-semibold text-secondary-brand">
-                  Page {page} of {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-xl"
-                  disabled={page >= totalPages}
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                >
-                  Next
-                </Button>
-              </div>
-            )}
+            <Pagination
+              page={page}
+              pageSize={20}
+              total={total}
+              onPageChange={setPage}
+              itemLabel="orders"
+            />
           </div>
 
           {/* Order detail */}

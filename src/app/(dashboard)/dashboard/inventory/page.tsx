@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, Button, Card } from '@/components/ui';
+import { Badge, Button, Card, Pagination } from '@/components/ui';
 import { fetchMenuItems, type MenuItem } from '@/lib/api/catalog';
 import { fetchBulkAvailability, type StockAvailability } from '@/lib/api/inventory';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -30,6 +30,8 @@ export default function InventoryOverview() {
 
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'low' | 'out'>('all');
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
 
   // Modals state
   const [isAdjustmentModalOpen, setIsAdjustmentModalOpen] = useState(false);
@@ -53,10 +55,10 @@ export default function InventoryOverview() {
     }
   }, [skuParam]);
 
-  // Fetch all menu items to get SKUs
+  // Fetch menu items with server-side pagination
   const { data: itemsRes, isLoading: loadingItems } = useQuery({
-    queryKey: ['inventory-items'],
-    queryFn: () => fetchMenuItems({ limit: 200 }),
+    queryKey: ['inventory-items', page, search],
+    queryFn: () => fetchMenuItems({ limit: pageSize, page, search: search || undefined }),
   });
 
   const items = itemsRes?.data?.data ?? [];
@@ -349,6 +351,15 @@ export default function InventoryOverview() {
           </table>
         </div>
       )}
+
+      {/* Pagination */}
+      <Pagination
+        page={page}
+        pageSize={pageSize}
+        total={itemsRes?.data?.total ?? 0}
+        onPageChange={setPage}
+        itemLabel="inventory items"
+      />
 
       {/* Adjustment Modal */}
       <CrudModal

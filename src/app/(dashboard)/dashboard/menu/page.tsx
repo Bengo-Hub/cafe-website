@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, Button } from '@/components/ui';
+import { Badge, Button, Pagination } from '@/components/ui';
 import {
     type MenuCategory,
     type MenuItem,
@@ -13,6 +13,7 @@ import {
     deleteMenuItem,
 } from '@/lib/api/catalog';
 import { recipesApi } from '@/lib/api/recipes';
+import { getMediaUrl } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
     ChefHat,
@@ -284,7 +285,7 @@ export default function MenuManagement() {
                     <div className="flex items-center gap-3">
                       {item.imageUrl ? (
                         <div className="h-10 w-10 rounded-lg overflow-hidden border border-brand-beige/10">
-                          <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
+                          <img src={getMediaUrl(item.imageUrl)} alt={item.name} className="h-full w-full object-cover" />
                         </div>
                       ) : (
                         <div className="h-10 w-10 rounded-lg bg-brand-beige/10 flex items-center justify-center text-lg">
@@ -359,36 +360,14 @@ export default function MenuManagement() {
         </table>
 
         {/* Pagination */}
-        {itemsData && itemsData.total > pageSize && (
-          <div className="flex items-center justify-between border-t border-brand-beige/10 bg-brand-beige/5 px-6 py-4">
-            <p className="text-xs text-secondary-brand">
-              Showing <span className="font-bold text-primary-brand">{(page - 1) * pageSize + 1}</span> to{' '}
-              <span className="font-bold text-primary-brand">
-                {Math.min(page * pageSize, itemsData.total)}
-              </span>{' '}
-              of <span className="font-bold text-primary-brand">{itemsData.total}</span> items
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page === 1}
-                onClick={() => setPage(p => p - 1)}
-                className="h-8 rounded-lg border-brand-beige/10 text-xs"
-              >
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page * pageSize >= itemsData.total}
-                onClick={() => setPage(p => p + 1)}
-                className="h-8 rounded-lg border-brand-beige/10 text-xs"
-              >
-                Next
-              </Button>
-            </div>
-          </div>
+        {itemsData && (
+          <Pagination
+            page={page}
+            pageSize={pageSize}
+            total={itemsData.total}
+            onPageChange={setPage}
+            itemLabel="items"
+          />
         )}
       </div>
 

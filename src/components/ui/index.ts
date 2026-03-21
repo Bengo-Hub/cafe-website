@@ -7,4 +7,4 @@ export * from './Dialog';
 export * from './LoadingSpinner';
 export * from './Skeleton';
 export * from './Switch';
-
+export * from './Pagination';
