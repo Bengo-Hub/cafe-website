@@ -1,8 +1,17 @@
 'use client';
 
 import { Badge, Button, Card, Pagination } from '@/components/ui';
-import { fetchMenuItems, type MenuItem } from '@/lib/api/catalog';
-import { fetchBulkAvailability, type StockAvailability } from '@/lib/api/inventory';
+import {
+  fetchInventoryItems,
+  fetchBulkAvailability,
+  fetchInventorySummary,
+  type InventoryItem,
+  type StockAvailability,
+  adjustStock,
+  createInventoryItem,
+  deleteInventoryItem,
+  updateInventoryItem,
+} from '@/lib/api/inventory';
 import { toast } from 'sonner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -20,7 +29,6 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CrudModal } from '@/components/dashboard/CrudModal';
-import { adjustStock, createInventoryItem, deleteInventoryItem, updateInventoryItem } from '@/lib/api/inventory';
 import { StockAdjustmentForm } from '@/components/forms/StockAdjustmentForm';
 import { InventoryItemForm } from '@/components/forms/InventoryItemForm';
 
@@ -40,22 +48,30 @@ export default function InventoryOverview() {
   const [selectedSku, setSelectedSku] = useState<string | null>(null);
   const [adjustmentValue, setAdjustmentValue] = useState('0');
   const [adjustmentReason, setAdjustmentReason] = useState('Restock');
-  
+
   const [newItem, setNewItem] = useState<{
-    sku: string;
     name: string;
-    unit: string;
     description?: string;
+    category_id?: string;
+    unit_id?: string;
     type?: string;
     initial_quantity?: string | number;
+    reorder_level?: string | number;
   }>({
-    sku: '',
     name: '',
-    unit: 'pcs',
-    initial_quantity: '0',
+    type: 'GOODS',
+    initial_quantity: '1',
+    reorder_level: '1',
   });
 
-  const [editingItem, setEditingItem] = useState<{sku: string; name: string; unit: string; description?: string; type?: string} | null>(null);
+  const [editingItem, setEditingItem] = useState<{
+    sku?: string;
+    name: string;
+    description?: string;
+    category_id?: string;
+    unit_id?: string;
+    type?: string;
+  } | null>(null);
 
   useEffect(() => {
     if (skuParam) {
@@ -63,21 +79,20 @@ export default function InventoryOverview() {
     }
   }, [skuParam]);
 
-  // Fetch menu items with server-side pagination
-  const { data: itemsRes, isLoading: loadingItems } = useQuery({
-    queryKey: ['inventory-items', page, search],
-    queryFn: () => fetchMenuItems({ limit: pageSize, page, search: search || undefined }),
+  // Fetch inventory items from inventory-api
+  const { data: itemsRes, isLoading: loadingItems, refetch } = useQuery({
+    queryKey: ['inventory-items'],
+    queryFn: fetchInventoryItems,
   });
 
-  const items = itemsRes?.data?.data ?? [];
-  const skus = items.map((i: MenuItem) => i.sku).filter(Boolean);
+  const allItems: InventoryItem[] = itemsRes?.data ?? [];
 
   // Fetch stock availability for all SKUs
+  const skus = allItems.map((i) => i.sku).filter(Boolean);
   const {
     data: stockData,
     isLoading: loadingStock,
     isError,
-    refetch,
   } = useQuery({
     queryKey: ['inventory-stock', skus],
     queryFn: () => fetchBulkAvailability(skus),
@@ -85,35 +100,45 @@ export default function InventoryOverview() {
     refetchInterval: 60_000,
   });
 
-  // Merge items with stock data
+  // Fetch summary for stats
+  const { data: summary } = useQuery({
+    queryKey: ['inventory-summary'],
+    queryFn: fetchInventorySummary,
+  });
+
+  // Merge items with stock data, apply filters and pagination
   const inventory = useMemo(() => {
     const stockMap = new Map<string, StockAvailability>();
     stockData?.forEach((s) => stockMap.set(s.sku, s));
 
-    return items
-      .map((item: MenuItem) => ({
-        ...item,
-        stock: stockMap.get(item.sku) || null,
-        quantity: stockMap.get(item.sku)?.quantity ?? 0,
-        reserved: stockMap.get(item.sku)?.reserved ?? 0,
-      }))
+    return allItems
+      .map((item) => {
+        const stock = stockMap.get(item.sku);
+        return {
+          ...item,
+          stock: stock || null,
+          quantity: stock?.available ?? 0,
+          on_hand: stock?.on_hand ?? 0,
+          reserved: stock?.reserved ?? 0,
+          unit_of_measure: stock?.unit_of_measure || '',
+        };
+      })
       .filter((item) => {
-        if (search && !item.name.toLowerCase().includes(search.toLowerCase())) return false;
+        if (search && !item.name.toLowerCase().includes(search.toLowerCase()) &&
+            !item.sku.toLowerCase().includes(search.toLowerCase())) return false;
         if (filter === 'low') return item.quantity > 0 && item.quantity <= 10;
         if (filter === 'out') return item.quantity === 0;
         return true;
       });
-  }, [items, stockData, search, filter]);
+  }, [allItems, stockData, search, filter]);
 
-  const totalItems = items.length;
-  const lowStockCount = items.filter((i: MenuItem) => {
-    const s = stockData?.find((s) => s.sku === i.sku);
-    return s && s.quantity > 0 && s.quantity <= 10;
-  }).length;
-  const outOfStockCount = items.filter((i: MenuItem) => {
-    const s = stockData?.find((s) => s.sku === i.sku);
-    return s && s.quantity === 0;
-  }).length;
+  // Client-side pagination
+  const totalFiltered = inventory.length;
+  const paginatedInventory = inventory.slice((page - 1) * pageSize, page * pageSize);
+
+  const totalItems = summary?.total_items ?? allItems.length;
+  const lowStockCount = summary?.low_stock_items ?? 0;
+  const outOfStockCount = summary?.out_of_stock_items ?? 0;
 
   const isLoading = loadingItems || loadingStock;
 
@@ -122,6 +147,7 @@ export default function InventoryOverview() {
       adjustStock(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory-stock'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-summary'] });
       setIsAdjustmentModalOpen(false);
       setAdjustmentValue('0');
       setAdjustmentReason('Restock');
@@ -134,8 +160,9 @@ export default function InventoryOverview() {
     mutationFn: (data: any) => createInventoryItem(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-summary'] });
       setIsItemModalOpen(false);
-      setNewItem({ sku: '', name: '', unit: 'pcs', initial_quantity: '0' });
+      setNewItem({ name: '', type: 'GOODS', initial_quantity: '1', reorder_level: '1' });
       toast.success('Inventory item created');
     },
     onError: (err: Error) => toast.error(`Failed to create item: ${err.message}`),
@@ -155,6 +182,7 @@ export default function InventoryOverview() {
     mutationFn: (sku: string) => deleteInventoryItem(sku),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-summary'] });
       toast.success('Item deleted');
     },
     onError: (err: Error) => toast.error(`Failed to delete: ${err.message}`),
@@ -252,7 +280,7 @@ export default function InventoryOverview() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary-brand opacity-40" />
           <input
             type="text"
-            placeholder="Search by name..."
+            placeholder="Search by name or SKU..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="h-10 w-56 rounded-xl border border-brand-beige/10 bg-brand-beige/5 pl-10 pr-4 text-sm text-primary-brand focus:border-brand-orange/50 focus:outline-none"
@@ -276,7 +304,7 @@ export default function InventoryOverview() {
             Retry
           </Button>
         </div>
-      ) : inventory.length === 0 ? (
+      ) : paginatedInventory.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20">
           <Box className="mb-3 h-10 w-10 text-secondary-brand opacity-30" />
           <p className="font-bold text-primary-brand">No items found</p>
@@ -288,7 +316,7 @@ export default function InventoryOverview() {
               <tr className="border-b border-brand-beige/10 text-left text-xs font-black uppercase tracking-widest text-secondary-brand opacity-60">
                 <th className="pb-3 pr-4">Item</th>
                 <th className="pb-3 pr-4">SKU</th>
-                <th className="pb-3 pr-4">Price</th>
+                <th className="pb-3 pr-4">Type</th>
                 <th className="pb-3 pr-4">In Stock</th>
                 <th className="pb-3 pr-4">Reserved</th>
                 <th className="pb-3 pr-4">Status</th>
@@ -296,7 +324,7 @@ export default function InventoryOverview() {
               </tr>
             </thead>
             <tbody>
-              {inventory.map((item) => {
+              {paginatedInventory.map((item) => {
                 const isLow = item.quantity > 0 && item.quantity <= 10;
                 const isOut = item.quantity === 0;
                 return (
@@ -306,16 +334,21 @@ export default function InventoryOverview() {
                   >
                     <td className="py-3 pr-4">
                       <p className="font-bold text-primary-brand">{item.name}</p>
+                      {item.description && (
+                        <p className="text-xs text-secondary-brand truncate max-w-[200px]">{item.description}</p>
+                      )}
                     </td>
                     <td className="py-3 pr-4 font-mono text-xs text-secondary-brand">{item.sku}</td>
-                    <td className="py-3 pr-4 font-black text-primary-brand">
-                      {item.currency} {item.basePrice.toLocaleString()}
+                    <td className="py-3 pr-4">
+                      <Badge className="bg-brand-beige/10 text-secondary-brand text-[10px]">
+                        {item.type}
+                      </Badge>
                     </td>
                     <td className="py-3 pr-4">
                       <span
                         className={`font-black ${isOut ? 'text-red-500' : isLow ? 'text-yellow-600' : 'text-green-600'}`}
                       >
-                        {item.quantity} {item.stock?.unit || 'pcs'}
+                        {item.quantity} {item.unit_of_measure || 'pcs'}
                       </span>
                     </td>
                     <td className="py-3 pr-4 text-secondary-brand">{item.reserved}</td>
@@ -341,7 +374,14 @@ export default function InventoryOverview() {
                           <Plus className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => setEditingItem({ sku: item.sku, name: item.name, unit: item.stock?.unit || 'pcs' })}
+                          onClick={() => setEditingItem({
+                            sku: item.sku,
+                            name: item.name,
+                            description: item.description,
+                            category_id: item.category_id,
+                            unit_id: item.unit_id,
+                            type: item.type,
+                          })}
                           className="p-2 rounded-lg hover:bg-brand-beige/10 text-secondary-brand"
                           title="Edit Details"
                         >
@@ -372,7 +412,7 @@ export default function InventoryOverview() {
       <Pagination
         page={page}
         pageSize={pageSize}
-        total={itemsRes?.data?.total ?? 0}
+        total={totalFiltered}
         onPageChange={setPage}
         itemLabel="inventory items"
       />
@@ -409,12 +449,13 @@ export default function InventoryOverview() {
         isOpen={isItemModalOpen}
         onClose={() => setIsItemModalOpen(false)}
         title="Add Inventory Item"
-        description="Registry a new product SKU in the inventory system"
+        description="Register a new product in the inventory system"
         onSubmit={(e) => {
           e.preventDefault();
           createMutation.mutate({
             ...newItem,
-            initial_quantity: parseFloat(String(newItem.initial_quantity ?? '0')),
+            initial_quantity: parseFloat(String(newItem.initial_quantity ?? '1')),
+            reorder_level: parseFloat(String(newItem.reorder_level ?? '1')),
           });
         }}
         submitLabel="Create Item"
@@ -436,18 +477,24 @@ export default function InventoryOverview() {
           onSubmit={(e) => {
             e.preventDefault();
             updateMutation.mutate({
-              sku: editingItem.sku,
-              data: { name: editingItem.name, unit: editingItem.unit }
+              sku: editingItem.sku!,
+              data: {
+                name: editingItem.name,
+                description: editingItem.description,
+                category_id: editingItem.category_id,
+                unit_id: editingItem.unit_id,
+                type: editingItem.type,
+              },
             });
           }}
           submitLabel="Save Changes"
           isSubmitting={updateMutation.isPending}
         >
-        <InventoryItemForm
-          data={editingItem}
-          onChange={(data) => setEditingItem(data)}
-          isEdit
-        />
+          <InventoryItemForm
+            data={editingItem}
+            onChange={(data) => setEditingItem(data)}
+            isEdit
+          />
         </CrudModal>
       )}
     </div>

@@ -25,13 +25,46 @@ function headers(): Record<string, string> {
 
 // Types
 
-export interface StockAvailability {
+export interface InventoryItem {
+  id: string;
   sku: string;
-  available: boolean;
-  quantity: number;
+  name: string;
+  description?: string;
+  category_id?: string;
+  unit_id?: string;
+  type: 'GOODS' | 'SERVICE' | 'RECIPE' | 'INGREDIENT' | 'VOUCHER' | 'EQUIPMENT';
+  is_active: boolean;
+  image_url?: string;
+  metadata?: Record<string, unknown>;
+  initial_quantity?: number;
+  reorder_level?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InventoryCategory {
+  id: string;
+  name: string;
+  code?: string;
+  description?: string;
+  is_active: boolean;
+}
+
+export interface StockAvailability {
+  item_id: string;
+  sku: string;
+  warehouse_id: string;
+  on_hand: number;
+  available: number;
   reserved: number;
-  unit: string;
-  last_updated: string;
+  unit_of_measure: string;
+  updated_at: string;
+}
+
+export interface InventorySummary {
+  total_items: number;
+  low_stock_items: number;
+  out_of_stock_items: number;
 }
 
 export interface Reservation {
@@ -44,7 +77,22 @@ export interface Reservation {
   created_at: string;
 }
 
-// API functions
+// Unit API
+export interface Unit {
+  id: string;
+  name: string;
+  abbreviation?: string;
+  is_active?: boolean;
+}
+
+// ─── Inventory Items ────────────────────────────────────────────────────
+
+export async function fetchInventoryItems(): Promise<{ data: InventoryItem[]; total: number }> {
+  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/items`;
+  const resp = await fetch(url, { headers: headers() });
+  if (!resp.ok) throw new Error(`Fetch inventory items failed: ${resp.statusText}`);
+  return resp.json();
+}
 
 export async function fetchStockAvailability(sku: string): Promise<StockAvailability> {
   const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/items/${sku}`;
@@ -64,35 +112,25 @@ export async function fetchBulkAvailability(skus: string[]): Promise<StockAvaila
   return resp.json();
 }
 
-export async function fetchReservationsByOrder(orderId: string): Promise<Reservation[]> {
-  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/reservations?order_id=${orderId}`;
+export async function fetchInventorySummary(): Promise<InventorySummary> {
+  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/summary`;
   const resp = await fetch(url, { headers: headers() });
-  if (!resp.ok) throw new Error(`Reservations fetch failed: ${resp.statusText}`);
-  return resp.json();
-}
-
-export async function adjustStock(data: {
-  sku: string;
-  adjustment: number;
-  reason: string;
-  reference?: string;
-}) {
-  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/adjust`;
-  const resp = await fetch(url, {
-    method: 'POST',
-    headers: headers(),
-    body: JSON.stringify(data),
-  });
-  if (!resp.ok) throw new Error(`Stock adjustment failed: ${resp.statusText}`);
+  if (!resp.ok) throw new Error(`Fetch inventory summary failed: ${resp.statusText}`);
   return resp.json();
 }
 
 export async function createInventoryItem(data: {
-  sku: string;
+  sku?: string;
   name: string;
-  unit: string;
+  description?: string;
+  category_id?: string;
+  unit_id?: string;
+  type?: string;
+  is_active?: boolean;
+  image_url?: string;
   initial_quantity?: number;
-}) {
+  reorder_level?: number;
+}): Promise<InventoryItem> {
   const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/items`;
   const resp = await fetch(url, {
     method: 'POST',
@@ -105,8 +143,13 @@ export async function createInventoryItem(data: {
 
 export async function updateInventoryItem(sku: string, data: {
   name?: string;
-  unit?: string;
-}) {
+  description?: string;
+  category_id?: string;
+  unit_id?: string;
+  type?: string;
+  is_active?: boolean;
+  image_url?: string;
+}): Promise<InventoryItem> {
   const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/items/${sku}`;
   const resp = await fetch(url, {
     method: 'PUT',
@@ -127,12 +170,43 @@ export async function deleteInventoryItem(sku: string) {
   return resp.json();
 }
 
-// Unit API
-export interface Unit {
-  id: string;
-  name: string;
-  abbreviation?: string;
+// ─── Stock Adjustments ──────────────────────────────────────────────────
+
+export async function adjustStock(data: {
+  sku: string;
+  adjustment: number;
+  reason: string;
+  reference?: string;
+}) {
+  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/adjust`;
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: headers(),
+    body: JSON.stringify(data),
+  });
+  if (!resp.ok) throw new Error(`Stock adjustment failed: ${resp.statusText}`);
+  return resp.json();
 }
+
+// ─── Reservations ───────────────────────────────────────────────────────
+
+export async function fetchReservationsByOrder(orderId: string): Promise<Reservation[]> {
+  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/reservations?order_id=${orderId}`;
+  const resp = await fetch(url, { headers: headers() });
+  if (!resp.ok) throw new Error(`Reservations fetch failed: ${resp.statusText}`);
+  return resp.json();
+}
+
+// ─── Categories ─────────────────────────────────────────────────────────
+
+export async function fetchInventoryCategories(): Promise<{ data: InventoryCategory[]; total: number }> {
+  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/categories`;
+  const resp = await fetch(url, { headers: headers() });
+  if (!resp.ok) throw new Error(`Fetch categories failed: ${resp.statusText}`);
+  return resp.json();
+}
+
+// ─── Units ──────────────────────────────────────────────────────────────
 
 export async function fetchUnits(): Promise<Unit[]> {
   const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/units`;

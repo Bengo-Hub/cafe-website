@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,8 +6,7 @@ import * as z from 'zod';
 import { Plus, Trash2, Search, Loader2 } from 'lucide-react';
 import { Button, Input, Card } from '@/components/ui';
 import { type Recipe } from '@/lib/api/recipes';
-import { api } from '@/lib/api/client';
-import { fetchUnits, createUnit, type Unit } from '@/lib/api/inventory';
+import { fetchUnits, createUnit, fetchInventoryItems, type Unit, type InventoryItem } from '@/lib/api/inventory';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CrudModal } from '@/components/dashboard/CrudModal';
 
@@ -36,7 +35,6 @@ interface RecipeFormProps {
 
 export default function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps) {
   const queryClient = useQueryClient();
-  const [inventoryItems, setInventoryItems] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddUnit, setShowAddUnit] = useState(false);
   const [newUnit, setNewUnit] = useState({ name: '', abbreviation: '' });
@@ -64,6 +62,12 @@ export default function RecipeForm({ initialData, onSubmit, isLoading }: RecipeF
     queryFn: fetchUnits,
   });
 
+  const { data: inventoryData } = useQuery({
+    queryKey: ['inventory-items'],
+    queryFn: fetchInventoryItems,
+  });
+  const inventoryItems: InventoryItem[] = inventoryData?.data ?? [];
+
   const addUnitMutation = useMutation({
     mutationFn: createUnit,
     onSuccess: (unit) => {
@@ -79,15 +83,8 @@ export default function RecipeForm({ initialData, onSubmit, isLoading }: RecipeF
     }
   });
 
-  useEffect(() => {
-    // Fetch inventory items for selection
-    api.get('/inventory/items').then(res => {
-      setInventoryItems(res.data.items || []);
-    });
-  }, []);
-
-  const filteredInventory = inventoryItems.filter(item => 
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredInventory = inventoryItems.filter((item: InventoryItem) =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.sku.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -228,7 +225,7 @@ export default function RecipeForm({ initialData, onSubmit, isLoading }: RecipeF
                     item_id: item.id,
                     item_sku: item.sku,
                     quantity: 1,
-                    unit_of_measure: item.unit_of_measure || 'PIECE',
+                    unit_of_measure: 'PIECE',
                   });
                   setSearchTerm('');
                 }}
@@ -239,7 +236,7 @@ export default function RecipeForm({ initialData, onSubmit, isLoading }: RecipeF
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] bg-brand-beige/10 px-2 py-0.5 rounded-full font-bold text-secondary-brand">
-                    {item.unit_of_measure}
+                    {item.type}
                   </span>
                   <Plus className="h-4 w-4 text-brand-orange" />
                 </div>

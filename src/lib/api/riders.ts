@@ -73,12 +73,13 @@ export async function fetchRider(memberId: string): Promise<FleetMember> {
  * Invite a rider to the fleet. Creates a FleetMember in "pending" status.
  * POST /api/v1/{tenant}/fleet/members
  *
- * The backend expects: { user_id, fleet_id?, id_number?, license_no? }
- * - user_id is required (UUID of an existing user in the identity system)
- * - fleet_id is optional (auto-resolved to the tenant's default fleet)
+ * Supports two formats:
+ * - Simplified: { email, id_number } — creates stub user if needed
+ * - Legacy: { user_id, fleet_id?, id_number?, license_no? }
  */
 export async function inviteRider(data: {
-  user_id: string;
+  email?: string;
+  user_id?: string;
   fleet_id?: string;
   id_number?: string;
   license_no?: string;

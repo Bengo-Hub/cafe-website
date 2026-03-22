@@ -45,7 +45,7 @@ export default function RiderManagement() {
   const [riderPage, setRiderPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
   const [showInvite, setShowInvite] = useState(false);
-  const [inviteForm, setInviteForm] = useState({ user_id: '', id_number: '', license_no: '' });
+  const [inviteForm, setInviteForm] = useState({ email: '', id_number: '' });
 
   const { data: riders = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['admin-riders', statusFilter],
@@ -56,14 +56,13 @@ export default function RiderManagement() {
   const invite = useMutation({
     mutationFn: () =>
       inviteRider({
-        user_id: inviteForm.user_id,
+        email: inviteForm.email,
         id_number: inviteForm.id_number || undefined,
-        license_no: inviteForm.license_no || undefined,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-riders'] });
       setShowInvite(false);
-      setInviteForm({ user_id: '', id_number: '', license_no: '' });
+      setInviteForm({ email: '', id_number: '' });
     },
   });
 
@@ -264,24 +263,18 @@ export default function RiderManagement() {
             </div>
             <div className="space-y-3">
               <input
-                type="text"
-                placeholder="User ID (UUID) *"
-                value={inviteForm.user_id}
-                onChange={(e) => setInviteForm({ ...inviteForm, user_id: e.target.value })}
+                type="email"
+                placeholder="Rider Email *"
+                value={inviteForm.email}
+                onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
                 className="w-full rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
+                required
               />
               <input
                 type="text"
                 placeholder="ID / Passport Number"
                 value={inviteForm.id_number}
                 onChange={(e) => setInviteForm({ ...inviteForm, id_number: e.target.value })}
-                className="w-full rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
-              />
-              <input
-                type="text"
-                placeholder="Driving License Number"
-                value={inviteForm.license_no}
-                onChange={(e) => setInviteForm({ ...inviteForm, license_no: e.target.value })}
                 className="w-full rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-3 text-sm focus:border-brand-orange/50 focus:outline-none"
               />
             </div>
@@ -292,7 +285,7 @@ export default function RiderManagement() {
               <Button
                 className="flex-1 rounded-xl bg-brand-orange text-white"
                 onClick={() => invite.mutate()}
-                disabled={!inviteForm.user_id.trim() || invite.isPending}
+                disabled={!inviteForm.email.trim() || invite.isPending}
               >
                 {invite.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Send Invite
