@@ -311,8 +311,8 @@ export default function RecipeForm({ initialData, onSubmit, isLoading }: RecipeF
       </CrudModal>
 
       <div className="flex justify-end gap-3 pt-4">
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           disabled={isLoading}
           className="rounded-xl bg-brand-orange text-white h-12 px-8 font-black flex items-center gap-2"
         >

@@ -173,6 +173,7 @@ export async function createMenuItem(data: {
 export async function updateMenuItem(
   itemId: string,
   data: Partial<{
+    categoryId: string;
     name: string;
     description: string;
     basePrice: number;

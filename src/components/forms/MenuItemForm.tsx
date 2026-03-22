@@ -60,7 +60,6 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
   const { data: inventoryData } = useQuery({
     queryKey: ['inventory-items'],
     queryFn: fetchInventoryItems,
-    enabled: !isEdit, // Only fetch for create mode (BOM setup)
   });
   const inventoryItems: InventoryItem[] = inventoryData?.data ?? [];
 
@@ -248,9 +247,8 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
         </div>
       )}
 
-      {/* Recipe Setup + BOM Ingredients (Create mode only) */}
-      {!isEdit && (
-        <div className="pt-4 border-t border-brand-beige/10 space-y-4">
+      {/* Recipe Setup + BOM Ingredients */}
+      <div className="pt-4 border-t border-brand-beige/10 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <BookOpen className="h-4 w-4 text-brand-orange" />
@@ -360,7 +358,6 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
             )}
           </div>
         </div>
-      )}
 
       {/* Add Category Modal */}
       <CrudModal

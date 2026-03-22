@@ -94,6 +94,11 @@ export default function MenuManagement() {
   const itemsData = itemsRes?.data;
   const items = itemsData?.data ?? [];
 
+  const { data: allRecipes = [] } = useQuery({
+    queryKey: ['recipes'],
+    queryFn: () => recipesApi.list(),
+  });
+
   const toggleAvailability = useMutation({
     mutationFn: ({ id, available }: { id: string; available: boolean }) =>
       updateMenuItem(id, { isAvailable: available }),
@@ -205,9 +210,12 @@ export default function MenuManagement() {
   });
 
   const saveEdit = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       if (!editingItem) return Promise.reject();
-      return updateMenuItem(editingItem.id, {
+
+      // Update the menu item (including category reassignment)
+      const result = await updateMenuItem(editingItem.id, {
+        categoryId: editingItem.categoryId,
         name: editingItem.name,
         description: editingItem.description,
         basePrice: Number(editingItem.basePrice),
@@ -216,9 +224,48 @@ export default function MenuManagement() {
         isFeatured: editingItem.isFeatured,
         leadTimeMinutes: editingItem.leadTimeMinutes,
       });
+
+      // Update recipe BOM if ingredients were modified
+      const bomIngredients = ((editingItem as any).recipe_ingredients ?? []).map((ing: any, idx: number) => ({
+        item_id: ing.item_id,
+        item_sku: ing.item_sku,
+        quantity: ing.quantity,
+        unit_of_measure: ing.unit_of_measure,
+        display_order: idx,
+      }));
+
+      if (bomIngredients.length > 0 && editingItem.sku) {
+        try {
+          const existingRecipes = await recipesApi.list();
+          const existingRecipe = existingRecipes.find(r => r.sku === editingItem.sku);
+
+          if (existingRecipe?.id) {
+            await recipesApi.update(existingRecipe.id, {
+              ...existingRecipe,
+              output_qty: (editingItem as any).recipe_output_qty ?? existingRecipe.output_qty,
+              unit_of_measure: (editingItem as any).recipe_unit ?? existingRecipe.unit_of_measure,
+              ingredients: bomIngredients,
+            });
+          } else {
+            await recipesApi.create({
+              name: editingItem.name,
+              sku: editingItem.sku,
+              output_qty: (editingItem as any).recipe_output_qty ?? 1,
+              unit_of_measure: (editingItem as any).recipe_unit ?? 'PORTION',
+              ingredients: bomIngredients,
+              is_active: true,
+            });
+          }
+        } catch {
+          // Recipe update is best-effort — menu item was already saved
+        }
+      }
+
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['catalog-items'] });
+      queryClient.invalidateQueries({ queryKey: ['recipes'] });
       setEditingItem(null);
       toast.success('Item updated');
     },
@@ -405,7 +452,21 @@ export default function MenuManagement() {
                           <ExternalLink className="h-4 w-4" />
                         </Link>
                       )}
-                      <button onClick={() => setEditingItem({ ...item })} className="rounded-lg p-2 hover:bg-brand-beige/10 transition-colors" title="Edit">
+                      <button onClick={() => {
+                          const recipe = allRecipes.find(r => r.sku === item.sku);
+                          setEditingItem({
+                            ...item,
+                            recipe_output_qty: recipe?.output_qty ?? 1,
+                            recipe_unit: recipe?.unit_of_measure ?? 'PORTION',
+                            recipe_ingredients: recipe?.ingredients?.map(ing => ({
+                              item_id: ing.item_id,
+                              item_sku: ing.item_sku,
+                              item_name: ing.item_sku,
+                              quantity: ing.quantity,
+                              unit_of_measure: ing.unit_of_measure,
+                            })) ?? [],
+                          } as any);
+                        }} className="rounded-lg p-2 hover:bg-brand-beige/10 transition-colors" title="Edit">
                         <Edit2 className="h-4 w-4 text-secondary-brand" />
                       </button>
                       <button
