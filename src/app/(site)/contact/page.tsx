@@ -2,9 +2,11 @@
 
 import { Button, Input } from '@/components/ui';
 import { motion } from 'framer-motion';
-import { Clock, Mail, MapPin, Phone, Send } from 'lucide-react';
+import { CheckCircle, Clock, Loader2, Mail, MapPin, Phone, Send, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
+
+type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -13,12 +15,32 @@ export default function ContactPage() {
     subject: '',
     message: '',
   });
+  const [status, setStatus] = useState<FormStatus>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement form submission
-    alert('Thank you for your message! We will get back to you soon.');
-    setFormData({ name: '', email: '', subject: '', message: '' });
+    setStatus('submitting');
+    setErrorMessage('');
+
+    try {
+      const resp = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!resp.ok) {
+        const data = await resp.json().catch(() => ({ error: 'Something went wrong' }));
+        throw new Error(data.error || 'Failed to send message');
+      }
+
+      setStatus('success');
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (err: any) {
+      setStatus('error');
+      setErrorMessage(err.message || 'Failed to send message. Please try again.');
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -155,12 +177,28 @@ export default function ContactPage() {
                         className="w-full rounded-3xl border-none bg-white/10 p-6 text-white placeholder:text-white/40 focus:ring-2 focus:ring-brand-orange/50 transition-all"
                       />
                     </div>
+                    {status === 'success' && (
+                      <div className="flex items-center gap-3 rounded-2xl bg-green-500/20 border border-green-500/30 p-4 text-green-300">
+                        <CheckCircle className="h-5 w-5 flex-shrink-0" />
+                        <p className="text-sm font-medium">Thank you for your message! We'll get back to you soon.</p>
+                      </div>
+                    )}
+                    {status === 'error' && (
+                      <div className="flex items-center gap-3 rounded-2xl bg-red-500/20 border border-red-500/30 p-4 text-red-300">
+                        <XCircle className="h-5 w-5 flex-shrink-0" />
+                        <p className="text-sm font-medium">{errorMessage}</p>
+                      </div>
+                    )}
                     <Button
                       type="submit"
-                      className="h-16 w-full rounded-full bg-brand-orange text-sm font-black uppercase tracking-widest text-white hover:bg-brand-burnt shadow-xl shadow-brand-orange/20 transition-all hover:scale-[1.02]"
+                      disabled={status === 'submitting'}
+                      className="h-16 w-full rounded-full bg-brand-orange text-sm font-black uppercase tracking-widest text-white hover:bg-brand-burnt shadow-xl shadow-brand-orange/20 transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Send className="mr-2 h-5 w-5" />
-                      Send Message
+                      {status === 'submitting' ? (
+                        <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Sending...</>
+                      ) : (
+                        <><Send className="mr-2 h-5 w-5" /> Send Message</>
+                      )}
                     </Button>
                   </form>
                 </div>
