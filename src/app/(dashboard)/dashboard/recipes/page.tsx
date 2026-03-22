@@ -229,7 +229,8 @@ export default function RecipesPage() {
                 </p>
               </div>
 
-              <RecipeForm 
+              <RecipeForm
+                key={editingRecipe?.id ?? editingRecipe?.sku ?? 'new'}
                 initialData={editingRecipe || undefined}
                 onSubmit={handleFormSubmit}
                 isLoading={createMutation.isPending || updateMutation.isPending}

@@ -214,7 +214,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </div>
                 <div className="hidden sm:block text-left">
                   <p className="text-xs font-black text-foreground truncate max-w-[120px] uppercase tracking-tight">{displayName.split(' ')[0]}</p>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{(rbacUser as any)?.role || 'Admin'}</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{(rbacUser as any)?.role || user?.role || 'Staff'}</p>
                 </div>
                 <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${profileOpen ? 'rotate-180' : ''}`} />
               </button>

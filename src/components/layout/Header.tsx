@@ -62,6 +62,10 @@ export function Header() {
   }, [lastScrollY]);
 
   const isDashboard = pathname?.startsWith('/dashboard') ?? false;
+
+  // Dashboard has its own header — don't render the public site header
+  if (isDashboard) return null;
+
   const navigation = [
     { name: 'Home', href: '/' },
     { name: 'Menu', href: '/menu' },
