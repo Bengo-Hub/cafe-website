@@ -3,10 +3,12 @@
 import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
 import { Button } from '@/components/ui';
 import { useAuth } from '@/hooks/use-auth';
+import { useMe } from '@/hooks/use-me';
 import type { UserProfile } from '@/lib/store/auth-store';
 import { useThemeStore } from '@/lib/store/theme-store';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
+    Bell,
     ChevronDown,
     Facebook,
     Instagram,
@@ -15,6 +17,7 @@ import {
     Moon,
     Phone,
     Search,
+    Settings,
     ShoppingBag,
     Sun,
     Twitter,
@@ -24,7 +27,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 function displayName(user: UserProfile | null | undefined): string {
   if (!user) return 'Account';
@@ -40,9 +43,12 @@ export function Header() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useThemeStore();
   const { isAuthenticated, user, login, logout } = useAuth();
+  const { me, roles: meRoles } = useMe();
   const { tenant, getServiceTitle } = useTenantBrand();
   const siteName = getServiceTitle('Cafe');
   const logoSrc = tenant?.logoUrl ?? '/images/logo/logo.jpeg';
+  const profileRef = useRef<HTMLDivElement>(null);
+  const userRole = (meRoles?.[0] ?? me?.roles?.[0] ?? user?.role ?? (user?.roles as string[] | undefined)?.[0] ?? 'Staff');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -62,9 +68,6 @@ export function Header() {
   }, [lastScrollY]);
 
   const isDashboard = pathname?.startsWith('/dashboard') ?? false;
-
-  // Dashboard has its own header — don't render the public site header
-  if (isDashboard) return null;
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -176,59 +179,78 @@ export function Header() {
               {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
             </button>
 
-            {/* Auth Section */}
+            {/* Notification bell (dashboard only) */}
+            {isDashboard && isAuthenticated && (
+              <button className="relative p-2.5 rounded-xl bg-brand-orange/5 text-brand-muted hover:bg-brand-orange/10 hover:text-brand-orange transition-all" aria-label="Notifications">
+                <Bell className="h-5 w-5" />
+                <span className="absolute top-2 right-2 h-2 w-2 bg-brand-orange rounded-full border-2 border-white dark:border-brand-dark" />
+              </button>
+            )}
+
+            {/* Auth / Profile Section */}
             <div className="hidden md:block">
               {isAuthenticated ? (
-                <div className="relative flex items-center gap-3">
+                <div className="relative" ref={profileRef}>
                   <button
                     type="button"
                     onClick={() => setUserMenuOpen((o) => !o)}
-                    className="flex items-center gap-2 p-1 pr-3 rounded-full bg-brand-orange/5 border border-brand-orange/10 hover:border-brand-orange/30 transition-all group"
+                    className="flex items-center gap-3 rounded-2xl hover:bg-brand-orange/5 p-1 pr-2 transition-all group"
                     aria-expanded={userMenuOpen}
                     aria-haspopup="true"
+                    aria-label="Open profile menu"
                   >
-                    <div className="h-8 w-8 rounded-full bg-brand-orange text-white flex items-center justify-center font-black text-xs">
-                      {(displayName(user))[0]?.toUpperCase() ?? <User className="h-4 w-4" />}
+                    <div className="h-9 w-9 rounded-xl bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center text-brand-orange font-black text-xs shadow-inner">
+                      {displayName(user).split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U'}
                     </div>
-                    <span className="text-xs font-black uppercase tracking-widest text-brand-dark dark:text-white group-hover:text-brand-orange transition-colors">
-                      {displayName(user).split(' ')[0]}
-                    </span>
-                    <ChevronDown className={`h-4 w-4 text-brand-muted transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+                    <div className="hidden sm:block text-left">
+                      <p className="text-xs font-black text-brand-dark dark:text-white truncate max-w-[120px] uppercase tracking-tight group-hover:text-brand-orange transition-colors">
+                        {displayName(user).split(' ')[0]}
+                      </p>
+                      <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest">{userRole}</p>
+                    </div>
+                    <ChevronDown className={`h-4 w-4 text-brand-muted transition-transform duration-300 ${userMenuOpen ? 'rotate-180' : ''}`} />
                   </button>
                   <AnimatePresence>
                     {userMenuOpen && (
                       <>
-                        <div
-                          className="fixed inset-0 z-40"
-                          aria-hidden="true"
-                          onClick={() => setUserMenuOpen(false)}
-                        />
+                        <div className="fixed inset-0 z-40" aria-hidden="true" onClick={() => setUserMenuOpen(false)} />
                         <motion.div
                           initial={{ opacity: 0, y: -8 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -8 }}
                           transition={{ duration: 0.15 }}
-                          className="absolute right-0 top-full mt-2 z-50 min-w-[180px] py-1 rounded-xl bg-white dark:bg-brand-dark border border-brand-orange/10 shadow-xl"
+                          className="absolute right-0 top-full mt-2 z-50 w-56 rounded-2xl p-3 shadow-2xl border border-brand-orange/10 bg-white dark:bg-brand-dark overflow-hidden"
                         >
-                          <Link
-                            href="/profile"
-                            onClick={() => setUserMenuOpen(false)}
-                            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-brand-dark dark:text-white hover:bg-brand-orange/10 transition-colors"
-                          >
-                            <User className="h-4 w-4" />
-                            Profile
-                          </Link>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setUserMenuOpen(false);
-                              logout();
-                            }}
-                            className="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-semibold text-brand-dark dark:text-white hover:bg-brand-orange/10 transition-colors"
-                          >
-                            <LogOut className="h-4 w-4" />
-                            Logout
-                          </button>
+                          <div className="mb-2 px-3 py-2">
+                            <p className="text-sm font-black text-brand-dark dark:text-white">{displayName(user)}</p>
+                            <p className="text-[10px] text-brand-muted truncate font-bold uppercase tracking-widest mt-0.5">{user?.email}</p>
+                          </div>
+                          <div className="h-[1px] bg-brand-beige/20 dark:bg-brand-orange/10 my-2 mx-1" />
+                          <div className="grid gap-1">
+                            <Link
+                              href={isDashboard ? '/dashboard/settings' : '/profile'}
+                              onClick={() => setUserMenuOpen(false)}
+                              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-brand-dark dark:text-white hover:bg-brand-orange/5 transition-all group"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-brand-orange/5 flex items-center justify-center group-hover:text-brand-orange transition-colors">
+                                <Settings className="h-4 w-4" />
+                              </div>
+                              Settings
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setUserMenuOpen(false);
+                                logout();
+                              }}
+                              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all group w-full"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center transition-colors">
+                                <LogOut className="h-4 w-4" />
+                              </div>
+                              Logout
+                            </button>
+                          </div>
                         </motion.div>
                       </>
                     )}
