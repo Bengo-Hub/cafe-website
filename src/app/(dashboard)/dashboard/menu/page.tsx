@@ -50,6 +50,7 @@ export default function MenuManagement() {
 
   // Form state
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [selectedOutletId, setSelectedOutletId] = useState<string | null>(null);
   const [newItem, setNewItem] = useState({
     name: '',
     description: '',
@@ -57,8 +58,10 @@ export default function MenuManagement() {
     categoryId: '',
     leadTimeMinutes: 0,
     imageUrl: '',
+    outletId: '',
     recipe_output_qty: 1,
     recipe_unit: 'PORTION',
+    recipe_ingredients: [] as any[],
   });
 
   const { data: outletsRes } = useQuery({
@@ -74,11 +77,14 @@ export default function MenuManagement() {
 
   const categories = categoriesRes?.data ?? [];
 
+  const outlets = outletsRes?.data ?? [];
+
   const { data: itemsRes, isLoading: loadingItems } = useQuery({
-    queryKey: ['catalog-items', selectedCategoryId, search, page],
+    queryKey: ['catalog-items', selectedCategoryId, selectedOutletId, search, page],
     queryFn: () =>
       fetchMenuItems({
         category_id: selectedCategoryId || undefined,
+        outlet_id: selectedOutletId || undefined,
         search: search || undefined,
         limit: pageSize,
         page: page,
@@ -142,14 +148,22 @@ export default function MenuManagement() {
 
       const sku = invItem.sku;
 
-      // 2. Create Recipe (optional, for BOM tracking)
+      // 2. Create Recipe with BOM ingredients (optional)
+      const bomIngredients = (newItem.recipe_ingredients ?? []).map((ing: any, idx: number) => ({
+        item_id: ing.item_id,
+        item_sku: ing.item_sku,
+        quantity: ing.quantity,
+        unit_of_measure: ing.unit_of_measure,
+        display_order: idx,
+      }));
+
       try {
         await recipesApi.create({
           name: newItem.name,
           sku,
           output_qty: newItem.recipe_output_qty,
           unit_of_measure: newItem.recipe_unit,
-          ingredients: [],
+          ingredients: bomIngredients,
           is_active: true,
         });
       } catch {
@@ -159,7 +173,7 @@ export default function MenuManagement() {
       // 3. Create Menu Item in catalog
       return createMenuItem({
         categoryId: newItem.categoryId || (categories[0]?.id ?? ''),
-        outletId: defaultOutletId,
+        outletId: newItem.outletId || defaultOutletId,
         name: newItem.name,
         description: newItem.description,
         sku,
@@ -180,8 +194,10 @@ export default function MenuManagement() {
         categoryId: '',
         leadTimeMinutes: 0,
         imageUrl: '',
+        outletId: '',
         recipe_output_qty: 1,
         recipe_unit: 'PORTION',
+        recipe_ingredients: [],
       });
       toast.success('Menu item created');
     },
@@ -263,6 +279,18 @@ export default function MenuManagement() {
           ))}
         </div>
         <div className="flex flex-1 items-center gap-4">
+          {outlets.length > 1 && (
+            <select
+              value={selectedOutletId || ''}
+              onChange={(e) => setSelectedOutletId(e.target.value || null)}
+              className="h-10 rounded-xl border border-brand-beige/20 bg-white px-3 text-sm text-primary-brand focus:border-brand-orange/50 focus:outline-none"
+            >
+              <option value="">All Outlets</option>
+              {outlets.map((o: any) => (
+                <option key={o.id} value={o.id}>{o.name}</option>
+              ))}
+            </select>
+          )}
            <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary-brand opacity-40" />
             <Input
@@ -445,6 +473,8 @@ export default function MenuManagement() {
         <MenuItemForm
           data={{ ...newItem, categoryId: newItem.categoryId || selectedCategoryId || '' }}
           categories={categories}
+          outlets={outlets}
+          defaultOutletId={defaultOutletId}
           onChange={(data) => setNewItem(data)}
           onCategoryCreated={(name) => addCategory.mutate(name)}
         />
@@ -468,6 +498,8 @@ export default function MenuManagement() {
         <MenuItemForm
           data={editingItem}
           categories={categories}
+          outlets={outlets}
+          defaultOutletId={defaultOutletId}
           onChange={(data) => setEditingItem(data)}
           isEdit
           onCategoryCreated={(name) => addCategory.mutate(name)}

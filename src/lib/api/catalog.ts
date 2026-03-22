@@ -117,6 +117,7 @@ export async function deleteCategory(categoryId: string) {
 
 export async function fetchMenuItems(params?: {
   category_id?: string;
+  outlet_id?: string;
   search?: string;
   available_only?: boolean;
   page?: number;
@@ -124,6 +125,7 @@ export async function fetchMenuItems(params?: {
 }) {
   const query = new URLSearchParams();
   if (params?.category_id) query.set('category_id', params.category_id);
+  if (params?.outlet_id) query.set('outlet_id', params.outlet_id);
   if (params?.search) query.set('search', params.search);
   if (params?.available_only) query.set('is_available', 'true');
   if (params?.page) query.set('page', String(params.page));
