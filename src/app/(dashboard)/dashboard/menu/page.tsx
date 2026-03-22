@@ -53,10 +53,10 @@ export default function MenuManagement() {
   const [newItem, setNewItem] = useState({
     name: '',
     description: '',
-    sku: '',
-    price: 0,
-    category_id: '',
-    prep_time_minutes: 0,
+    basePrice: 0,
+    categoryId: '',
+    leadTimeMinutes: 0,
+    imageUrl: '',
     recipe_output_qty: 1,
     recipe_unit: 'PORTION',
   });
@@ -130,11 +130,23 @@ export default function MenuManagement() {
 
   const addItem = useMutation({
     mutationFn: async () => {
-      // 1. Create Recipe first (if inventory-api is available)
+      // 1. Create inventory item (auto-generates SKU)
+      const { createInventoryItem } = await import('@/lib/api/inventory');
+      const invItem = await createInventoryItem({
+        name: newItem.name,
+        description: newItem.description,
+        type: 'RECIPE',
+        initial_quantity: 1,
+        reorder_level: 1,
+      });
+
+      const sku = invItem.sku;
+
+      // 2. Create Recipe (optional, for BOM tracking)
       try {
         await recipesApi.create({
           name: newItem.name,
-          sku: newItem.sku,
+          sku,
           output_qty: newItem.recipe_output_qty,
           unit_of_measure: newItem.recipe_unit,
           ingredients: [],
@@ -144,27 +156,30 @@ export default function MenuManagement() {
         // Recipe creation is optional — continue with menu item
       }
 
-      // 2. Create Menu Item
+      // 3. Create Menu Item in catalog
       return createMenuItem({
-        categoryId: newItem.category_id || (categories[0]?.id ?? ''),
+        categoryId: newItem.categoryId || (categories[0]?.id ?? ''),
         outletId: defaultOutletId,
         name: newItem.name,
         description: newItem.description,
-        sku: newItem.sku,
-        basePrice: Number(newItem.price),
-        leadTimeMinutes: Number(newItem.prep_time_minutes),
+        sku,
+        basePrice: Number(newItem.basePrice),
+        imageUrl: newItem.imageUrl,
+        leadTimeMinutes: Number(newItem.leadTimeMinutes),
+        isAvailable: true,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['catalog-items'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
       setShowAddItem(false);
       setNewItem({
         name: '',
         description: '',
-        sku: '',
-        price: 0,
-        category_id: '',
-        prep_time_minutes: 0,
+        basePrice: 0,
+        categoryId: '',
+        leadTimeMinutes: 0,
+        imageUrl: '',
         recipe_output_qty: 1,
         recipe_unit: 'PORTION',
       });
@@ -180,8 +195,10 @@ export default function MenuManagement() {
         name: editingItem.name,
         description: editingItem.description,
         basePrice: Number(editingItem.basePrice),
+        imageUrl: editingItem.imageUrl,
         isAvailable: editingItem.isAvailable,
         isFeatured: editingItem.isFeatured,
+        leadTimeMinutes: editingItem.leadTimeMinutes,
       });
     },
     onSuccess: () => {
@@ -319,7 +336,7 @@ export default function MenuManagement() {
                   </td>
                   <td className="px-6 py-4">
                     <Badge className="bg-brand-beige/10 text-secondary-brand whitespace-nowrap">
-                      {categories.find((c: MenuCategory) => c.id === item.categoryId)?.name || 'Uncategorized'}
+                      {item.category?.name || item.categoryName || categories.find((c: MenuCategory) => c.id === item.categoryId)?.name || 'Uncategorized'}
                     </Badge>
                   </td>
                   <td className="px-6 py-4 text-right">
@@ -351,13 +368,15 @@ export default function MenuManagement() {
                       >
                         <Star className={`h-4 w-4 ${item.isFeatured ? 'fill-yellow-400 text-yellow-400' : 'text-secondary-brand'}`} />
                       </button>
-                      <Link
-                        href={`/dashboard/inventory?search=${item.sku}`}
-                        className="rounded-lg p-2 hover:bg-brand-orange/10 text-brand-orange transition-colors"
-                        title="Manage Recipe / Stock"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </Link>
+                      {item.sku && (
+                        <Link
+                          href={`/dashboard/inventory?search=${item.sku}`}
+                          className="rounded-lg p-2 hover:bg-brand-orange/10 text-brand-orange transition-colors"
+                          title="Manage Recipe / Stock"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Link>
+                      )}
                       <button onClick={() => setEditingItem({ ...item })} className="rounded-lg p-2 hover:bg-brand-beige/10 transition-colors" title="Edit">
                         <Edit2 className="h-4 w-4 text-secondary-brand" />
                       </button>
@@ -424,9 +443,10 @@ export default function MenuManagement() {
         size="lg"
       >
         <MenuItemForm
-          data={{ ...newItem, category_id: newItem.category_id || selectedCategoryId || '' }}
+          data={{ ...newItem, categoryId: newItem.categoryId || selectedCategoryId || '' }}
           categories={categories}
           onChange={(data) => setNewItem(data)}
+          onCategoryCreated={(name) => addCategory.mutate(name)}
         />
       </CrudModal>
 
@@ -450,6 +470,7 @@ export default function MenuManagement() {
           categories={categories}
           onChange={(data) => setEditingItem(data)}
           isEdit
+          onCategoryCreated={(name) => addCategory.mutate(name)}
         />
         </CrudModal>
       )}

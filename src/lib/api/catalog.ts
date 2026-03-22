@@ -38,6 +38,8 @@ export interface MenuCategory {
 export interface MenuItem {
   id: string;
   categoryId: string;
+  category?: MenuCategory;
+  categoryName?: string;
   name: string;
   description?: string;
   sku: string;
