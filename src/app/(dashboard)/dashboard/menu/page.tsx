@@ -19,12 +19,12 @@ import { toast } from 'sonner';
 import {
     ChefHat,
     Edit2,
-    Eye,
-    EyeOff,
     Loader2,
     Plus,
     Search,
     Star,
+    ToggleLeft,
+    ToggleRight,
     Trash2,
     ExternalLink,
 } from 'lucide-react';
@@ -42,6 +42,7 @@ export default function MenuManagement() {
   const queryClient = useQueryClient();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [availabilityFilter, setAvailabilityFilter] = useState<string>('');
   const [showAddItem, setShowAddItem] = useState(false);
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
@@ -59,6 +60,7 @@ export default function MenuManagement() {
     leadTimeMinutes: 0,
     imageUrl: '',
     outletId: '',
+    addToAllOutlets: false,
     recipe_output_qty: 1,
     recipe_unit: 'PORTION',
     recipe_ingredients: [] as any[],
@@ -80,12 +82,13 @@ export default function MenuManagement() {
   const outlets = outletsRes?.data ?? [];
 
   const { data: itemsRes, isLoading: loadingItems } = useQuery({
-    queryKey: ['catalog-items', selectedCategoryId, selectedOutletId, search, page],
+    queryKey: ['catalog-items', selectedCategoryId, selectedOutletId, search, availabilityFilter, page],
     queryFn: () =>
       fetchMenuItems({
         category_id: selectedCategoryId || undefined,
         outlet_id: selectedOutletId || undefined,
         search: search || undefined,
+        is_available: availabilityFilter === 'available' ? true : availabilityFilter === 'unavailable' ? false : undefined,
         limit: pageSize,
         page: page,
       }),
@@ -149,6 +152,8 @@ export default function MenuManagement() {
         type: 'RECIPE',
         initial_quantity: 1,
         reorder_level: 1,
+        image_url: newItem.imageUrl,
+        add_to_all_outlets: newItem.addToAllOutlets,
       });
 
       const sku = invItem.sku;
@@ -200,6 +205,7 @@ export default function MenuManagement() {
         leadTimeMinutes: 0,
         imageUrl: '',
         outletId: '',
+        addToAllOutlets: false,
         recipe_output_qty: 1,
         recipe_unit: 'PORTION',
         recipe_ingredients: [],
@@ -338,6 +344,15 @@ export default function MenuManagement() {
               ))}
             </select>
           )}
+          <select
+            value={availabilityFilter}
+            onChange={(e) => { setAvailabilityFilter(e.target.value); setPage(1); }}
+            className="h-10 rounded-xl border border-brand-beige/20 bg-white px-3 text-sm text-primary-brand focus:border-brand-orange/50 focus:outline-none"
+          >
+            <option value="">All Status</option>
+            <option value="available">Available</option>
+            <option value="unavailable">Unavailable</option>
+          </select>
            <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary-brand opacity-40" />
             <Input
@@ -434,14 +449,14 @@ export default function MenuManagement() {
                         className="rounded-lg p-2 hover:bg-brand-beige/10 transition-colors"
                         title={item.isAvailable ? 'Mark unavailable' : 'Mark available'}
                       >
-                        {item.isAvailable ? <EyeOff className="h-4 w-4 text-red-400" /> : <Eye className="h-4 w-4 text-green-500" />}
+                        {item.isAvailable ? <ToggleRight className="h-5 w-5 text-green-500" /> : <ToggleLeft className="h-5 w-5 text-red-400" />}
                       </button>
                       <button
                         onClick={() => toggleFeatured.mutate({ id: item.id, featured: !item.isFeatured })}
                         className="rounded-lg p-2 hover:bg-brand-beige/10 transition-colors"
                         title={item.isFeatured ? 'Unfeature' : 'Feature'}
                       >
-                        <Star className={`h-4 w-4 ${item.isFeatured ? 'fill-yellow-400 text-yellow-400' : 'text-secondary-brand'}`} />
+                        <Star className={`h-4 w-4 ${item.isFeatured ? 'text-yellow-400' : 'text-secondary-brand'}`} fill={item.isFeatured ? 'currentColor' : 'none'} />
                       </button>
                       {item.sku && (
                         <Link
@@ -461,7 +476,7 @@ export default function MenuManagement() {
                             recipe_ingredients: recipe?.ingredients?.map(ing => ({
                               item_id: ing.item_id,
                               item_sku: ing.item_sku,
-                              item_name: ing.item_sku,
+                              item_name: ing.item_name || ing.item_sku,
                               quantity: ing.quantity,
                               unit_of_measure: ing.unit_of_measure,
                             })) ?? [],

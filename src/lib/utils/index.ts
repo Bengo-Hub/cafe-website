@@ -8,17 +8,18 @@ export function cn(...classes: (string | undefined | null | false)[]): string {
 
 /**
  * Resolve a media path to a full URL.
- * Prefers the ordering service URL from config.
+ * Handles both full URLs (https://...) and relative paths (/media/images/...).
+ * Prefers the inventory service (master data) as the base for relative paths.
  */
 export function getMediaUrl(path: string | undefined | null): string {
   if (!path) return '';
-  if (path.startsWith('http')) return path;
-  
-  // Use ordering service URL as base for images
-  // ensure it doesn't end with /api/v1/ or similar if it's the raw base
-  const baseUrl = process.env.NEXT_PUBLIC_ORDERING_SERVICE_URL || 'https://orderingapi.codevertexitsolutions.com';
-  const cleanBase = baseUrl.replace(/\/api\/v1\/?$/, '').replace(/\/+$/, '');
-  
+  // Full URL — use as-is
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+
+  // Relative path — resolve against inventory-api (master data source) or ordering-api fallback
+  const inventoryBase = process.env.NEXT_PUBLIC_INVENTORY_SERVICE_URL || 'https://inventoryapi.codevertexitsolutions.com';
+  const cleanBase = inventoryBase.replace(/\/v1\/?$/, '').replace(/\/+$/, '');
+
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   return `${cleanBase}${cleanPath}`;
 }

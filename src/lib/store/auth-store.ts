@@ -161,8 +161,12 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async () => {
         set({ status: 'idle', user: null, session: null, accessToken: null, refreshToken: null });
-        const siteUrl = typeof window !== 'undefined' ? window.location.origin : '';
-        window.location.href = buildLogoutUrl(siteUrl);
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('cafe-auth-storage');
+          localStorage.removeItem('tenantId');
+          localStorage.removeItem('tenantSlug');
+          window.location.href = buildLogoutUrl(window.location.origin);
+        }
       },
 
       initialize: async () => {

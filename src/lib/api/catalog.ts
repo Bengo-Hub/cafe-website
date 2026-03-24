@@ -66,7 +66,8 @@ interface ListResponse<T> {
 // Category API
 
 export async function fetchCategories() {
-  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/categories`;
+  // Use admin endpoint which returns ListResponse{data, total, limit, page} and includes all categories
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/admin/categories`;
   const res = await apiClient<ListResponse<MenuCategory>>(url, { headers: headers() });
   return { ...res, data: res.data?.data ?? [] };
 }
@@ -120,6 +121,7 @@ export async function fetchMenuItems(params?: {
   outlet_id?: string;
   search?: string;
   available_only?: boolean;
+  is_available?: boolean;
   page?: number;
   limit?: number;
 }) {
@@ -128,11 +130,13 @@ export async function fetchMenuItems(params?: {
   if (params?.outlet_id) query.set('outlet_id', params.outlet_id);
   if (params?.search) query.set('search', params.search);
   if (params?.available_only) query.set('is_available', 'true');
+  if (params?.is_available !== undefined) query.set('is_available', String(params.is_available));
   if (params?.page) query.set('page', String(params.page));
   if (params?.limit) query.set('limit', String(params.limit));
 
   const qs = query.toString();
-  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/items${qs ? `?${qs}` : ''}`;
+  // Use admin endpoint which returns ALL items (including unavailable) with full field data
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/admin/items${qs ? `?${qs}` : ''}`;
   const res = await apiClient<ListResponse<MenuItem>>(url, { headers: headers() });
   return { ...res, data: { data: res.data?.data ?? [], total: res.data?.total ?? 0 } };
 }

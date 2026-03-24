@@ -87,8 +87,9 @@ export interface Unit {
 
 // ─── Inventory Items ────────────────────────────────────────────────────
 
-export async function fetchInventoryItems(): Promise<{ data: InventoryItem[]; total: number }> {
-  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/items`;
+export async function fetchInventoryItems(type?: string): Promise<{ data: InventoryItem[]; total: number }> {
+  const query = type ? `?type=${encodeURIComponent(type)}` : '';
+  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/items${query}`;
   const resp = await fetch(url, { headers: headers() });
   if (!resp.ok) throw new Error(`Fetch inventory items failed: ${resp.statusText}`);
   return resp.json();
@@ -130,6 +131,7 @@ export async function createInventoryItem(data: {
   image_url?: string;
   initial_quantity?: number;
   reorder_level?: number;
+  add_to_all_outlets?: boolean;
 }): Promise<InventoryItem> {
   const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/items`;
   const resp = await fetch(url, {

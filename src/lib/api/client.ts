@@ -71,6 +71,13 @@ function authHeader(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+let on401Callback: (() => void) | null = null;
+
+/** Register a callback to run when any API response is 401 (e.g. clear session / redirect to auth). */
+export function setOn401(callback: (() => void) | null) {
+  on401Callback = callback;
+}
+
 export async function apiClient<T = any>(
   url: string,
   options: RequestInit = {}
@@ -100,6 +107,9 @@ export async function apiClient<T = any>(
       const data = await response.json();
 
       if (!response.ok) {
+        if (response.status === 401 && on401Callback) {
+          on401Callback();
+        }
         throw new ApiError(response.status, data.message || 'API request failed', data);
       }
 

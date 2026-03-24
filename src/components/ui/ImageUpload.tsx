@@ -15,15 +15,16 @@ interface ImageUploadProps {
 export const ImageUpload: React.FC<ImageUploadProps> = ({ label, value, onChange, required }) => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const ORDERING_URL = config.services.ordering;
+  // Upload to inventory-api (master data source) — media is synced to ordering-backend via events
+  const INVENTORY_URL = config.services.inventory;
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate size (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('File size exceeds 5MB limit');
+    // Validate size (10MB — matches backend limit)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size exceeds 10MB limit');
       return;
     }
 
@@ -32,9 +33,9 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ label, value, onChange
     formData.append('file', file);
 
     try {
-      // Direct upload to ordering-backend media endpoint
+      // Upload to inventory-api media endpoint (master data)
       const result = await api.post<{ url: string }>(
-        `${ORDERING_URL}/api/v1/media/upload`, 
+        `${INVENTORY_URL}/api/v1/media/upload`,
         formData
       );
       if (result.data?.url) {
