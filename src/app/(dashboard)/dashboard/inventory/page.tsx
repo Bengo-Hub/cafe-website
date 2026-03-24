@@ -82,7 +82,7 @@ export default function InventoryOverview() {
   // Fetch inventory items from inventory-api
   const { data: itemsRes, isLoading: loadingItems, refetch } = useQuery({
     queryKey: ['inventory-items'],
-    queryFn: fetchInventoryItems,
+    queryFn: () => fetchInventoryItems(),
   });
 
   const allItems: InventoryItem[] = itemsRes?.data ?? [];

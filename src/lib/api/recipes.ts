@@ -23,6 +23,7 @@ export interface RecipeIngredient {
   id?: string;
   item_id: string;
   item_sku: string;
+  item_name?: string;
   quantity: number;
   unit_of_measure: string;
   notes?: string;

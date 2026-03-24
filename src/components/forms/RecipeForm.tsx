@@ -64,7 +64,7 @@ export default function RecipeForm({ initialData, onSubmit, isLoading }: RecipeF
 
   const { data: inventoryData } = useQuery({
     queryKey: ['inventory-items'],
-    queryFn: fetchInventoryItems,
+    queryFn: () => fetchInventoryItems(),
   });
   const inventoryItems: InventoryItem[] = inventoryData?.data ?? [];
 
