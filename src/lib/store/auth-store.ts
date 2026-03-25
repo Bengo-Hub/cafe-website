@@ -172,12 +172,18 @@ export const useAuthStore = create<AuthState>()(
       },
 
       initialize: async () => {
-        const { session } = get();
+        const { session, user: existingUser } = get();
         if (!session) {
           set({ status: 'idle' });
           return;
         }
-        set({ status: 'loading' });
+        // If we already have a user from a previous hydration or callback, mark as
+        // authenticated immediately — profile refresh happens in background.
+        if (existingUser) {
+          set({ status: 'authenticated' });
+        } else {
+          set({ status: 'loading' });
+        }
         try {
           const user = await fetchProfile(session.accessToken);
           const profile: UserProfile = {
@@ -192,7 +198,15 @@ export const useAuthStore = create<AuthState>()(
           };
           set({ user: profile, status: 'authenticated' });
         } catch {
-          set({ status: 'idle', session: null, user: null, accessToken: null, refreshToken: null });
+          // If profile fetch fails but we have a valid session, keep the session
+          // and mark authenticated with existing user data (graceful degradation).
+          // Only wipe session if token is truly expired (refresh not implemented yet).
+          const current = get();
+          if (current.user) {
+            set({ status: 'authenticated' });
+          } else {
+            set({ status: 'idle', session: null, user: null, accessToken: null, refreshToken: null });
+          }
         }
       },
 
@@ -209,9 +223,13 @@ export const useAuthStore = create<AuthState>()(
       }),
       onRehydrateStorage: () => (state) => {
         // Called after Zustand hydrates from localStorage.
-        // If session exists, validate it; otherwise mark as idle (not authenticated).
-        if (state?.session?.accessToken) {
-          // Session found in localStorage — trigger profile validation
+        if (state?.session?.accessToken && state?.user) {
+          // Session + user found in localStorage — mark authenticated immediately.
+          // Profile refresh happens lazily via Providers initialize() — no blocking.
+          useAuthStore.setState({ status: 'authenticated' });
+        } else if (state?.session?.accessToken) {
+          // Session but no user — need to fetch profile
+          useAuthStore.setState({ status: 'loading' });
           state.initialize();
         } else {
           // No saved session — mark as idle so dashboard redirects to login

@@ -16,11 +16,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     },
   }));
   const logout = useAuthStore((s) => s.logout);
-  const initialize = useAuthStore((s) => s.initialize);
 
-  useEffect(() => {
-    initialize();
-  }, [initialize]);
+  // NOTE: Do NOT call initialize() here — it races with Zustand persist hydration.
+  // onRehydrateStorage in auth-store.ts handles initialization AFTER hydration completes.
 
   // Register 401 handler: clear all caches and redirect to SSO
   useEffect(() => {
