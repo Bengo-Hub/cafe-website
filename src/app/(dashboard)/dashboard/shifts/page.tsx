@@ -11,20 +11,20 @@ import {
 
 import { useAuthStore } from '@/lib/store/auth-store';
 import { useShifts } from '@/hooks/use-shifts';
-import { format } from 'date-fns';
+import { format, startOfWeek, isAfter } from 'date-fns';
 
 export default function StaffShifts() {
   const { user } = useAuthStore();
-  const staffId = user?.id || 'mock-staff-id';
+  const staffId = user?.id;
   const { shifts, clockIn, clockOut } = useShifts(staffId);
 
   const ongoingShift = shifts?.find(s => s.status === 'Ongoing');
   const isClockedIn = !!ongoingShift;
 
   const handleClockAction = () => {
-    if (!isClockedIn) {
+    if (!isClockedIn && staffId) {
       clockIn(staffId);
-    } else if (ongoingShift) {
+    } else if (ongoingShift && staffId) {
       clockOut(ongoingShift.id);
     }
   };
@@ -109,14 +109,14 @@ export default function StaffShifts() {
                     <Calendar className="h-4 w-4" />
                     <span className="text-sm font-medium">Today's Date</span>
                   </div>
-                  <span className="text-sm font-bold text-primary-brand">Oct 26, 2023</span>
+                  <span className="text-sm font-bold text-primary-brand">{format(new Date(), 'MMM dd, yyyy')}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 text-secondary-brand">
                     <MapPin className="h-4 w-4" />
                     <span className="text-sm font-medium">Location</span>
                   </div>
-                  <span className="text-sm font-bold text-primary-brand">Busia Branch</span>
+                  <span className="text-sm font-bold text-primary-brand">{user?.tenant_slug ?? 'Main Branch'}</span>
                 </div>
               </div>
             </div>
@@ -124,23 +124,40 @@ export default function StaffShifts() {
 
           <Card className="p-8 magical-card border-none bg-brand-dark text-white">
             <h3 className="text-lg font-black mb-6">Weekly Summary</h3>
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <p className="text-brand-beige/60 text-sm">Total Hours</p>
-                <p className="text-xl font-black">32.5h</p>
-              </div>
-              <div className="flex items-center justify-between">
-                <p className="text-brand-beige/60 text-sm">Overtime</p>
-                <p className="text-xl font-black text-brand-orange">2.5h</p>
-              </div>
-              <div className="flex items-center justify-between">
-                <p className="text-brand-beige/60 text-sm">Days Worked</p>
-                <p className="text-xl font-black">4/5</p>
-              </div>
-              <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden">
-                <div className="bg-brand-orange h-full w-[80%]" />
-              </div>
-            </div>
+            {(() => {
+              const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+              const weekShifts = (shifts ?? []).filter(
+                (s) => isAfter(new Date(s.clock_in), weekStart)
+              );
+              const totalHours = weekShifts.reduce((sum, s) => {
+                if (!s.clock_out) return sum;
+                return sum + (new Date(s.clock_out).getTime() - new Date(s.clock_in).getTime()) / (1000 * 60 * 60);
+              }, 0);
+              const overtime = Math.max(0, totalHours - 40);
+              const daysWorked = new Set(
+                weekShifts.map((s) => format(new Date(s.clock_in), 'yyyy-MM-dd'))
+              ).size;
+              const progress = Math.min(100, (totalHours / 40) * 100);
+              return (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <p className="text-brand-beige/60 text-sm">Total Hours</p>
+                    <p className="text-xl font-black">{totalHours.toFixed(1)}h</p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-brand-beige/60 text-sm">Overtime</p>
+                    <p className="text-xl font-black text-brand-orange">{overtime.toFixed(1)}h</p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-brand-beige/60 text-sm">Days Worked</p>
+                    <p className="text-xl font-black">{daysWorked}/5</p>
+                  </div>
+                  <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                    <div className="bg-brand-orange h-full" style={{ width: `${progress}%` }} />
+                  </div>
+                </div>
+              );
+            })()}
           </Card>
         </div>
 
