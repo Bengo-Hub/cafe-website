@@ -52,7 +52,9 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
-      status: 'idle',
+      // Start as 'loading' so dashboard layout waits for hydration before redirect check.
+      // Once Zustand hydrates from localStorage, onRehydrateStorage sets the correct status.
+      status: 'loading' as AuthState['status'],
       user: null,
       session: null,
       error: null,
@@ -205,7 +207,17 @@ export const useAuthStore = create<AuthState>()(
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
       }),
-      onRehydrateStorage: () => () => {},
+      onRehydrateStorage: () => (state) => {
+        // Called after Zustand hydrates from localStorage.
+        // If session exists, validate it; otherwise mark as idle (not authenticated).
+        if (state?.session?.accessToken) {
+          // Session found in localStorage — trigger profile validation
+          state.initialize();
+        } else {
+          // No saved session — mark as idle so dashboard redirects to login
+          useAuthStore.setState({ status: 'idle' });
+        }
+      },
     }
   )
 );
