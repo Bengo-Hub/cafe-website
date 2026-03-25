@@ -3,48 +3,22 @@
 import { Button, Card, Input } from '@/components/ui';
 import { Search } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useState } from 'react';
+import { TrackingIframeModal } from '@bengo-hub/shared-ui-lib';
 
 function TrackOrderContent() {
   const searchParams = useSearchParams();
   const initialOrderId = searchParams.get('id');
   const [orderId, setOrderId] = useState(initialOrderId || '');
-  const [isRedirecting, setIsRedirecting] = useState(!!initialOrderId);
-  const tenant = process.env.NEXT_PUBLIC_TENANT_SLUG || 'urban-loft';
-
-  const handleRedirect = (id: string) => {
-    if (!id) return;
-    setIsRedirecting(true);
-    const logisticsUrl =
-      process.env.NEXT_PUBLIC_LOGISTICS_UI_URL || 'https://logistics.codevertexitsolutions.com';
-    const trackUrl = `${logisticsUrl}/${tenant}/tracking?orderId=${encodeURIComponent(id)}`;
-    window.location.href = trackUrl;
-  };
-
-  useEffect(() => {
-    if (initialOrderId) {
-      handleRedirect(initialOrderId);
-    }
-  }, [initialOrderId]);
+  const [trackingOpen, setTrackingOpen] = useState(!!initialOrderId);
+  const [trackingCode, setTrackingCode] = useState(initialOrderId || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleRedirect(orderId);
+    if (!orderId) return;
+    setTrackingCode(orderId);
+    setTrackingOpen(true);
   };
-
-  if (isRedirecting) {
-    return (
-      <main className="min-h-screen bg-brand-cream dark:bg-brand-dark flex items-center justify-center transition-colors duration-500">
-        <div className="text-center space-y-6">
-          <div className="h-20 w-20 rounded-full bg-brand-orange/10 flex items-center justify-center mx-auto animate-pulse">
-            <div className="h-10 w-10 rounded-full border-4 border-brand-orange border-t-transparent animate-spin" />
-          </div>
-          <h1 className="text-2xl font-black text-primary-brand tracking-tight">Redirecting to Tracking...</h1>
-          <p className="text-secondary-brand font-light">We're taking you to our specialized ordering service for real-time updates.</p>
-        </div>
-      </main>
-    );
-  }
 
   return (
     <main className="min-h-screen bg-brand-cream dark:bg-brand-dark pt-32 pb-20 px-4 transition-colors duration-500">
@@ -80,7 +54,7 @@ function TrackOrderContent() {
               </div>
             </div>
 
-            <Button 
+            <Button
               type="submit"
               className="w-full h-16 rounded-2xl text-sm font-black uppercase tracking-widest bg-brand-orange hover:bg-brand-orange/90 text-white shadow-xl shadow-brand-orange/20 transition-all"
             >
@@ -113,6 +87,14 @@ function TrackOrderContent() {
           </div>
         </div>
       </div>
+
+      {trackingCode && (
+        <TrackingIframeModal
+          open={trackingOpen}
+          onOpenChange={setTrackingOpen}
+          trackingCode={trackingCode}
+        />
+      )}
     </main>
   );
 }
@@ -124,5 +106,3 @@ export default function TrackOrderPage() {
     </Suspense>
   );
 }
-
-
