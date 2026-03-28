@@ -119,11 +119,13 @@ export const useAuthStore = create<AuthState>()(
             refreshToken: session.refreshToken,
           });
 
+          // Fetch user profile (retry up to 5 times)
+          let profile: UserProfile | null = null;
           let attempts = 0;
-          while (attempts < 5) {
+          while (attempts < 5 && !profile) {
             try {
               const user = await fetchProfile(session.accessToken);
-              const profile: UserProfile = {
+              profile = {
                 id: user.id ?? user.sub,
                 email: user.email,
                 name: user.name ?? user.fullName,
@@ -135,23 +137,31 @@ export const useAuthStore = create<AuthState>()(
                 tenant_slug: user.tenant_slug,
                 ...user,
               };
-              // Subscription enforcement: platform owner (codevertex) bypasses check
-              if (profile.tenant_slug !== 'codevertex' && profile.tenant_id) {
-                const active = await checkSubscription(
-                  profile.tenant_id as string,
-                  profile.tenant_slug as string ?? '',
-                  session.accessToken,
-                );
-                if (!active) {
-                  set({ status: 'subscription_required' });
-                  return;
-                }
-              }
-              set({ user: profile, status: 'authenticated' });
-              return;
             } catch {
               attempts++;
               await new Promise((r) => setTimeout(r, 1500));
+            }
+          }
+
+          // Always store profile first (even if subscription check follows)
+          if (profile) {
+            set({ user: profile });
+          }
+
+          // Subscription enforcement (separate from profile fetch — never blocks login on failure)
+          if (profile?.tenant_slug !== 'codevertex' && profile?.tenant_id) {
+            try {
+              const active = await checkSubscription(
+                profile.tenant_id as string,
+                profile.tenant_slug as string ?? '',
+                session.accessToken,
+              );
+              if (!active) {
+                set({ status: 'subscription_required' });
+                return;
+              }
+            } catch {
+              // Fail open — subscription API unreachable, allow login
             }
           }
 
