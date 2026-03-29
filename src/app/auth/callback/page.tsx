@@ -1,5 +1,6 @@
 'use client';
 
+import { consumeState } from '@/lib/auth/pkce';
 import { hasStaffOrAdminRole } from '@/lib/auth/roles';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -22,10 +23,18 @@ function AuthCallbackContent() {
   useEffect(() => {
     if (code && !hasStarted.current && typeof window !== 'undefined') {
       hasStarted.current = true;
+      // Verify CSRF state parameter
+      const urlState = searchParams?.get('state');
+      const storedState = consumeState();
+      if (urlState && storedState && urlState !== storedState) {
+        console.error('CSRF state mismatch — possible attack');
+        router.replace('/login');
+        return;
+      }
       const callbackUrl = `${window.location.origin}/auth/callback`;
       handleSSOCallback(code, callbackUrl);
     }
-  }, [code, handleSSOCallback]);
+  }, [code, handleSSOCallback, searchParams, router]);
 
   useEffect(() => {
     if (status === 'authenticated') {
