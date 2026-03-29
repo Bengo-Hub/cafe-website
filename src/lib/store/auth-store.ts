@@ -7,7 +7,6 @@ import {
     storeVerifier,
 } from '@/lib/auth/pkce';
 import { buildAuthorizeUrl, buildLogoutUrl, exchangeCodeForTokens, fetchProfile } from '@/lib/auth/sso-api';
-import { checkSubscription } from '@/lib/auth/subscription';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -34,13 +33,17 @@ interface Session {
 }
 
 interface AuthState {
-  status: 'idle' | 'loading' | 'authenticated' | 'error' | 'syncing' | 'subscription_required';
+  status: 'idle' | 'loading' | 'authenticated' | 'error' | 'syncing';
   user: UserProfile | null;
   session: Session | null;
   error: string | null;
   /** Top-level for backward compat with api client and use-me */
   accessToken: string | null;
   refreshToken: string | null;
+
+  /** Subscription info fetched lazily after login (undefined = not started, null = loading). */
+  subscriptionInfo: Record<string, unknown> | null | undefined;
+  setSubscriptionInfo: (info: Record<string, unknown> | null) => void;
 
   redirectToSSO: (returnTo?: string) => Promise<void>;
   handleSSOCallback: (code: string, callbackUrl: string) => Promise<void>;
@@ -52,6 +55,8 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
+      subscriptionInfo: undefined,
+      setSubscriptionInfo: (info: Record<string, unknown> | null) => set({ subscriptionInfo: info }),
       // Start as 'loading' so dashboard layout waits for hydration before redirect check.
       // Once Zustand hydrates from localStorage, onRehydrateStorage sets the correct status.
       status: 'loading' as AuthState['status'],
@@ -146,23 +151,6 @@ export const useAuthStore = create<AuthState>()(
           // Always store profile first (even if subscription check follows)
           if (profile) {
             set({ user: profile });
-          }
-
-          // Subscription enforcement (separate from profile fetch — never blocks login on failure)
-          if (profile?.tenant_slug !== 'codevertex' && profile?.tenant_id) {
-            try {
-              const active = await checkSubscription(
-                profile.tenant_id as string,
-                profile.tenant_slug as string ?? '',
-                session.accessToken,
-              );
-              if (!active) {
-                set({ status: 'subscription_required' });
-                return;
-              }
-            } catch {
-              // Fail open — subscription API unreachable, allow login
-            }
           }
 
           set({ status: 'authenticated' });

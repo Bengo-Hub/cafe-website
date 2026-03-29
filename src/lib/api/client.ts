@@ -72,10 +72,16 @@ function authHeader(): Record<string, string> {
 }
 
 let on401Callback: (() => void) | null = null;
+let onSubscription403Callback: ((data: any) => void) | null = null;
 
 /** Register a callback to run when any API response is 401 (e.g. clear session / redirect to auth). */
 export function setOn401(callback: (() => void) | null) {
   on401Callback = callback;
+}
+
+/** Register a callback for subscription-related 403 errors (code=subscription_inactive, upgrade=true). */
+export function setOnSubscription403(callback: ((data: any) => void) | null) {
+  onSubscription403Callback = callback;
 }
 
 export async function apiClient<T = any>(
@@ -109,6 +115,11 @@ export async function apiClient<T = any>(
       if (!response.ok) {
         if (response.status === 401 && on401Callback) {
           on401Callback();
+        }
+        if (response.status === 403 && onSubscription403Callback) {
+          if (data?.code === 'subscription_inactive' || data?.upgrade === true) {
+            onSubscription403Callback(data);
+          }
         }
         throw new ApiError(response.status, data.message || 'API request failed', data);
       }

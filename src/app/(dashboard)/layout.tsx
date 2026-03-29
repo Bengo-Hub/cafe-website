@@ -20,6 +20,7 @@ import {
     Users,
     X
 } from 'lucide-react';
+import { SubscriptionBanner } from '@/components/subscription/subscription-banner';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -182,6 +183,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Menu className="h-6 w-6" />
         </button>
 
+        <SubscriptionBanner />
         {/* Page Content */}
         <div className="p-6 lg:p-10 overflow-y-auto flex-1">
           {children}
