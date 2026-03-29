@@ -160,12 +160,14 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
-        set({ status: 'idle', user: null, session: null, accessToken: null, refreshToken: null });
+        set({ status: 'idle', user: null, session: null, accessToken: null, refreshToken: null, subscriptionInfo: undefined });
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('cafe-auth-storage');
-          localStorage.removeItem('tenantId');
-          localStorage.removeItem('tenantSlug');
-          window.location.href = buildLogoutUrl(window.location.origin);
+          try { localStorage.removeItem('cafe-auth-storage'); } catch { /* no-op */ }
+          try { localStorage.removeItem('tenantId'); } catch { /* no-op */ }
+          try { localStorage.removeItem('tenantSlug'); } catch { /* no-op */ }
+          try { sessionStorage.clear(); } catch { /* no-op */ }
+          // Redirect to SSO logout → clears session cookie → accounts login page
+          window.location.href = buildLogoutUrl('https://accounts.codevertexitsolutions.com');
         }
       },
 
