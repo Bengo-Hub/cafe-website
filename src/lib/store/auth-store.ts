@@ -41,6 +41,9 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
 
+  /** Timestamp (ms) when status last became 'authenticated'. Transient — not persisted. */
+  lastAuthenticatedAt: number | null;
+
   /** Subscription info fetched lazily after login (undefined = not started, null = loading). */
   subscriptionInfo: Record<string, unknown> | null | undefined;
   setSubscriptionInfo: (info: Record<string, unknown> | null) => void;
@@ -55,6 +58,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
+      lastAuthenticatedAt: null,
       subscriptionInfo: undefined,
       setSubscriptionInfo: (info: Record<string, unknown> | null) => set({ subscriptionInfo: info }),
       // Start as 'loading' so dashboard layout waits for hydration before redirect check.
@@ -153,14 +157,14 @@ export const useAuthStore = create<AuthState>()(
             set({ user: profile });
           }
 
-          set({ status: 'authenticated' });
+          set({ status: 'authenticated', lastAuthenticatedAt: Date.now() });
         } catch (error) {
           set({ status: 'error', error: (error as Error).message || 'Sign-in failed' });
         }
       },
 
       logout: async () => {
-        set({ status: 'idle', user: null, session: null, accessToken: null, refreshToken: null, subscriptionInfo: undefined });
+        set({ status: 'idle', user: null, session: null, accessToken: null, refreshToken: null, subscriptionInfo: undefined, lastAuthenticatedAt: null });
         if (typeof window !== 'undefined') {
           try { localStorage.removeItem('cafe-auth-storage'); } catch { /* no-op */ }
           try { localStorage.removeItem('tenantId'); } catch { /* no-op */ }
@@ -196,14 +200,13 @@ export const useAuthStore = create<AuthState>()(
             tenant_slug: user.tenant_slug,
             ...user,
           };
-          set({ user: profile, status: 'authenticated' });
+          set({ user: profile, status: 'authenticated', lastAuthenticatedAt: Date.now() });
         } catch {
           // If profile fetch fails but we have a valid session, keep the session
           // and mark authenticated with existing user data (graceful degradation).
-          // Only wipe session if token is truly expired (refresh not implemented yet).
           const current = get();
           if (current.user) {
-            set({ status: 'authenticated' });
+            set({ status: 'authenticated', lastAuthenticatedAt: Date.now() });
           } else {
             set({ status: 'idle', session: null, user: null, accessToken: null, refreshToken: null });
           }

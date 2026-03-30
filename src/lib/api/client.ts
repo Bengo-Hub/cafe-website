@@ -113,14 +113,47 @@ export async function apiClient<T = any>(
       const data = await response.json();
 
       if (!response.ok) {
-        if (response.status === 401 && on401Callback) {
-          // Do not auto-logout for /auth/me — it may 401 before JIT sync completes.
-          // The handleSSOCallback polling loop handles retries; firing on401 here
-          // clears the session mid-sync and causes a redirect loop.
-          if (!url.includes('/auth/me')) {
+        // 401: attempt token refresh before triggering logout
+        if (response.status === 401 && !url.includes('/auth/me')) {
+          const { refreshAccessToken } = await import('@/lib/auth/token-refresh');
+          const newToken = await refreshAccessToken();
+
+          if (newToken) {
+            // Retry the original request with the refreshed token
+            const retryController = new AbortController();
+            const retryTimeoutId = setTimeout(() => retryController.abort(), timeout);
+
+            const retryResponse = await fetch(url, {
+              ...options,
+              signal: retryController.signal,
+              headers: {
+                ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+                ...tenantHeaders(),
+                Authorization: `Bearer ${newToken}`,
+                ...options.headers,
+              },
+            });
+
+            clearTimeout(retryTimeoutId);
+            const retryData = await retryResponse.json();
+
+            if (retryResponse.ok) {
+              return { data: retryData, status: retryResponse.status };
+            }
+
+            // Retry still failed — if 401 again, now fire the logout callback
+            if (retryResponse.status === 401 && on401Callback) {
+              on401Callback();
+            }
+            throw new ApiError(retryResponse.status, retryData.message || 'API request failed after token refresh', retryData);
+          }
+
+          // Refresh failed entirely — fire logout callback
+          if (on401Callback) {
             on401Callback();
           }
         }
+
         if (response.status === 403 && onSubscription403Callback) {
           if (data?.code === 'subscription_inactive' || data?.upgrade === true) {
             onSubscription403Callback(data);

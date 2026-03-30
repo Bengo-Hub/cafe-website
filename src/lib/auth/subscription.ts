@@ -12,6 +12,11 @@ export interface SubscriptionInfo {
   limits: Record<string, number>;
   trialEndsAt?: string;
   currentPeriodEnd?: string;
+  price?: number;
+  currency?: string;
+  billingInterval?: string;
+  licenseCount?: number;
+  usage?: Record<string, number>;
 }
 
 export async function fetchSubscriptionInfo(
@@ -51,6 +56,11 @@ export async function fetchSubscriptionInfo(
       limits: sub.limits ?? {},
       trialEndsAt: sub.trial_ends_at ?? sub.trialEndsAt,
       currentPeriodEnd: sub.current_period_end ?? sub.currentPeriodEnd,
+      price: sub.price ?? sub.amount,
+      currency: sub.currency ?? "KES",
+      billingInterval: sub.billing_interval ?? sub.billingInterval,
+      licenseCount: sub.license_count ?? sub.licenseCount ?? sub.seats,
+      usage: sub.usage ?? {},
     };
   } catch {
     return null;

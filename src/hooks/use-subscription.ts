@@ -73,5 +73,17 @@ export function useSubscription() {
     hasFeature: (code: string) => info?.features?.includes(code) ?? false,
     /** Get a usage limit value (defaults to Infinity if not set) */
     getLimit: (key: string) => info?.limits?.[key] ?? Infinity,
+    /** Subscription price */
+    price: info?.price ?? null,
+    /** Currency code (e.g. "KES", "USD") */
+    currency: info?.currency ?? "KES",
+    /** Billing interval ("monthly" | "yearly") */
+    billingInterval: info?.billingInterval ?? null,
+    /** Number of licensed seats */
+    licenseCount: info?.licenseCount ?? null,
+    /** Current usage metrics */
+    usage: info?.usage ?? {},
+    /** Next renewal date */
+    renewalDate: info?.currentPeriodEnd ? new Date(info.currentPeriodEnd) : null,
   };
 }
