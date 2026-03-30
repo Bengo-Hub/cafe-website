@@ -20,9 +20,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // NOTE: Do NOT call initialize() here — it races with Zustand persist hydration.
   // onRehydrateStorage in auth-store.ts handles initialization AFTER hydration completes.
 
-  // Register 401 handler: clear all caches and redirect to SSO
+  // Register 401 handler: clear all caches and redirect to SSO.
+  // Skip during syncing/loading to avoid clearing session during JIT sync.
   useEffect(() => {
     setOn401(() => {
+      const status = useAuthStore.getState().status;
+      if (status === 'syncing' || status === 'loading') return;
       queryClient.clear();
       void logout();
     });
