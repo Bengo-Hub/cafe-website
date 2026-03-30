@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { test } from '@playwright/test';
 import * as path from 'path';
 import { NetworkLogger } from './helpers/network-logger';
 
@@ -22,7 +22,8 @@ test.describe('Production Login Flow Diagnostics', () => {
     test.skip(!PROD_EMAIL || !PROD_PASSWORD, 'Set PROD_TEST_EMAIL and PROD_TEST_PASSWORD env vars');
 
     // Step 1: Visit homepage
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(3_000);
     await page.screenshot({ path: path.join(OUTPUT_DIR, '01-homepage.png'), fullPage: true });
 
     // Step 2: Navigate to login — should redirect to SSO
@@ -162,8 +163,8 @@ test.describe('Production Login Flow Diagnostics', () => {
     ];
 
     for (const p of pages) {
-      await page.goto(p.path, { waitUntil: 'networkidle' });
-      await page.waitForTimeout(3_000);
+      await page.goto(p.path, { waitUntil: 'domcontentloaded', timeout: 30_000 });
+      await page.waitForTimeout(5_000);
       await page.screenshot({
         path: path.join(OUTPUT_DIR, `service-${p.name}.png`),
         fullPage: true,
