@@ -15,7 +15,7 @@ export default defineConfig({
   reporter: [['html', { open: 'never' }]],
   timeout: 90_000,
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: process.env.PROD_BASE_URL || 'http://localhost:3000',
     headless: process.env.CI === 'true',
     screenshot: 'on',
     video: 'on',

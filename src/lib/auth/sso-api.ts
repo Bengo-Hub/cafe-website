@@ -73,16 +73,13 @@ export async function refreshTokens(refreshToken: string): Promise<{
   refresh_token?: string;
   expires_in?: number;
 }> {
-  const body = new URLSearchParams({
-    grant_type: 'refresh_token',
-    refresh_token: refreshToken,
-    client_id: SSO_CLIENT_ID,
-  });
-
   const response = await fetch(`${SSO_BASE_URL}/api/v1/auth/refresh`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: body.toString(),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      refresh_token: refreshToken,
+      client_id: SSO_CLIENT_ID,
+    }),
   });
 
   if (!response.ok) {
