@@ -51,6 +51,7 @@ export default function MenuManagement() {
 
   // Form state
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryParentId, setNewCategoryParentId] = useState('');
   const [selectedOutletId, setSelectedOutletId] = useState<string | null>(null);
   const [newItem, setNewItem] = useState({
     name: '',
@@ -103,8 +104,8 @@ export default function MenuManagement() {
   });
 
   const toggleAvailability = useMutation({
-    mutationFn: ({ id, available }: { id: string; available: boolean }) =>
-      updateMenuItem(id, { isAvailable: available }),
+    mutationFn: ({ sku, available }: { sku: string; available: boolean }) =>
+      updateMenuItem(sku, { isAvailable: available }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['catalog-items'] });
       toast.success('Availability updated');
@@ -113,8 +114,8 @@ export default function MenuManagement() {
   });
 
   const toggleFeatured = useMutation({
-    mutationFn: ({ id, featured }: { id: string; featured: boolean }) =>
-      updateMenuItem(id, { isFeatured: featured }),
+    mutationFn: ({ sku, featured }: { sku: string; featured: boolean }) =>
+      updateMenuItem(sku, { isFeatured: featured }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['catalog-items'] });
       toast.success('Featured status updated');
@@ -123,7 +124,7 @@ export default function MenuManagement() {
   });
 
   const removeItem = useMutation({
-    mutationFn: (id: string) => deleteMenuItem(id),
+    mutationFn: (sku: string) => deleteMenuItem(sku),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['catalog-items'] });
       toast.success('Item deleted');
@@ -132,10 +133,11 @@ export default function MenuManagement() {
   });
 
   const addCategory = useMutation({
-    mutationFn: (name: string) => createCategory({ name, outletId: defaultOutletId }),
+    mutationFn: (name: string) => createCategory({ name, outletId: defaultOutletId, parentId: newCategoryParentId || undefined }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['catalog-categories'] });
       setNewCategoryName('');
+      setNewCategoryParentId('');
       setShowAddCategory(false);
       toast.success('Category created');
     },
@@ -219,8 +221,8 @@ export default function MenuManagement() {
     mutationFn: async () => {
       if (!editingItem) return Promise.reject();
 
-      // Update the menu item (including category reassignment)
-      const result = await updateMenuItem(editingItem.id, {
+      // Update the catalog override by SKU
+      const result = await updateMenuItem(editingItem.sku, {
         categoryId: editingItem.categoryId,
         name: editingItem.name,
         description: editingItem.description,
@@ -366,8 +368,8 @@ export default function MenuManagement() {
       </div>
 
       {/* Modern Data Table */}
-      <div className="overflow-hidden rounded-2xl border border-brand-beige/10 bg-white shadow-sm">
-        <table className="w-full text-left border-collapse">
+      <div className="overflow-x-auto rounded-2xl border border-brand-beige/10 bg-white shadow-sm">
+        <table className="w-full min-w-[700px] text-left border-collapse">
           <thead>
             <tr className="border-b border-brand-beige/5 bg-brand-beige/5">
               <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-secondary-brand opacity-60">
@@ -445,14 +447,14 @@ export default function MenuManagement() {
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-1">
                       <button
-                        onClick={() => toggleAvailability.mutate({ id: item.id, available: !item.isAvailable })}
+                        onClick={() => toggleAvailability.mutate({ sku: item.sku, available: !item.isAvailable })}
                         className="rounded-lg p-2 hover:bg-brand-beige/10 transition-colors"
                         title={item.isAvailable ? 'Mark unavailable' : 'Mark available'}
                       >
                         {item.isAvailable ? <ToggleRight className="h-5 w-5 text-green-500" /> : <ToggleLeft className="h-5 w-5 text-red-400" />}
                       </button>
                       <button
-                        onClick={() => toggleFeatured.mutate({ id: item.id, featured: !item.isFeatured })}
+                        onClick={() => toggleFeatured.mutate({ sku: item.sku, featured: !item.isFeatured })}
                         className="rounded-lg p-2 hover:bg-brand-beige/10 transition-colors"
                         title={item.isFeatured ? 'Unfeature' : 'Feature'}
                       >
@@ -486,7 +488,7 @@ export default function MenuManagement() {
                       </button>
                       <button
                         onClick={() => {
-                          if (confirm(`Delete "${item.name}"?`)) removeItem.mutate(item.id);
+                          if (confirm(`Delete "${item.name}"?`)) removeItem.mutate(item.sku);
                         }}
                         className="rounded-lg p-2 hover:bg-red-500/10 transition-colors"
                         title="Delete"
@@ -528,7 +530,10 @@ export default function MenuManagement() {
       >
         <CategoryForm
           name={newCategoryName}
+          parentId={newCategoryParentId}
+          categories={categories}
           onChange={setNewCategoryName}
+          onParentChange={setNewCategoryParentId}
         />
       </CrudModal>
 

@@ -310,8 +310,8 @@ export default function InventoryOverview() {
           <p className="font-bold text-primary-brand">No items found</p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto rounded-2xl border border-brand-beige/10">
+          <table className="w-full min-w-[700px] text-sm">
             <thead>
               <tr className="border-b border-brand-beige/10 text-left text-xs font-black uppercase tracking-widest text-secondary-brand opacity-60">
                 <th className="pb-3 pr-4">Item</th>

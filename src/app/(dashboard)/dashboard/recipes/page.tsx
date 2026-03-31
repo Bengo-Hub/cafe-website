@@ -126,7 +126,7 @@ export default function RecipesPage() {
           </div>
         ) : (
           <div className="overflow-x-auto rounded-3xl border border-brand-beige/10">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[600px] text-sm">
               <thead>
                 <tr className="bg-brand-beige/5 text-left text-xs font-black uppercase tracking-widest text-secondary-brand opacity-60">
                   <th className="p-4">Menu Item</th>

@@ -36,7 +36,9 @@ export interface MenuCategory {
 }
 
 export interface MenuItem {
+  /** Inventory item ID (inventoryId from merged catalog). Use `sku` for API operations. */
   id: string;
+  inventoryId?: string;
   categoryId: string;
   category?: MenuCategory;
   categoryName?: string;
@@ -141,6 +143,11 @@ export async function fetchMenuItems(params?: {
   return { ...res, data: { data: res.data?.data ?? [], total: res.data?.total ?? 0 } };
 }
 
+/**
+ * Create a catalog override (menu item listing) for a SKU.
+ * POST /catalog/overrides
+ * The inventory item must already exist with this SKU.
+ */
 export async function createMenuItem(data: {
   categoryId: string;
   outletId: string;
@@ -154,30 +161,34 @@ export async function createMenuItem(data: {
   isFeatured?: boolean;
   leadTimeMinutes?: number;
 }) {
-  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/items`;
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/overrides`;
   return apiClient<MenuItem>(url, {
     method: 'POST',
     headers: headers(),
     body: JSON.stringify({
-      categoryId: data.categoryId,
       outletId: data.outletId,
-      name: data.name,
-      description: data.description,
       sku: data.sku,
       basePrice: data.basePrice,
       currency: data.currency ?? 'KES',
-      imageUrl: data.imageUrl,
       isAvailable: data.isAvailable ?? true,
       isFeatured: data.isFeatured ?? false,
       leadTimeMinutes: data.leadTimeMinutes ?? 0,
+      imageUrlOverride: data.imageUrl,
     }),
   });
 }
 
+/**
+ * Update a catalog override by SKU.
+ * PUT /catalog/overrides/{sku}
+ * Only override fields (price, availability, featured, etc.) can be changed here.
+ * To update name/description, update the inventory item directly.
+ */
 export async function updateMenuItem(
-  itemId: string,
+  sku: string,
   data: Partial<{
     categoryId: string;
+    outletId: string;
     name: string;
     description: string;
     basePrice: number;
@@ -188,16 +199,28 @@ export async function updateMenuItem(
     leadTimeMinutes: number;
   }>,
 ) {
-  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/items/${itemId}`;
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/overrides/${sku}`;
   return apiClient<MenuItem>(url, {
     method: 'PUT',
     headers: headers(),
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      basePrice: data.basePrice,
+      currency: data.currency,
+      isAvailable: data.isAvailable,
+      isFeatured: data.isFeatured,
+      leadTimeMinutes: data.leadTimeMinutes,
+      imageUrlOverride: data.imageUrl,
+    }),
   });
 }
 
-export async function deleteMenuItem(itemId: string) {
-  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/items/${itemId}`;
+/**
+ * Delete a catalog override by SKU.
+ * DELETE /catalog/overrides/{sku}
+ * This removes the menu listing but does NOT delete the inventory item.
+ */
+export async function deleteMenuItem(sku: string) {
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/overrides/${sku}`;
   return apiClient(url, { method: 'DELETE', headers: headers() });
 }
 
