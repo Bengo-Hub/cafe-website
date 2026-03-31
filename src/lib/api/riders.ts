@@ -7,6 +7,27 @@ const LOGISTICS_URL = config.services.logistics;
 
 export type RiderStatus = 'pending' | 'approved' | 'active' | 'suspended';
 
+export interface Vehicle {
+  id: string;
+  vehicle_type: string;
+  make?: string;
+  model?: string;
+  license_plate?: string;
+  capacity_json?: Record<string, unknown>;
+  status: string;
+  compliance_status: string;
+  image_license_plate?: string;
+  image_side_view?: string;
+}
+
+export interface RiderUser {
+  id: string;
+  email: string;
+  full_name?: string;
+  phone?: string;
+  status: string;
+}
+
 export interface FleetMember {
   id: string;
   tenant_id: string;
@@ -22,13 +43,26 @@ export interface FleetMember {
   joined_at: string;
   suspended_at?: string;
   metadata?: Record<string, any>;
+  specialization_tags?: string[];
+  has_cold_storage?: boolean;
+  max_weight_capacity_kg?: number;
+  average_rating?: number;
+  total_ratings?: number;
   created_at: string;
   updated_at: string;
   // Edges (populated when WithVehicle / WithUser)
   edges?: {
-    vehicle?: any;
-    user?: any;
+    vehicle?: Vehicle;
+    user?: RiderUser;
   };
+}
+
+/**
+ * Check if a rider has submitted KYC documents.
+ * KYC is considered submitted when id_passport_attachment and rider_photo are provided.
+ */
+export function hasSubmittedKyc(rider: FleetMember): boolean {
+  return !!(rider.id_passport_attachment && rider.rider_photo);
 }
 
 /** @deprecated Use FleetMember instead */

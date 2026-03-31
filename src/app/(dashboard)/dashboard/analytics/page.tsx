@@ -38,10 +38,10 @@ export default function StaffAnalytics() {
   if (error) return <div className="p-10 text-red-500 text-center">Failed to load analytics. Ensure you have a PROFESSIONAL plan.</div>;
 
   const stats = [
-    { label: 'Total Revenue', value: `KES ${summary?.totalRevenue.toLocaleString()}`, change: '+14%', icon: TrendingUp, color: 'text-green-500', bg: 'bg-green-500/10' },
-    { label: 'Total Orders', value: summary?.totalOrders.toString(), change: '+8%', icon: BarChart3, color: 'text-brand-orange', bg: 'bg-brand-orange/10' },
-    { label: 'Inventory Items', value: inventory?.totalItems.toString(), change: 'Stable', icon: BarChart3, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { label: 'Avg. Order', value: `KES ${(summary?.totalRevenue || 0) / (summary?.totalOrders || 1)}`, change: '-2%', icon: PieChart, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { label: 'Total Revenue', value: `KES ${(summary?.totalRevenue ?? 0).toLocaleString()}`, change: '+14%', icon: TrendingUp, color: 'text-green-500', bg: 'bg-green-500/10' },
+    { label: 'Total Orders', value: (summary?.totalOrders ?? 0).toString(), change: '+8%', icon: BarChart3, color: 'text-brand-orange', bg: 'bg-brand-orange/10' },
+    { label: 'Inventory Items', value: (inventory?.totalItems ?? 0).toString(), change: 'Stable', icon: BarChart3, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { label: 'Avg. Order', value: `KES ${((summary?.totalRevenue ?? 0) / (summary?.totalOrders || 1)).toLocaleString(undefined, { maximumFractionDigits: 0 })}`, change: '-2%', icon: PieChart, color: 'text-purple-500', bg: 'bg-purple-500/10' },
   ];
 
   return (

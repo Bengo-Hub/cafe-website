@@ -69,7 +69,7 @@ export default function PaymentsPage() {
 
   const handleOpenExternal = useCallback(() => {
     window.open(
-      `${TREASURY_UI_URL}/${tenantSlug}/dashboard`,
+      `${TREASURY_UI_URL}/${tenantSlug}`,
       '_blank',
       'noopener,noreferrer'
     );

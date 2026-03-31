@@ -6,6 +6,14 @@
 
 **Progress (March 2026):** SSO callback, JWT in store, login/logout UI done. Public menu via `lib/api/public-menu.ts` (no auth); staff menu via `lib/api/catalog.ts`. Dashboard: orders, menu, inventory, **recipes**, riders wired to real APIs; profile + desktop logout added. **Supabase** used for Team, Shifts, Events, Bookings (see `supabase/schema.sql`). Menu items linked to inventory by **SKU**; recipe (BOM) managed in inventory-service.
 
+**Progress (March 31 2026):**
+- **Analytics page bug fix:** Fixed `Cannot read properties of undefined (reading 'toString')` crash on analytics page. All stat values now use null-safe fallback `(value ?? 0).toString()`.
+- **Treasury embedding fix:** Fixed external "Open Treasury" link from `/{tenant}/dashboard` (404) to `/{tenant}/` (correct treasury-ui route). Iframe embedding via `/embed/dashboard` unchanged (already correct).
+- **Rider management rework:** Replaced flat rider list with tab interface: "Invites & Approvals" (invite riders, review KYC documents before approval) and "Fleet Members" (manage active/suspended riders). Added realistic KYC flow: invite -> rider signs up via SSO -> fills KYC in rider-app -> admin reviews documents in `RiderKycReviewModal` -> approve. Riders without KYC documents show "Awaiting KYC" badge and cannot be approved.
+- **New components:** `DocumentPreview` (reusable, supports PDF iframe, images, blocks .docx), `RiderKycReviewModal` (full rider details + KYC document preview + approve/reject).
+- **Playwright E2E tests:** Added comprehensive test suites for menu management (7 tests), recipes (6 tests), inventory (7 tests), analytics (4 tests), payments/treasury (5 tests), riders (8 tests). Shared auth fixture and dashboard navigation helpers at `tests/e2e-production/helpers/`.
+- **Rider API types extended:** `FleetMember` now includes `Vehicle`, `RiderUser` edges, `average_rating`, `total_ratings`, `specialization_tags`, `has_cold_storage`. Added `hasSubmittedKyc()` helper.
+
 ---
 
 ## Table of Contents

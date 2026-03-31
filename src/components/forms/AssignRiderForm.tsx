@@ -12,7 +12,7 @@ interface AssignRiderFormProps {
 
 function riderDisplayName(rider: FleetMember): string {
   // Try user edge first, then driver_code, then truncated user_id
-  if (rider.edges?.user?.name) return rider.edges.user.name;
+  if (rider.edges?.user?.full_name) return rider.edges.user.full_name;
   if (rider.driver_code) return `Rider ${rider.driver_code}`;
   return `Rider ${rider.user_id.substring(0, 8)}`;
 }
