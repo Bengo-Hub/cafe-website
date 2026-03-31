@@ -377,6 +377,21 @@ export default function RiderManagement() {
                           <UserCheck className="mr-1 h-3 w-3" /> Reactivate
                         </Button>
                       )}
+
+                      {/* Delete fleet member */}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 rounded-lg border-red-500/20 px-3 text-xs text-red-500 hover:bg-red-500/10"
+                        onClick={() => {
+                          if (confirm(`Permanently remove ${rider.edges?.user?.full_name || rider.driver_code || 'this rider'} from the fleet?`)) {
+                            deleteMember.mutate(rider.id);
+                          }
+                        }}
+                        disabled={deleteMember.isPending}
+                      >
+                        <Trash2 className="mr-1 h-3 w-3" /> Remove
+                      </Button>
                     </>
                   )}
                 </div>
