@@ -115,7 +115,7 @@ test.describe('Payments / Treasury Dashboard', () => {
     // Verify quick info cards
     await expect(page.locator('text=Payment Methods')).toBeVisible({ timeout: 10_000 });
     await expect(page.locator('text=M-Pesa')).toBeVisible({ timeout: 5_000 });
-    await expect(page.locator('text=Powered By')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText('Powered By', { exact: true })).toBeVisible({ timeout: 5_000 });
 
     await page.screenshot({ path: path.join(OUTPUT_DIR, 'payments-info-cards.png'), fullPage: true });
   });

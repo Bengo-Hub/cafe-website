@@ -22,11 +22,11 @@ test.describe('Rider Management Dashboard', () => {
   test('page loads with stats cards and tab interface', async ({ authenticatedPage: page }) => {
     await nav.navigateToRiders();
 
-    // Verify stats cards
-    await expect(page.locator('text=Total')).toBeVisible({ timeout: 10_000 });
-    await expect(page.locator('text=Active')).toBeVisible({ timeout: 5_000 });
-    await expect(page.locator('text=Pending')).toBeVisible({ timeout: 5_000 });
-    await expect(page.locator('text=Suspended')).toBeVisible({ timeout: 5_000 });
+    // Verify stats cards (use paragraph role to avoid matching filter buttons/badges)
+    await expect(page.getByRole('paragraph').filter({ hasText: /^Total$/ })).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('paragraph').filter({ hasText: /^Active$/ })).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('paragraph').filter({ hasText: /^Pending$/ })).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('paragraph').filter({ hasText: /^Suspended$/ })).toBeVisible({ timeout: 5_000 });
 
     // Verify tab interface
     await expect(page.locator('button:has-text("Invites & Approvals")')).toBeVisible({ timeout: 5_000 });
