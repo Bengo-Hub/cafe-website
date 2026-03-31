@@ -6,6 +6,7 @@ import {
   type FleetMember,
   type RiderStatus,
   approveRider,
+  deleteRider,
   fetchRider,
   fetchRiders,
   hasSubmittedKyc,
@@ -22,6 +23,7 @@ import {
   Loader2,
   RefreshCw,
   Star,
+  Trash2,
   Truck,
   UserCheck,
   UserPlus,
@@ -95,6 +97,11 @@ export default function RiderManagement() {
 
   const suspend = useMutation({
     mutationFn: (memberId: string) => suspendRider(memberId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-riders'] }),
+  });
+
+  const deleteMember = useMutation({
+    mutationFn: (memberId: string) => deleteRider(memberId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-riders'] }),
   });
 
@@ -266,9 +273,12 @@ export default function RiderManagement() {
                     <p className="font-black text-primary-brand">
                       {rider.edges?.user?.full_name || rider.driver_code || rider.user_id.slice(0, 8)}
                     </p>
+                    {rider.edges?.user?.email && (
+                      <p className="text-xs text-secondary-brand">{rider.edges.user.email}</p>
+                    )}
                     <div className="flex flex-wrap items-center gap-3 text-xs text-secondary-brand">
-                      {rider.edges?.user?.email && (
-                        <span>{rider.edges.user.email}</span>
+                      {rider.edges?.user?.phone && (
+                        <span>{rider.edges.user.phone}</span>
                       )}
                       {rider.id_number && (
                         <span>ID: {rider.id_number}</span>
@@ -314,6 +324,21 @@ export default function RiderManagement() {
                       {rider.status === 'approved' && (
                         <Badge className="bg-blue-500/10 text-blue-600">Approved</Badge>
                       )}
+
+                      {/* Delete invite */}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 rounded-lg border-red-500/20 px-3 text-xs text-red-500 hover:bg-red-500/10"
+                        onClick={() => {
+                          if (confirm(`Remove invite for ${rider.edges?.user?.email || rider.driver_code || rider.user_id.slice(0, 8)}?`)) {
+                            deleteMember.mutate(rider.id);
+                          }
+                        }}
+                        disabled={deleteMember.isPending}
+                      >
+                        <Trash2 className="mr-1 h-3 w-3" /> Delete
+                      </Button>
                     </>
                   )}
 

@@ -142,3 +142,12 @@ export async function suspendRider(memberId: string): Promise<FleetMember> {
   const resp = await api.post<FleetMember>(url);
   return resp.data!;
 }
+
+/**
+ * Delete a fleet member permanently.
+ * DELETE /api/v1/{tenant}/fleet/members/{memberId}
+ */
+export async function deleteRider(memberId: string): Promise<void> {
+  const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/fleet/members/${memberId}`;
+  await api.delete(url);
+}
