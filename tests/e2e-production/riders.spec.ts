@@ -1,22 +1,30 @@
 import { test, expect } from './helpers/auth-fixture';
 import { DashboardNav } from './helpers/dashboard-nav';
 import { NetworkLogger } from './helpers/network-logger';
+import { KubectlLogger } from './helpers/kubectl-logger';
 import * as path from 'path';
 
 const OUTPUT_DIR = path.join(__dirname, '..', '..', 'test-results', 'production');
 
+/** Real test email for rider invite — user receives the email to verify delivery. */
+const RIDER_TEST_EMAIL = 'titusowuor30@gmail.com';
+
 test.describe('Rider Management Dashboard', () => {
   let logger: NetworkLogger;
   let nav: DashboardNav;
+  let k8sLogger: KubectlLogger;
 
   test.beforeEach(async ({ authenticatedPage }) => {
     logger = new NetworkLogger();
     logger.attachToPage(authenticatedPage);
     nav = new DashboardNav(authenticatedPage);
+    k8sLogger = new KubectlLogger();
   });
 
   test.afterEach(async () => {
     logger.saveReport(OUTPUT_DIR, 'riders-report');
+    k8sLogger.stopAll();
+    k8sLogger.saveReport(OUTPUT_DIR, 'riders-k8s');
   });
 
   test('page loads with stats cards and tab interface', async ({ authenticatedPage: page }) => {
@@ -62,7 +70,10 @@ test.describe('Rider Management Dashboard', () => {
     await expect(page.locator('button:has-text("Pending")')).toBeVisible({ timeout: 3_000 });
   });
 
-  test('invite rider flow - modal opens and submits', async ({ authenticatedPage: page }) => {
+  test('invite rider flow - sends invite email via notifications-api', async ({ authenticatedPage: page }) => {
+    // Start tailing logs for logistics-api and notifications-api to verify event flow
+    k8sLogger.startTailing(['logistics-api', 'notifications-api', 'ordering-backend']);
+
     await nav.navigateToRiders();
 
     // Click "Invite Rider" button
@@ -75,13 +86,13 @@ test.describe('Rider Management Dashboard', () => {
     // Verify workflow description is shown
     await expect(page.locator('text=sign up via SSO')).toBeVisible({ timeout: 3_000 });
 
-    // Fill email
+    // Fill email with the real test address
     const emailInput = page.locator('input[type="email"]');
-    await emailInput.fill('test-rider-' + Date.now() + '@example.com');
+    await emailInput.fill(RIDER_TEST_EMAIL);
 
     // Fill optional ID
     const idInput = page.locator('input[placeholder*="ID / Passport"]');
-    await idInput.fill('TEST123456');
+    await idInput.fill('TEST-KYC-001');
 
     await page.screenshot({ path: path.join(OUTPUT_DIR, 'riders-invite-form.png'), fullPage: true });
 
@@ -96,10 +107,41 @@ test.describe('Rider Management Dashboard', () => {
 
     try {
       const response = await apiPromise;
-      // 201 = created, 409 = already exists
-      expect([200, 201, 409]).toContain(response.status());
-    } catch {
-      // API call may fail if logistics service is not configured for this email
+      const status = response.status();
+      console.log(`Rider invite API response: ${status}`);
+
+      // 200/201 = created, 409 = already exists (re-invite)
+      expect([200, 201, 409]).toContain(status);
+
+      if (status === 200 || status === 201) {
+        const body = await response.json().catch(() => null);
+        console.log('Invite response body:', JSON.stringify(body, null, 2));
+      }
+
+      // Wait for event propagation to notifications-api
+      await page.waitForTimeout(5_000);
+
+      // Check kubectl logs for the invite event trail
+      const inviteEvents = k8sLogger.searchLogs(/fleet\.member_invited|rider.*invite|email.*send/i);
+      console.log(`\n--- Event Trail (${inviteEvents.length} matches) ---`);
+      for (const evt of inviteEvents) {
+        console.log(`  [${evt.service}] ${evt.line}`);
+      }
+
+      // Check notifications-api specifically for email dispatch
+      const emailLogs = k8sLogger.searchLogs(new RegExp(RIDER_TEST_EMAIL, 'i'));
+      console.log(`\n--- Email delivery logs (${emailLogs.length} matches) ---`);
+      for (const log of emailLogs) {
+        console.log(`  [${log.service}] ${log.line}`);
+      }
+
+      // Also fetch recent notifications-api logs directly
+      const notifLogs = KubectlLogger.getRecentLogs('notifications-api', 2);
+      console.log('\n--- Recent notifications-api logs (last 2 min) ---');
+      console.log(notifLogs.slice(0, 2000));
+
+    } catch (err) {
+      console.error('Invite flow error:', err);
       await page.screenshot({ path: path.join(OUTPUT_DIR, 'riders-invite-error.png'), fullPage: true });
     }
   });
