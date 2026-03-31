@@ -48,22 +48,22 @@ test.describe('Menu Management Dashboard', () => {
     // Click toggle button (title contains "Mark available" or "Mark unavailable")
     const toggleBtn = firstRow.locator('button[title*="ark"]').first();
 
-    // Intercept API call
+    // Intercept API call - now uses PUT /catalog/overrides/{sku}
     const apiPromise = page.waitForResponse(
-      (resp) => resp.url().includes('/catalog/') && resp.request().method() === 'PUT',
+      (resp) => resp.url().includes('/catalog/overrides/') && resp.request().method() === 'PUT',
       { timeout: 10_000 },
     );
 
     await toggleBtn.click();
 
     const response = await apiPromise;
+    console.log(`Toggle availability: ${response.status()} ${response.url()}`);
 
-    // The catalog API may return 405 if PUT method isn't enabled on this route
     if (response.status() < 400) {
       await page.waitForTimeout(2_000);
       await expect(page.locator('text=Availability updated')).toBeVisible({ timeout: 5_000 });
     } else {
-      console.log(`Toggle availability returned ${response.status()} - catalog PUT endpoint may not be configured`);
+      console.log(`Toggle availability returned ${response.status()}`);
     }
 
     await page.screenshot({ path: path.join(OUTPUT_DIR, 'menu-toggle-availability.png'), fullPage: true });
@@ -82,20 +82,21 @@ test.describe('Menu Management Dashboard', () => {
     const firstRow = page.locator('tbody tr').first();
     const starBtn = firstRow.locator('button[title*="eature"]').first();
 
+    // Now uses PUT /catalog/overrides/{sku}
     const apiPromise = page.waitForResponse(
-      (resp) => resp.url().includes('/catalog/') && resp.request().method() === 'PUT',
+      (resp) => resp.url().includes('/catalog/overrides/') && resp.request().method() === 'PUT',
       { timeout: 10_000 },
     );
 
     await starBtn.click();
     const response = await apiPromise;
+    console.log(`Toggle featured: ${response.status()} ${response.url()}`);
 
-    // The catalog API may return 405 if the endpoint doesn't support isFeatured updates
     if (response.status() < 400) {
       await page.waitForTimeout(2_000);
       await expect(page.locator('text=Featured status updated')).toBeVisible({ timeout: 5_000 });
     } else {
-      console.log(`Featured toggle returned ${response.status()} - endpoint may not support isFeatured`);
+      console.log(`Featured toggle returned ${response.status()}`);
     }
 
     await page.screenshot({ path: path.join(OUTPUT_DIR, 'menu-toggle-featured.png'), fullPage: true });
@@ -208,9 +209,9 @@ test.describe('Menu Management Dashboard', () => {
     // Modify the name and save
     await nameInput.fill(nameValue + ' (edited)');
 
-    // Set up response listener BEFORE clicking submit
+    // Set up response listener BEFORE clicking submit - uses PUT /catalog/overrides/{sku}
     const apiPromise = page.waitForResponse(
-      (resp) => resp.url().includes('/catalog/') && (resp.request().method() === 'PUT' || resp.request().method() === 'PATCH'),
+      (resp) => resp.url().includes('/catalog/overrides/') && resp.request().method() === 'PUT',
       { timeout: 15_000 },
     );
 
