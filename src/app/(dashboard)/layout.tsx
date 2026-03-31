@@ -33,15 +33,15 @@ const SIDEBAR_ITEMS: Array<{
   permission?: string;
 }> = [
   { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-  { label: 'Orders', icon: ShoppingBag, href: '/dashboard/orders', permission: 'orders:read' },
-  { label: 'Menu', icon: ChefHat, href: '/dashboard/menu', permission: 'menu:read' },
-  { label: 'Recipes', icon: BookOpen, href: '/dashboard/recipes', permission: 'menu:read' },
-  { label: 'Inventory', icon: Box, href: '/dashboard/inventory', permission: 'inventory:read' },
-  { label: 'Riders', icon: Bike, href: '/dashboard/riders', adminOnly: true, permission: 'riders:read' },
+  { label: 'Orders', icon: ShoppingBag, href: '/dashboard/orders', permission: 'ordering.orders.view' },
+  { label: 'Menu', icon: ChefHat, href: '/dashboard/menu', permission: 'ordering.catalog.view' },
+  { label: 'Recipes', icon: BookOpen, href: '/dashboard/recipes', permission: 'ordering.catalog.view' },
+  { label: 'Inventory', icon: Box, href: '/dashboard/inventory', permission: 'inventory.items.view' },
+  { label: 'Riders', icon: Bike, href: '/dashboard/riders', adminOnly: true, permission: 'logistics.fleet.view' },
   { label: 'Shifts', icon: Clock, href: '/dashboard/shifts' },
-  { label: 'Payments', icon: CreditCard, href: '/dashboard/payments', permission: 'payments:read' },
+  { label: 'Payments', icon: CreditCard, href: '/dashboard/payments', permission: 'treasury.payments.view' },
   { label: 'Analytics', icon: BarChart3, href: '/dashboard/analytics' },
-  { label: 'Team', icon: Users, href: '/dashboard/team', adminOnly: true, permission: 'users:read' },
+  { label: 'Team', icon: Users, href: '/dashboard/team', adminOnly: true, permission: 'auth.users.view' },
   { label: 'Settings', icon: Settings, href: '/dashboard/settings' },
 ];
 
