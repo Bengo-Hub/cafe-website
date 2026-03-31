@@ -181,29 +181,26 @@ export async function createMenuItem(data: {
 /**
  * Update a catalog override by SKU.
  * PUT /catalog/overrides/{sku}
- * Only override fields (price, availability, featured, etc.) can be changed here.
- * To update name/description, update the inventory item directly.
+ * Requires outletId in the request body.
  */
 export async function updateMenuItem(
   sku: string,
-  data: Partial<{
-    categoryId: string;
+  data: {
     outletId: string;
-    name: string;
-    description: string;
-    basePrice: number;
-    currency: string;
-    imageUrl: string;
-    isAvailable: boolean;
-    isFeatured: boolean;
-    leadTimeMinutes: number;
-  }>,
+    basePrice?: number;
+    currency?: string;
+    imageUrl?: string;
+    isAvailable?: boolean;
+    isFeatured?: boolean;
+    leadTimeMinutes?: number;
+  },
 ) {
   const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/catalog/overrides/${sku}`;
   return apiClient<MenuItem>(url, {
     method: 'PUT',
     headers: headers(),
     body: JSON.stringify({
+      outletId: data.outletId,
       basePrice: data.basePrice,
       currency: data.currency,
       isAvailable: data.isAvailable,

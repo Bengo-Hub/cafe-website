@@ -105,7 +105,7 @@ export default function MenuManagement() {
 
   const toggleAvailability = useMutation({
     mutationFn: ({ sku, available }: { sku: string; available: boolean }) =>
-      updateMenuItem(sku, { isAvailable: available }),
+      updateMenuItem(sku, { outletId: selectedOutletId || defaultOutletId, isAvailable: available }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['catalog-items'] });
       toast.success('Availability updated');
@@ -115,7 +115,7 @@ export default function MenuManagement() {
 
   const toggleFeatured = useMutation({
     mutationFn: ({ sku, featured }: { sku: string; featured: boolean }) =>
-      updateMenuItem(sku, { isFeatured: featured }),
+      updateMenuItem(sku, { outletId: selectedOutletId || defaultOutletId, isFeatured: featured }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['catalog-items'] });
       toast.success('Featured status updated');
@@ -221,11 +221,10 @@ export default function MenuManagement() {
     mutationFn: async () => {
       if (!editingItem) return Promise.reject();
 
-      // Update the catalog override by SKU
+      // Update the catalog override by SKU (outletId is required)
+      const outletId = (editingItem as any).outletId || selectedOutletId || defaultOutletId;
       const result = await updateMenuItem(editingItem.sku, {
-        categoryId: editingItem.categoryId,
-        name: editingItem.name,
-        description: editingItem.description,
+        outletId,
         basePrice: Number(editingItem.basePrice),
         imageUrl: editingItem.imageUrl,
         isAvailable: editingItem.isAvailable,
