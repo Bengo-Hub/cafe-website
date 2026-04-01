@@ -9,7 +9,6 @@ import {
   deleteRider,
   fetchRider,
   fetchRiders,
-  hasSubmittedKyc,
   inviteRider,
   suspendRider,
 } from '@/lib/api/riders';
@@ -41,16 +40,20 @@ const TABS: { value: TabValue; label: string }[] = [
 ];
 
 const STATUS_CONFIG: Record<RiderStatus, { label: string; color: string; bg: string }> = {
-  pending: { label: 'Pending', color: 'text-yellow-600', bg: 'bg-yellow-500/10' },
-  approved: { label: 'Approved', color: 'text-blue-600', bg: 'bg-blue-500/10' },
+  invited: { label: 'Invited', color: 'text-gray-600', bg: 'bg-gray-500/10' },
+  pending: { label: 'Awaiting KYC', color: 'text-yellow-600', bg: 'bg-yellow-500/10' },
+  pending_review: { label: 'KYC Review', color: 'text-indigo-600', bg: 'bg-indigo-500/10' },
   active: { label: 'Active', color: 'text-green-600', bg: 'bg-green-500/10' },
+  rejected: { label: 'Rejected', color: 'text-orange-600', bg: 'bg-orange-500/10' },
   suspended: { label: 'Suspended', color: 'text-red-500', bg: 'bg-red-500/10' },
 };
 
 const INVITE_STATUS_FILTERS = [
   { value: '', label: 'All' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'approved', label: 'Approved' },
+  { value: 'invited', label: 'Invited' },
+  { value: 'pending', label: 'Awaiting KYC' },
+  { value: 'pending_review', label: 'KYC Review' },
+  { value: 'rejected', label: 'Rejected' },
 ];
 
 const FLEET_STATUS_FILTERS = [
@@ -112,13 +115,13 @@ export default function RiderManagement() {
     enabled: !!reviewingRider,
   });
 
-  const pendingCount = riders.filter((r) => r.status === 'pending').length;
+  const pendingCount = riders.filter((r) => ['invited', 'pending', 'pending_review'].includes(r.status)).length;
   const activeCount = riders.filter((r) => r.status === 'active').length;
   const suspendedCount = riders.filter((r) => r.status === 'suspended').length;
 
   // Split riders by tab context
   const inviteRiders = useMemo(() => {
-    return riders.filter((r) => r.status === 'pending' || r.status === 'approved');
+    return riders.filter((r) => ['invited', 'pending', 'pending_review', 'rejected'].includes(r.status));
   }, [riders]);
 
   const fleetMembers = useMemo(() => {
@@ -256,7 +259,6 @@ export default function RiderManagement() {
         <div className="space-y-3">
           {paginatedRiders.map((rider: FleetMember) => {
             const cfg = STATUS_CONFIG[rider.status] || STATUS_CONFIG.pending;
-            const kycSubmitted = hasSubmittedKyc(rider);
 
             return (
               <Card key={rider.id} className="flex flex-col gap-4 border border-brand-beige/10 p-5 md:flex-row md:items-center md:justify-between">
@@ -307,11 +309,7 @@ export default function RiderManagement() {
                   {/* Invites tab actions */}
                   {activeTab === 'invites' && (
                     <>
-                      {rider.status === 'pending' && !kycSubmitted && (
-                        <Badge className="bg-gray-500/10 text-gray-500">Awaiting KYC</Badge>
-                      )}
-
-                      {rider.status === 'pending' && kycSubmitted && (
+                      {rider.status === 'pending_review' && (
                         <Button
                           size="sm"
                           className="h-8 rounded-lg bg-indigo-500 px-3 text-xs text-white hover:bg-indigo-600"
@@ -319,10 +317,6 @@ export default function RiderManagement() {
                         >
                           <ClipboardCheck className="mr-1 h-3 w-3" /> Review KYC
                         </Button>
-                      )}
-
-                      {rider.status === 'approved' && (
-                        <Badge className="bg-blue-500/10 text-blue-600">Approved</Badge>
                       )}
 
                       {/* Delete invite */}

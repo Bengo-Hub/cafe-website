@@ -5,7 +5,7 @@ const LOGISTICS_URL = config.services.logistics;
 
 // Types matching the logistics-api FleetMember ent schema
 
-export type RiderStatus = 'pending' | 'approved' | 'active' | 'suspended';
+export type RiderStatus = 'invited' | 'pending' | 'pending_review' | 'active' | 'rejected' | 'suspended';
 
 export interface Vehicle {
   id: string;
