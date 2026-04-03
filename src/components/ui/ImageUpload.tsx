@@ -22,9 +22,16 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ label, value, onChange
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate size (10MB — matches backend limit)
-    if (file.size > 10 * 1024 * 1024) {
-      alert('File size exceeds 10MB limit');
+    // Validate file type (JPG/PNG only)
+    const allowedTypes = ['image/jpeg', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Only JPG and PNG images are allowed');
+      return;
+    }
+
+    // Validate size (2MB max — matches backend limit)
+    if (file.size > 2 * 1024 * 1024) {
+      alert('File size exceeds 2MB limit. Please compress or resize the image.');
       return;
     }
 
@@ -98,7 +105,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ label, value, onChange
             </div>
             <div>
               <p className="text-[11px] font-bold uppercase tracking-widest text-primary-brand">Upload Photo</p>
-              <p className="text-[9px] font-medium text-secondary-brand opacity-60">JPG/PNG (MAX 5MB)</p>
+              <p className="text-[9px] font-medium text-secondary-brand opacity-60">JPG/PNG only (MAX 2MB)</p>
             </div>
           </div>
         )}
@@ -106,7 +113,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ label, value, onChange
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png"
           className="hidden"
           onChange={handleFileChange}
           disabled={uploading}
