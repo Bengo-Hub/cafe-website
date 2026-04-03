@@ -2,8 +2,9 @@ import { test as base, expect, type Page } from '@playwright/test';
 import * as path from 'path';
 import * as fs from 'fs';
 
-const PROD_EMAIL = process.env.PROD_TEST_EMAIL || 'admin@theurbanloftcafe.com';
-const PROD_PASSWORD = process.env.PROD_TEST_PASSWORD || 'TenantAdmin2024!';
+// Tenant admin — loaded from .env.production.test (no hardcoded passwords)
+const PROD_EMAIL = process.env.PROD_TEST_EMAIL;
+const PROD_PASSWORD = process.env.PROD_TEST_PASSWORD;
 const STORAGE_STATE_PATH = path.join(__dirname, '..', '..', '..', 'test-results', 'production', '.auth-state.json');
 
 /**

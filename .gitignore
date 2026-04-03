@@ -100,3 +100,4 @@ logs/
 
 # Image optimization script
 optimize-images.js
+.env.production.test
