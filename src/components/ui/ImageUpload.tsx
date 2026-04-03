@@ -22,10 +22,10 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ label, value, onChange
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type (JPG/PNG only)
-    const allowedTypes = ['image/jpeg', 'image/png'];
+    // Validate file type (JPEG/JPG/PNG only)
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
     if (!allowedTypes.includes(file.type)) {
-      alert('Only JPG and PNG images are allowed');
+      alert('Only JPEG, JPG and PNG images are allowed');
       return;
     }
 
@@ -105,7 +105,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ label, value, onChange
             </div>
             <div>
               <p className="text-[11px] font-bold uppercase tracking-widest text-primary-brand">Upload Photo</p>
-              <p className="text-[9px] font-medium text-secondary-brand opacity-60">JPG/PNG only (MAX 2MB)</p>
+              <p className="text-[9px] font-medium text-secondary-brand opacity-60">JPEG, JPG, PNG only (MAX 2MB)</p>
             </div>
           </div>
         )}
@@ -113,7 +113,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ label, value, onChange
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/jpeg,image/png"
+          accept=".jpg,.jpeg,.png"
           className="hidden"
           onChange={handleFileChange}
           disabled={uploading}
