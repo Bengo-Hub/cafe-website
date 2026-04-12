@@ -75,7 +75,7 @@ export default function StaffDashboard() {
   const recentOrders = recentRes?.data?.data ?? [];
 
   const ordersToday = orders.length;
-  const revenueToday = orders.reduce((sum: number, o: Order) => sum + (o.total ?? 0), 0);
+  const revenueToday = orders.reduce((sum: number, o: Order) => sum + (o.grandTotal ?? 0), 0);
   const preparing = orders.filter((o: Order) => o.status === 'preparing').length;
   const ready = orders.filter((o: Order) => o.status === 'ready').length;
 
@@ -182,8 +182,8 @@ export default function StaffDashboard() {
                 ) : (
                   recentOrders.slice(0, 10).map((order: Order) => (
                     <tr key={order.id} className="group hover:bg-brand-orange/5 transition-colors">
-                      <td className="p-6 font-bold text-primary-brand">{order.order_number}</td>
-                      <td className="p-6 text-secondary-brand">{order.customer_name}</td>
+                      <td className="p-6 font-bold text-primary-brand">{order.orderNumber}</td>
+                      <td className="p-6 text-secondary-brand">{order.customerName || (order.source === 'guest' ? 'Guest' : '—')}</td>
                       <td className="p-6 text-secondary-brand text-sm">{order.items?.length ?? 0} items</td>
                       <td className="p-6">
                         <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-brand-orange/10 text-brand-orange">
@@ -191,7 +191,7 @@ export default function StaffDashboard() {
                         </span>
                       </td>
                       <td className="p-6 font-black text-primary-brand">
-                        {formatCurrency(order.total ?? 0, order.currency)}
+                        {formatCurrency(order.grandTotal ?? 0, order.currency)}
                       </td>
                       <td className="p-6">
                         <Link
