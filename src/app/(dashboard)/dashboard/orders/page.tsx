@@ -309,7 +309,12 @@ export default function OrderManagement() {
                     <div className="mb-3 flex items-start justify-between">
                       <div>
                         <p className="font-black text-primary-brand">{order.orderNumber}</p>
-                        <p className="text-sm text-secondary-brand">{order.customerName || 'Guest'}</p>
+                        <p className="text-sm text-secondary-brand">
+                          {order.customerName || '—'}
+                          {order.source === 'guest' && (
+                            <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-purple-100 text-purple-600">Guest</span>
+                          )}
+                        </p>
                       </div>
                       <Badge className={`${cfg.bg} ${cfg.color}`}>{cfg.label}</Badge>
                     </div>
@@ -351,9 +356,20 @@ export default function OrderManagement() {
                       {selectedOrder.orderNumber}
                     </h2>
                     <p className="text-secondary-brand">
-                      {selectedOrder.customerName || 'Guest'} &bull; {selectedOrder.channel}
-                      {selectedOrder.deliveryAddress && ' (Delivery)'}
+                      {selectedOrder.customerName || '—'}
+                      {selectedOrder.source === 'guest' && (
+                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-purple-100 text-purple-600">Guest</span>
+                      )}
+                      <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-blue-100 text-blue-600">{selectedOrder.channel}</span>
+                      {selectedOrder.fulfillmentType && (
+                        <span className="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-green-100 text-green-700">{selectedOrder.fulfillmentType}</span>
+                      )}
                     </p>
+                    {(selectedOrder.customerEmail || selectedOrder.customerPhone) && (
+                      <p className="mt-0.5 text-xs text-secondary-brand opacity-60">
+                        {selectedOrder.customerEmail}{selectedOrder.customerPhone ? ` · ${selectedOrder.customerPhone}` : ''}
+                      </p>
+                    )}
                     <p className="mt-1 text-xs text-secondary-brand opacity-60">
                       {formatDate(selectedOrder.createdAt)}
                     </p>

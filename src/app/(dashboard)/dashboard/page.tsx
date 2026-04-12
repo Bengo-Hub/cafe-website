@@ -183,7 +183,15 @@ export default function StaffDashboard() {
                   recentOrders.slice(0, 10).map((order: Order) => (
                     <tr key={order.id} className="group hover:bg-brand-orange/5 transition-colors">
                       <td className="p-6 font-bold text-primary-brand">{order.orderNumber}</td>
-                      <td className="p-6 text-secondary-brand">{order.customerName || (order.source === 'guest' ? 'Guest' : '—')}</td>
+                      <td className="p-6 text-secondary-brand">
+                        <span>{order.customerName || '—'}</span>
+                        {order.source === 'guest' && (
+                          <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-purple-100 text-purple-600">Guest</span>
+                        )}
+                        {order.channel && (
+                          <span className="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-blue-100 text-blue-600">{order.channel}</span>
+                        )}
+                      </td>
                       <td className="p-6 text-secondary-brand text-sm">{order.items?.length ?? 0} items</td>
                       <td className="p-6">
                         <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-brand-orange/10 text-brand-orange">
