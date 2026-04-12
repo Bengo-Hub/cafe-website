@@ -308,22 +308,22 @@ export default function OrderManagement() {
                   >
                     <div className="mb-3 flex items-start justify-between">
                       <div>
-                        <p className="font-black text-primary-brand">{order.order_number}</p>
-                        <p className="text-sm text-secondary-brand">{order.customer_name}</p>
+                        <p className="font-black text-primary-brand">{order.orderNumber}</p>
+                        <p className="text-sm text-secondary-brand">{order.customerName || 'Guest'}</p>
                       </div>
                       <Badge className={`${cfg.bg} ${cfg.color}`}>{cfg.label}</Badge>
                     </div>
                     <div className="flex items-center justify-between text-xs font-bold text-secondary-brand opacity-60">
                       <div className="flex items-center gap-1.5">
                         <Clock className="h-3 w-3" />
-                        <span>{formatTime(order.created_at)}</span>
+                        <span>{formatTime(order.createdAt)}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <ShoppingBag className="h-3 w-3" />
                         <span>{order.items.length} items</span>
                       </div>
                       <span className="font-black text-primary-brand">
-                        {formatCurrency(order.total, order.currency)}
+                        {formatCurrency(order.grandTotal, order.currency)}
                       </span>
                     </div>
                   </motion.div>
@@ -348,14 +348,14 @@ export default function OrderManagement() {
                 <div className="flex items-center justify-between border-b border-brand-beige/10 pb-6">
                   <div>
                     <h2 className="text-2xl font-black tracking-tight text-primary-brand md:text-3xl">
-                      {selectedOrder.order_number}
+                      {selectedOrder.orderNumber}
                     </h2>
                     <p className="text-secondary-brand">
-                      {selectedOrder.customer_name} &bull; {selectedOrder.channel}
-                      {selectedOrder.delivery_address && ' (Delivery)'}
+                      {selectedOrder.customerName || 'Guest'} &bull; {selectedOrder.channel}
+                      {selectedOrder.deliveryAddress && ' (Delivery)'}
                     </p>
                     <p className="mt-1 text-xs text-secondary-brand opacity-60">
-                      {formatDate(selectedOrder.created_at)}
+                      {formatDate(selectedOrder.createdAt)}
                     </p>
                   </div>
                   <div className="text-right">
@@ -363,11 +363,11 @@ export default function OrderManagement() {
                       Total
                     </p>
                     <p className="text-2xl font-black text-brand-orange md:text-3xl">
-                      {formatCurrency(selectedOrder.total, selectedOrder.currency)}
+                      {formatCurrency(selectedOrder.grandTotal, selectedOrder.currency)}
                     </p>
-                    {selectedOrder.discount > 0 && (
+                    {selectedOrder.discountTotal > 0 && (
                       <p className="text-xs text-green-500">
-                        Discount: -{formatCurrency(selectedOrder.discount, selectedOrder.currency)}
+                        Discount: -{formatCurrency(selectedOrder.discountTotal, selectedOrder.currency)}
                       </p>
                     )}
                   </div>
@@ -423,7 +423,7 @@ export default function OrderManagement() {
                           <span className="font-bold text-primary-brand">{item.name}</span>
                         </div>
                         <span className="font-black text-primary-brand">
-                          {formatCurrency(item.total_price, selectedOrder.currency)}
+                          {formatCurrency(item.totalPrice, selectedOrder.currency)}
                         </span>
                       </div>
                     ))}
@@ -435,38 +435,38 @@ export default function OrderManagement() {
                       <span>Subtotal</span>
                       <span>{formatCurrency(selectedOrder.subtotal, selectedOrder.currency)}</span>
                     </div>
-                    {selectedOrder.delivery_fee > 0 && (
+                    {selectedOrder.deliveryFee > 0 && (
                       <div className="flex justify-between text-secondary-brand">
                         <span>Delivery Fee</span>
                         <span>
-                          {formatCurrency(selectedOrder.delivery_fee, selectedOrder.currency)}
+                          {formatCurrency(selectedOrder.deliveryFee, selectedOrder.currency)}
                         </span>
                       </div>
                     )}
-                    {selectedOrder.discount > 0 && (
+                    {selectedOrder.discountTotal > 0 && (
                       <div className="flex justify-between text-green-500">
                         <span>Discount</span>
                         <span>
-                          -{formatCurrency(selectedOrder.discount, selectedOrder.currency)}
+                          -{formatCurrency(selectedOrder.discountTotal, selectedOrder.currency)}
                         </span>
                       </div>
                     )}
                     <div className="flex justify-between border-t border-brand-beige/10 pt-1 font-black text-primary-brand">
                       <span>Total</span>
-                      <span>{formatCurrency(selectedOrder.total, selectedOrder.currency)}</span>
+                      <span>{formatCurrency(selectedOrder.grandTotal, selectedOrder.currency)}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Customer & delivery info */}
-                {(selectedOrder.delivery_address || selectedOrder.instructions) && (
+                {(selectedOrder.deliveryAddress || selectedOrder.instructions) && (
                   <div className="space-y-2 rounded-xl border border-brand-beige/10 bg-brand-beige/5 p-4">
-                    {selectedOrder.delivery_address && (
+                    {selectedOrder.deliveryAddress && (
                       <div>
                         <p className="text-xs font-bold uppercase tracking-widest text-secondary-brand opacity-40">
                           Delivery Address
                         </p>
-                        <p className="text-sm text-primary-brand">{selectedOrder.delivery_address}</p>
+                        <p className="text-sm text-primary-brand">{selectedOrder.deliveryAddress}</p>
                       </div>
                     )}
                     {selectedOrder.instructions && (
@@ -494,7 +494,7 @@ export default function OrderManagement() {
                       {STATUS_CONFIG[NEXT_STATUS[selectedOrder.status]!].label}
                     </Button>
                   )}
-                  {selectedOrder.delivery_address && !['delivered', 'completed', 'cancelled', 'refunded'].includes(selectedOrder.status) && (
+                  {selectedOrder.deliveryAddress && !['delivered', 'completed', 'cancelled', 'refunded'].includes(selectedOrder.status) && (
                     <Button
                       variant="outline"
                       className="h-12 rounded-2xl border-brand-orange/20 bg-brand-orange/5 px-6 text-xs font-black uppercase tracking-widest text-brand-orange hover:bg-brand-orange/10"
@@ -555,7 +555,7 @@ export default function OrderManagement() {
               </button>
             </div>
             <p className="mb-4 text-sm text-secondary-brand">
-              Cancel order <strong>{selectedOrder.order_number}</strong>? This action cannot be
+              Cancel order <strong>{selectedOrder.orderNumber}</strong>? This action cannot be
               undone.
             </p>
             <textarea
@@ -606,7 +606,7 @@ export default function OrderManagement() {
         isSubmitting={assignRiderMutation.isPending}
       >
         <AssignRiderForm
-          orderNumber={selectedOrder?.order_number || ''}
+          orderNumber={selectedOrder?.orderNumber || ''}
           riders={activeRiders}
           selectedRiderId={selectedRiderId}
           onRiderChange={setSelectedRiderId}

@@ -19,7 +19,7 @@ function headers(): Record<string, string> {
   return { ...authHeaders(), ...getTenantHeaders() };
 }
 
-// Types matching ordering-backend responses
+// Types matching ordering-backend responses (camelCase JSON)
 
 export type OrderStatus =
   | 'pending'
@@ -34,37 +34,46 @@ export type OrderStatus =
 
 export interface OrderItem {
   id: string;
-  menu_item_id: string;
+  inventorySku: string;
+  nameSnapshot: string;
+  /** Alias for UI convenience */
   name: string;
   quantity: number;
-  unit_price: number;
-  total_price: number;
-  customizations?: Record<string, string>;
+  unitPrice: number;
+  totalPrice: number;
+  notes?: string;
+  metadata?: Record<string, unknown>;
 }
 
 export interface Order {
   id: string;
-  order_number: string;
-  customer_id: string;
-  customer_name: string;
-  customer_email: string;
-  customer_phone: string;
+  orderNumber: string;
+  customerId?: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
   items: OrderItem[];
   subtotal: number;
-  discount: number;
-  delivery_fee: number;
-  total: number;
+  discountTotal: number;
+  deliveryFee: number;
+  grandTotal: number;
   currency: string;
   status: OrderStatus;
+  paymentStatus: string;
+  paymentMethod: string;
+  fulfillmentType: string;
+  source?: string;
   channel: string;
-  delivery_address?: string;
+  deliveryAddress?: string;
   instructions?: string;
-  created_at: string;
-  updated_at: string;
-  confirmed_at?: string;
-  completed_at?: string;
-  cancelled_at?: string;
-  cancel_reason?: string;
+  metadata?: Record<string, unknown>;
+  placedAt: string;
+  createdAt: string;
+  updatedAt: string;
+  confirmedAt?: string;
+  completedAt?: string;
+  cancelledAt?: string;
+  cancelReason?: string;
 }
 
 export interface ListOrdersResponse {
@@ -74,6 +83,46 @@ export interface ListOrdersResponse {
   page: number;
 }
 
+/** Normalize a raw backend order into a typed Order with resolved customer info. */
+function normalizeOrder(raw: Record<string, unknown>): Order {
+  const meta = (raw.metadata ?? {}) as Record<string, unknown>;
+  const isGuest = !!meta.guest;
+
+  const rawItems = (raw.items ?? []) as Record<string, unknown>[];
+  const items: OrderItem[] = rawItems.map((it) => ({
+    id: (it.id ?? '') as string,
+    inventorySku: (it.inventorySku ?? '') as string,
+    nameSnapshot: (it.nameSnapshot ?? it.name ?? '') as string,
+    name: (it.nameSnapshot ?? it.name ?? '') as string,
+    quantity: (it.quantity ?? 0) as number,
+    unitPrice: (it.unitPrice ?? 0) as number,
+    totalPrice: (it.totalPrice ?? 0) as number,
+    notes: (it.notes ?? '') as string,
+    metadata: it.metadata as Record<string, unknown> | undefined,
+  }));
+
+  return {
+    ...(raw as unknown as Order),
+    orderNumber: (raw.orderNumber ?? raw.order_number ?? '') as string,
+    customerName: (isGuest ? meta.contactName : '') as string || '',
+    customerEmail: (isGuest ? meta.contactEmail : '') as string || '',
+    customerPhone: (isGuest ? meta.contactPhone : '') as string || '',
+    items,
+    discountTotal: (raw.discountTotal ?? raw.discount ?? 0) as number,
+    deliveryFee: (raw.deliveryFee ?? raw.delivery_fee ?? 0) as number,
+    grandTotal: (raw.grandTotal ?? raw.total ?? 0) as number,
+    deliveryAddress: (raw.instructions ?? raw.deliveryAddress ?? raw.delivery_address ?? '') as string,
+    createdAt: (raw.createdAt ?? raw.created_at ?? '') as string,
+    updatedAt: (raw.updatedAt ?? raw.updated_at ?? '') as string,
+    placedAt: (raw.placedAt ?? raw.createdAt ?? '') as string,
+    confirmedAt: (raw.confirmedAt ?? raw.confirmed_at) as string | undefined,
+    completedAt: (raw.completedAt ?? raw.completed_at) as string | undefined,
+    cancelledAt: (raw.cancelledAt ?? raw.cancelled_at) as string | undefined,
+    cancelReason: (raw.cancelReason ?? raw.cancel_reason) as string | undefined,
+    channel: (raw.channel ?? raw.source ?? 'web') as string,
+  };
+}
+
 // API functions
 
 export async function fetchAdminOrders(params?: {
@@ -81,7 +130,7 @@ export async function fetchAdminOrders(params?: {
   page?: number;
   limit?: number;
   search?: string;
-  date_from?: string; // ISO date or RFC3339
+  date_from?: string;
   date_to?: string;
 }) {
   const query = new URLSearchParams();
@@ -95,12 +144,21 @@ export async function fetchAdminOrders(params?: {
   const qs = query.toString();
   const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/admin/orders${qs ? `?${qs}` : ''}`;
 
-  return apiClient<ListOrdersResponse>(url, { headers: headers() });
+  const res = await apiClient<ListOrdersResponse>(url, { headers: headers() });
+  // Normalize orders from raw backend response
+  if (res.data?.data) {
+    res.data.data = res.data.data.map((o) => normalizeOrder(o as unknown as Record<string, unknown>));
+  }
+  return res;
 }
 
 export async function fetchAdminOrder(orderId: string) {
   const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/admin/orders/${orderId}`;
-  return apiClient<Order>(url, { headers: headers() });
+  const res = await apiClient<Order>(url, { headers: headers() });
+  if (res.data) {
+    res.data = normalizeOrder(res.data as unknown as Record<string, unknown>);
+  }
+  return res;
 }
 
 export async function updateOrderStatus(orderId: string, status: OrderStatus) {
