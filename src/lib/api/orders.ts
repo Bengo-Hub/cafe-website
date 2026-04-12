@@ -179,6 +179,14 @@ export async function cancelOrder(orderId: string, reason: string) {
   });
 }
 
+export async function deleteOrder(orderId: string) {
+  const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/admin/orders/${orderId}`;
+  return apiClient<void>(url, {
+    method: 'DELETE',
+    headers: headers(),
+  });
+}
+
 export async function assignOrderRider(orderId: string, riderId: string) {
   const url = `${ORDERING_URL}/api/v1/${getTenantSlug()}/admin/orders/${orderId}/rider`;
   return apiClient<Order>(url, {

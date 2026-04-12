@@ -4,6 +4,7 @@ import { Badge, Button, Card, Pagination } from '@/components/ui';
 import {
     type OrderStatus,
     cancelOrder,
+    deleteOrder,
     fetchAdminOrders,
     updateOrderStatus,
     assignOrderRider,
@@ -148,6 +149,14 @@ export default function OrderManagement() {
     onSuccess: () => {
       setCancelDialogOpen(false);
       setCancelReason('');
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (orderId: string) => deleteOrder(orderId),
+    onSuccess: () => {
+      setSelectedOrderId(null);
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
     },
   });
@@ -530,6 +539,20 @@ export default function OrderManagement() {
                       Cancel Order
                     </Button>
                   )}
+                  {/* Delete order */}
+                  <Button
+                    variant="outline"
+                    className="h-12 rounded-2xl border-red-500/20 bg-red-500/5 px-6 text-xs font-black uppercase tracking-widest text-red-500 hover:bg-red-500/10"
+                    onClick={() => {
+                      if (window.confirm(`Delete order ${selectedOrder.orderNumber}? This cannot be undone.`)) {
+                        deleteMutation.mutate(selectedOrder.id);
+                      }
+                    }}
+                    disabled={deleteMutation.isPending}
+                  >
+                    {deleteMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Delete
+                  </Button>
                   {/* Status Override */}
                   <select
                     value={selectedOrder.status}
