@@ -67,7 +67,8 @@ test.describe('Rider Management Dashboard', () => {
     await page.click('button:has-text("Invites & Approvals")');
     await page.waitForTimeout(1_000);
     await expect(page.locator('button:has-text("All")')).toBeVisible({ timeout: 3_000 });
-    await expect(page.locator('button:has-text("Pending")')).toBeVisible({ timeout: 3_000 });
+    // Invites tab filters: All, Invited, Awaiting KYC, KYC Review, Rejected
+    await expect(page.locator('button:has-text("Invited")')).toBeVisible({ timeout: 3_000 });
   });
 
   test('invite rider flow - sends invite email via notifications-api', async ({ authenticatedPage: page }) => {
@@ -146,10 +147,10 @@ test.describe('Rider Management Dashboard', () => {
   test('status filter buttons work', async ({ authenticatedPage: page }) => {
     await nav.navigateToRiders();
 
-    // Test "Pending" filter
-    await page.click('button:has-text("Pending")');
+    // Test "Invited" filter (Invites tab: All, Invited, Awaiting KYC, KYC Review, Rejected)
+    await page.click('button:has-text("Invited")');
     await page.waitForTimeout(2_000);
-    await page.screenshot({ path: path.join(OUTPUT_DIR, 'riders-filter-pending.png'), fullPage: true });
+    await page.screenshot({ path: path.join(OUTPUT_DIR, 'riders-filter-invited.png'), fullPage: true });
 
     // Test "All" filter
     await page.click('button:has-text("All")');

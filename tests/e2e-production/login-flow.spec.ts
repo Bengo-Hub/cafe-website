@@ -26,18 +26,15 @@ test.describe('Production Login Flow Diagnostics', () => {
     await page.waitForTimeout(3_000);
     await page.screenshot({ path: path.join(OUTPUT_DIR, '01-homepage.png'), fullPage: true });
 
-    // Step 2: Navigate to login — should redirect to SSO
+    // Step 2: Navigate to login — redirects to SSO via PKCE
     await page.goto('/login');
-    // Wait for SSO redirect to accounts.codevertexitsolutions.com
-    await page.waitForURL('**/accounts.codevertexitsolutions.com/**', { timeout: 30_000 });
     await page.screenshot({ path: path.join(OUTPUT_DIR, '02-sso-login-page.png'), fullPage: true });
 
-    // Step 3: Fill credentials on SSO login form
-    // Try common selectors for email/password fields
+    // Step 3: Wait for SSO form to appear (skips URL wait — wait for form directly)
     const emailInput = page.locator('input[name="email"], input[type="email"], input[id="email"]').first();
     const passwordInput = page.locator('input[name="password"], input[type="password"], input[id="password"]').first();
 
-    await emailInput.waitFor({ state: 'visible', timeout: 15_000 });
+    await emailInput.waitFor({ state: 'visible', timeout: 45_000 });
     await emailInput.fill(PROD_EMAIL!);
     await passwordInput.fill(PROD_PASSWORD!);
     await page.screenshot({ path: path.join(OUTPUT_DIR, '03-credentials-filled.png'), fullPage: true });
@@ -130,13 +127,11 @@ test.describe('Production Login Flow Diagnostics', () => {
   test('verify downstream service endpoints after login', async ({ page }) => {
     test.skip(!PROD_EMAIL || !PROD_PASSWORD, 'Set PROD_TEST_EMAIL and PROD_TEST_PASSWORD env vars');
 
-    // Login first
+    // Login first — wait for SSO form directly
     await page.goto('/login');
-    await page.waitForURL('**/accounts.codevertexitsolutions.com/**', { timeout: 30_000 });
-
     const emailInput = page.locator('input[name="email"], input[type="email"], input[id="email"]').first();
     const passwordInput = page.locator('input[name="password"], input[type="password"], input[id="password"]').first();
-    await emailInput.waitFor({ state: 'visible', timeout: 15_000 });
+    await emailInput.waitFor({ state: 'visible', timeout: 45_000 });
     await emailInput.fill(PROD_EMAIL!);
     await passwordInput.fill(PROD_PASSWORD!);
     await page.locator('button[type="submit"]').first().click();

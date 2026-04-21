@@ -111,7 +111,7 @@ function normalizeOrder(raw: Record<string, unknown>): Order {
     discountTotal: (raw.discountTotal ?? raw.discount ?? 0) as number,
     deliveryFee: (raw.deliveryFee ?? raw.delivery_fee ?? 0) as number,
     grandTotal: (raw.grandTotal ?? raw.total ?? 0) as number,
-    deliveryAddress: (raw.instructions ?? raw.deliveryAddress ?? raw.delivery_address ?? '') as string,
+    deliveryAddress: (raw.deliveryAddress ?? raw.delivery_address ?? raw.instructions ?? '') as string,
     createdAt: (raw.createdAt ?? raw.created_at ?? '') as string,
     updatedAt: (raw.updatedAt ?? raw.updated_at ?? '') as string,
     placedAt: (raw.placedAt ?? raw.createdAt ?? '') as string,

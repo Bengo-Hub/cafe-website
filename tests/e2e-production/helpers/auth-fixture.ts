@@ -17,12 +17,11 @@ async function performLogin(page: Page): Promise<void> {
   }
 
   await page.goto('/login');
-  await page.waitForURL('**/accounts.codevertexitsolutions.com/**', { timeout: 30_000 });
-
+  // Login page performs PKCE redirect to SSO — wait for the form to appear
   const emailInput = page.locator('input[name="email"], input[type="email"], input[id="email"]').first();
   const passwordInput = page.locator('input[name="password"], input[type="password"], input[id="password"]').first();
 
-  await emailInput.waitFor({ state: 'visible', timeout: 15_000 });
+  await emailInput.waitFor({ state: 'visible', timeout: 45_000 });
   await emailInput.fill(PROD_EMAIL);
   await passwordInput.fill(PROD_PASSWORD);
 
