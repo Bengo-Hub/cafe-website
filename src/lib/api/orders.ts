@@ -104,9 +104,9 @@ function normalizeOrder(raw: Record<string, unknown>): Order {
   return {
     ...(raw as unknown as Order),
     orderNumber: (raw.orderNumber ?? raw.order_number ?? '') as string,
-    customerName: (isGuest ? meta.contactName : '') as string || '',
-    customerEmail: (isGuest ? meta.contactEmail : '') as string || '',
-    customerPhone: (isGuest ? meta.contactPhone : '') as string || '',
+    customerName: ((raw.customerName as string) || (isGuest ? (meta.contactName as string) : '')) || '',
+    customerEmail: ((raw.customerEmail as string) || (isGuest ? (meta.contactEmail as string) : '')) || '',
+    customerPhone: ((raw.customerPhone as string) || (isGuest ? (meta.contactPhone as string) : '')) || '',
     items,
     discountTotal: (raw.discountTotal ?? raw.discount ?? 0) as number,
     deliveryFee: (raw.deliveryFee ?? raw.delivery_fee ?? 0) as number,
