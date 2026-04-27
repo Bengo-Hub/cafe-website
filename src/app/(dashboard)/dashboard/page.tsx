@@ -4,6 +4,7 @@ import { Card } from '@/components/ui';
 import { hasPermission, hasStaffOrAdminRole } from '@/lib/auth/roles';
 import { fetchAdminOrders, type Order } from '@/lib/api/orders';
 import { useMe } from '@/hooks/use-me';
+import { useAuthStore } from '@/lib/store/auth-store';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
@@ -19,13 +20,16 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-/** Canonical MVP service UI domains (redirect only; no duplicate UIs). */
-const SERVICE_LINKS = [
-  { label: 'Inventory', href: 'https://inventory.codevertexitsolutions.com', permission: 'inventory.items.view' as const, icon: Box },
-  { label: 'Ordering', href: 'https://ordersapp.codevertexitsolutions.com', permission: 'ordering.orders.view' as const, icon: ShoppingBag },
-  { label: 'Logistics', href: 'https://logistics.codevertexitsolutions.com', permission: 'logistics.fleet.view' as const, icon: Bike },
-  { label: 'Treasury', href: 'https://books.codevertexitsolutions.com', permission: null, icon: BookOpen },
-] as const;
+/** Build service links scoped to the current tenant slug. */
+function buildServiceLinks(orgSlug: string | undefined) {
+  const slug = orgSlug ? `/${orgSlug}` : '';
+  return [
+    { label: 'Inventory', href: `https://inventory.codevertexitsolutions.com${slug}`, permission: 'inventory.items.view' as const, icon: Box },
+    { label: 'Ordering', href: `https://ordersapp.codevertexitsolutions.com${slug}`, permission: 'ordering.orders.view' as const, icon: ShoppingBag },
+    { label: 'Logistics', href: `https://logistics.codevertexitsolutions.com${slug}`, permission: 'logistics.fleet.view' as const, icon: Bike },
+    { label: 'Treasury', href: `https://books.codevertexitsolutions.com${slug}`, permission: null as null, icon: BookOpen },
+  ];
+}
 
 function formatCurrency(amount: number, currency = 'KES') {
   return `${currency} ${amount.toLocaleString()}`;
@@ -45,12 +49,14 @@ function endOfTodayISO() {
 
 export default function StaffDashboard() {
   const { me } = useMe();
+  const orgSlug = useAuthStore((s) => s.user?.tenant_slug as string | undefined);
   const todayStart = todayISO();
   const todayEnd = endOfTodayISO();
 
   const isStaff = hasStaffOrAdminRole(me);
   const noPerms = !me?.permissions?.length;
-  const visibleServiceLinks = SERVICE_LINKS.filter((s) => {
+  const serviceLinks = buildServiceLinks(orgSlug);
+  const visibleServiceLinks = serviceLinks.filter((s) => {
     if (s.permission) return hasPermission(me, s.permission) || (isStaff && noPerms);
     return isStaff;
   });
