@@ -14,7 +14,6 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { format } from "date-fns";
 
@@ -23,7 +22,7 @@ import { useSubscription } from "@/hooks/use-subscription";
 const SUBSCRIBE_URL =
   process.env.NEXT_PUBLIC_SUBSCRIPTIONS_UI_URL || "https://pricing.codevertexitsolutions.com";
 
-const UPGRADE_PATH = `${SUBSCRIBE_URL}/subscribe`;
+const UPGRADE_PATH = `${SUBSCRIBE_URL}/plans`;
 const BILLING_PATH = `${SUBSCRIBE_URL}/billing`;
 
 function formatDate(d: Date | null | string | undefined): string {
@@ -93,13 +92,15 @@ function BlockingOverlay({ plan }: { plan: string }) {
           ended. Upgrade now to restore access to your dashboard.
         </p>
       </div>
-      <Link
+      <a
         href={UPGRADE_PATH}
+        target="_blank"
+        rel="noopener noreferrer"
         className="inline-flex items-center gap-2 rounded-lg bg-brand-orange px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-orange/90"
       >
         <Zap className="size-4" />
         Upgrade now
-      </Link>
+      </a>
     </div>
   );
 }
@@ -167,13 +168,15 @@ export function SubscriptionBanner() {
               <span className="font-semibold">{daysLeft} day{daysLeft === 1 ? "" : "s"}</span>{" "}
               left to renew before access is blocked.
             </p>
-            <Link
+            <a
               href={UPGRADE_PATH}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex shrink-0 items-center gap-1 rounded-md bg-amber-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-amber-700"
             >
               Renew now
               <ArrowRight className="size-3" />
-            </Link>
+            </a>
           </div>
         </div>
       </div>
@@ -193,13 +196,15 @@ export function SubscriptionBanner() {
             <p className="flex-1 text-sm text-amber-800 dark:text-amber-200">
               Your subscription is suspended. Please update your payment method to restore access.
             </p>
-            <Link
+            <a
               href={BILLING_PATH}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex shrink-0 items-center gap-1 rounded-md bg-amber-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-amber-700"
             >
               Update payment
               <ArrowRight className="size-3" />
-            </Link>
+            </a>
           </div>
         </div>
       </div>
@@ -219,13 +224,15 @@ export function SubscriptionBanner() {
               <span className="font-semibold">{days} day{days === 1 ? "" : "s"}</span> left.
               Expires {formatDate(expiresAt)}. Upgrade to keep your features.
             </p>
-            <Link
+            <a
               href={UPGRADE_PATH}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex shrink-0 items-center gap-1 rounded-md bg-blue-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-blue-700"
             >
               Subscribe
               <ArrowRight className="size-3" />
-            </Link>
+            </a>
             <button
               onClick={() => setDismissed(true)}
               className="shrink-0 rounded p-1 opacity-60 transition hover:opacity-100"
@@ -252,13 +259,15 @@ export function SubscriptionBanner() {
               <span className="font-semibold">{days} day{days === 1 ? "" : "s"}</span> on{" "}
               {formatDate(expiresAt)}.
             </p>
-            <Link
+            <a
               href={BILLING_PATH}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex shrink-0 items-center gap-1 rounded-md bg-amber-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-amber-700"
             >
               Manage billing
               <ArrowRight className="size-3" />
-            </Link>
+            </a>
             <button
               onClick={() => setDismissed(true)}
               className="shrink-0 rounded p-1 opacity-60 transition hover:opacity-100"
@@ -284,13 +293,15 @@ export function SubscriptionBanner() {
               {expiresAt ? ` — access until ${formatDate(expiresAt)}` : ""}.
               Reactivate to keep using premium features.
             </p>
-            <Link
+            <a
               href={UPGRADE_PATH}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex shrink-0 items-center gap-1 rounded-md bg-red-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-red-700"
             >
               Reactivate
               <ArrowRight className="size-3" />
-            </Link>
+            </a>
             <button
               onClick={() => setDismissed(true)}
               className="shrink-0 rounded p-1 opacity-60 transition hover:opacity-100"
@@ -326,13 +337,15 @@ export function SubscriptionBanner() {
               Renews {formatDate(expiresAt)}
             </span>
             <div className="flex-1" />
-            <Link
-              href={UPGRADE_PATH}
+            <a
+              href={`${UPGRADE_PATH}?from=${info.planCode ?? ""}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex shrink-0 items-center gap-1 rounded-md bg-brand-orange px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-brand-orange/90"
             >
               Upgrade
               <ArrowRight className="size-3" />
-            </Link>
+            </a>
             <button
               onClick={() => setExpanded(!expanded)}
               className="shrink-0 rounded p-1 opacity-60 transition hover:opacity-100"
@@ -436,13 +449,15 @@ export function SubscriptionBanner() {
             <p className="flex-1 text-sm text-blue-800 dark:text-blue-200">
               No active subscription — subscribe to unlock all features.
             </p>
-            <Link
+            <a
               href={UPGRADE_PATH}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex shrink-0 items-center gap-1 rounded-md bg-blue-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-blue-700"
             >
               Subscribe
               <ArrowRight className="size-3" />
-            </Link>
+            </a>
             <button
               onClick={() => setDismissed(true)}
               className="shrink-0 rounded p-1 opacity-60 transition hover:opacity-100"
