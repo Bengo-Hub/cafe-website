@@ -570,7 +570,10 @@ export default function OrderManagement() {
 
                 {/* Actions */}
                 <div className="flex flex-wrap gap-3 border-t border-brand-beige/10 pt-6">
-                  {NEXT_STATUS[selectedOrder.status] && (
+                  {/* For delivery orders at "ready" status, hide the direct advance button —
+                      rider must be assigned via "Assign Rider" which goes through the logistics API */}
+                  {NEXT_STATUS[selectedOrder.status] &&
+                    !(selectedOrder.status === 'ready' && selectedOrder.fulfillmentType === 'delivery') && (
                     <Button
                       className="h-12 rounded-2xl bg-brand-orange px-6 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-brand-orange/20 hover:bg-brand-orange/90"
                       onClick={handleAdvanceStatus}
