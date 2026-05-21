@@ -8,6 +8,7 @@ import {
     fetchAdminOrders,
     updateOrderStatus,
     assignOrderRider,
+    fetchDeliveryTask,
 } from '@/lib/api/orders';
 import { fetchRiders } from '@/lib/api/riders';
 import { CrudModal } from '@/components/dashboard/CrudModal';
@@ -19,6 +20,7 @@ import {
     CheckCircle2,
     ChefHat,
     Clock,
+    ImageIcon,
     Loader2,
     Package,
     RefreshCw,
@@ -178,6 +180,13 @@ export default function OrderManagement() {
   });
 
   const activeRiders = ridersRes ?? [];
+
+  const { data: deliveryTask } = useQuery({
+    queryKey: ['delivery-task', selectedOrderId],
+    queryFn: () => fetchDeliveryTask(selectedOrderId!),
+    enabled: !!selectedOrderId && ['out_for_delivery', 'delivered', 'completed'].includes(selectedOrder?.status ?? ''),
+    staleTime: 30_000,
+  });
 
   const handleAdvanceStatus = () => {
     if (!selectedOrder) return;
@@ -502,6 +511,60 @@ export default function OrderManagement() {
                         <p className="text-sm text-primary-brand">{selectedOrder.instructions}</p>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* Proof of Delivery */}
+                {deliveryTask?.proofOfDelivery && (
+                  <div className="space-y-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                      <h3 className="text-sm font-black uppercase tracking-widest text-emerald-600">
+                        Proof of Delivery
+                      </h3>
+                      <span className="ml-auto text-xs text-secondary-brand opacity-60">
+                        {new Date(deliveryTask.proofOfDelivery.createdAt).toLocaleString('en-KE', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                      </span>
+                    </div>
+                    {deliveryTask.proofOfDelivery.recipientName && (
+                      <p className="text-sm text-primary-brand">
+                        <span className="font-bold">Recipient:</span> {deliveryTask.proofOfDelivery.recipientName}
+                      </p>
+                    )}
+                    <div className="flex flex-wrap gap-4">
+                      {deliveryTask.proofOfDelivery.photoUrl && (
+                        <div>
+                          <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-secondary-brand opacity-60">Photo</p>
+                          <img
+                            src={deliveryTask.proofOfDelivery.photoUrl}
+                            alt="Delivery photo"
+                            className="h-24 w-24 rounded-xl object-cover ring-1 ring-brand-beige/20"
+                          />
+                        </div>
+                      )}
+                      {deliveryTask.proofOfDelivery.signatureUrl && (
+                        <div>
+                          <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-secondary-brand opacity-60">Signature</p>
+                          <img
+                            src={deliveryTask.proofOfDelivery.signatureUrl}
+                            alt="Customer signature"
+                            className="h-24 rounded-xl border border-brand-beige/10 bg-white object-contain px-2"
+                          />
+                        </div>
+                      )}
+                      {deliveryTask.proofOfDelivery.otpCode && (
+                        <div>
+                          <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-secondary-brand opacity-60">OTP Verified</p>
+                          <p className="font-mono text-xl font-black text-emerald-600">{deliveryTask.proofOfDelivery.otpCode}</p>
+                        </div>
+                      )}
+                      {!deliveryTask.proofOfDelivery.photoUrl && !deliveryTask.proofOfDelivery.signatureUrl && !deliveryTask.proofOfDelivery.otpCode && (
+                        <div className="flex items-center gap-2 text-sm text-secondary-brand opacity-60">
+                          <ImageIcon className="h-4 w-4" />
+                          <span>Delivery confirmed — no media uploaded</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
 

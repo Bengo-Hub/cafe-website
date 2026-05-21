@@ -195,3 +195,78 @@ export async function assignOrderRider(orderId: string, riderId: string) {
     body: JSON.stringify({ rider_id: riderId }),
   });
 }
+
+// ---- Delivery task + Proof of Delivery ----
+
+export interface ProofOfDelivery {
+  id: string;
+  photoUrl?: string;
+  signatureUrl?: string;
+  recipientName?: string;
+  otpCode?: string;
+  createdAt: string;
+}
+
+export interface DeliveryTask {
+  id: string;
+  logisticsTaskId?: string;
+  status: string;
+  assignedAt?: string;
+  completedAt?: string;
+  proofOfDelivery?: ProofOfDelivery;
+}
+
+/** Fetch the delivery task (+ embedded PoD from logistics) for an order. */
+export async function fetchDeliveryTask(orderId: string): Promise<DeliveryTask | null> {
+  const LOGISTICS_URL = config.services.logistics;
+  const tenant = getTenantSlug();
+
+  // Step 1: get assignment from ordering-backend (has logistics_task_id)
+  const assignmentUrl = `${ORDERING_URL}/api/v1/${tenant}/orders/${orderId}/delivery/task`;
+  const assignmentRes = await apiClient<Record<string, unknown>>(assignmentUrl, { headers: headers() });
+
+  const assignment = assignmentRes.data;
+  if (!assignment) return null;
+
+  const logisticsTaskId =
+    (assignment.logisticsTaskId ?? assignment.logistics_task_id) as string | undefined;
+
+  if (!logisticsTaskId) {
+    return {
+      id: (assignment.id ?? '') as string,
+      status: (assignment.status ?? '') as string,
+      assignedAt: (assignment.assignedAt ?? assignment.assigned_at) as string | undefined,
+      completedAt: (assignment.completedAt ?? assignment.completed_at) as string | undefined,
+    };
+  }
+
+  // Step 2: fetch logistics task to get PoD
+  const taskUrl = `${LOGISTICS_URL}/api/v1/${tenant}/tasks/${logisticsTaskId}`;
+  const taskRes = await apiClient<Record<string, unknown>>(taskUrl, { headers: headers() });
+  const task = taskRes.data;
+
+  let pod: ProofOfDelivery | undefined;
+  if (task?.edges) {
+    const edges = task.edges as Record<string, unknown>;
+    const rawPod = edges.proof_of_delivery as Record<string, unknown> | undefined;
+    if (rawPod) {
+      pod = {
+        id: (rawPod.id ?? '') as string,
+        photoUrl: (rawPod.photo_url) as string | undefined,
+        signatureUrl: (rawPod.signature_url) as string | undefined,
+        recipientName: (rawPod.recipient_name) as string | undefined,
+        otpCode: (rawPod.otp_code) as string | undefined,
+        createdAt: (rawPod.created_at ?? '') as string,
+      };
+    }
+  }
+
+  return {
+    id: (assignment.id ?? '') as string,
+    logisticsTaskId,
+    status: (assignment.status ?? '') as string,
+    assignedAt: (assignment.assignedAt ?? assignment.assigned_at) as string | undefined,
+    completedAt: (assignment.completedAt ?? assignment.completed_at) as string | undefined,
+    proofOfDelivery: pod,
+  };
+}
