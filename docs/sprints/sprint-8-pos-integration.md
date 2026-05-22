@@ -1,6 +1,6 @@
 # Sprint 8: POS Integration — cafe-website
 
-**Status:** 🔴 Not Started  
+**Status:** ✅ Complete  
 **Period:** July–August 2026  
 **Goal:** Embed KDS and POS terminal via iframe, migrate shift management from Supabase to pos-api, add pos-api staff client
 
@@ -188,15 +188,25 @@ env:
 
 ## Tasks
 
-- [ ] Create `src/app/(dashboard)/dashboard/kds/page.tsx`
-- [ ] Create `src/app/(dashboard)/dashboard/pos/page.tsx`
-- [ ] Add KDS + POS links to sidebar navigation
-- [ ] Create `src/lib/api/pos-sessions.ts`
-- [ ] Update `src/app/api/shifts/route.ts` → call pos-sessions.ts
-- [ ] Update `src/hooks/use-shifts.ts` — verify interface compatibility
-- [ ] Create `src/lib/api/pos-staff.ts`
-- [ ] Update Team page to show POS role column alongside Supabase data
-- [ ] Update `next.config.mjs` with frame-src CSP header
-- [ ] Add env vars to `devops-k8s apps/cafe-website/values.yaml`
-- [ ] Run `pnpm build` and fix all errors
-- [ ] Push to staging, merge to main
+- [x] Create `src/app/(dashboard)/dashboard/kds/page.tsx` — iframe + SubscriptionGate(feature="kds")
+- [x] Create `src/app/(dashboard)/dashboard/pos/page.tsx` — iframe + SubscriptionGate(feature="pos_terminal")
+- [x] Add KDS + POS links to sidebar navigation (no permission gate; page content gated)
+- [x] Create `src/lib/api/pos-sessions.ts` — openSession/closeSession/getSessions via pos-api
+- [x] Update `src/app/api/shifts/route.ts` → call pos-sessions.ts (graceful degradation if pos-api unavailable)
+- [x] Update `src/hooks/use-shifts.ts` — interface compatible (getShifts/clockIn/clockOut unchanged)
+- [x] Create `src/lib/api/pos-staff.ts` — getPOSUsers/getPOSRoles/assignPOSRole
+- [x] Create `src/app/api/pos-staff/route.ts` — Route Handler proxying POS staff queries
+- [x] Update Team page to show POS role column (matched by email from /api/pos-staff)
+- [x] Update `next.config.mjs` with frame-src CSP header for pos.codevertexitsolutions.com
+- [x] Add `POS_API_URL` env var to `devops-k8s apps/cafe-website/values.yaml` (POS_API_KEY via sealed secret)
+- [x] Run `pnpm build` — zero TypeScript errors
+- [x] Push to master (commits 4170072, 8ca86a3)
+
+## Subscription Gating (added)
+
+- [x] `ORDERING_GROWTH` + `ORDERING_GROWTH_YEARLY`: added `pos_terminal` feature
+- [x] `ORDERING_PROFESSIONAL` + `ORDERING_PROFESSIONAL_YEARLY`: added `pos_terminal` + `kds`
+- [x] `POS_DEVICE_5` + `POS_DEVICE_5_YEARLY`: added `kds`
+- [x] `POS_DEVICE_10` + `POS_DEVICE_10_YEARLY` + `POS_LICENSE_COMPLETE`: added `kds`
+- [x] Starter plan has no `pos_terminal` or `kds` — shows upgrade prompt
+- [x] Seeded to production via subscriptions-api entrypoint (b0ca1c65, CI run 26299974055)
