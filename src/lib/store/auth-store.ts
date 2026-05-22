@@ -158,6 +158,12 @@ export const useAuthStore = create<AuthState>()(
           }
 
           set({ status: 'authenticated', lastAuthenticatedAt: Date.now() });
+
+          // Set a cookie so the middleware can gate /dashboard/* server-side
+          if (typeof document !== 'undefined') {
+            const maxAge = tokens.expires_in || 3600;
+            document.cookie = `access_token=${tokens.access_token}; path=/; max-age=${maxAge}; SameSite=Lax`;
+          }
         } catch (error) {
           set({ status: 'error', error: (error as Error).message || 'Sign-in failed' });
         }
@@ -166,6 +172,8 @@ export const useAuthStore = create<AuthState>()(
       logout: async () => {
         set({ status: 'idle', user: null, session: null, accessToken: null, refreshToken: null, subscriptionInfo: undefined, lastAuthenticatedAt: null });
         if (typeof window !== 'undefined') {
+          // Clear the middleware auth cookie
+          try { document.cookie = 'access_token=; path=/; max-age=0'; } catch { /* no-op */ }
           try { localStorage.removeItem('cafe-auth-storage'); } catch { /* no-op */ }
           try { localStorage.removeItem('tenantId'); } catch { /* no-op */ }
           try { localStorage.removeItem('tenantSlug'); } catch { /* no-op */ }
