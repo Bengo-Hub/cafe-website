@@ -1,11 +1,12 @@
 'use client';
 
+import { SubscriptionGate } from '@/components/subscription/subscription-gate';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { Loader2, MonitorPlay } from 'lucide-react';
 
 const POS_UI_URL = process.env.NEXT_PUBLIC_POS_UI_URL ?? 'https://pos.codevertexitsolutions.com';
 
-export default function KDSPage() {
+function KDSFrame() {
   const tenantSlug = useAuthStore((s) => s.user?.tenant_slug);
 
   if (!tenantSlug) {
@@ -29,5 +30,13 @@ export default function KDSPage() {
         allow="fullscreen"
       />
     </div>
+  );
+}
+
+export default function KDSPage() {
+  return (
+    <SubscriptionGate feature="kds">
+      <KDSFrame />
+    </SubscriptionGate>
   );
 }

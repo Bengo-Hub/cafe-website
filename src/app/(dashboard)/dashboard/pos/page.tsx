@@ -1,11 +1,12 @@
 'use client';
 
+import { SubscriptionGate } from '@/components/subscription/subscription-gate';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { Loader2, ShoppingCart } from 'lucide-react';
 
 const POS_UI_URL = process.env.NEXT_PUBLIC_POS_UI_URL ?? 'https://pos.codevertexitsolutions.com';
 
-export default function POSPage() {
+function POSFrame() {
   const tenantSlug = useAuthStore((s) => s.user?.tenant_slug);
 
   if (!tenantSlug) {
@@ -29,5 +30,13 @@ export default function POSPage() {
         allow="fullscreen"
       />
     </div>
+  );
+}
+
+export default function POSPage() {
+  return (
+    <SubscriptionGate feature="pos_terminal">
+      <POSFrame />
+    </SubscriptionGate>
   );
 }
