@@ -45,20 +45,20 @@ const slug = () => getTenantSlug();
 
 export const recipesApi = {
   list: async (): Promise<Recipe[]> => {
-    const url = `${INVENTORY_URL}/v1/${slug()}/inventory/recipes`;
+    const url = `${INVENTORY_URL}/api/v1/${slug()}/inventory/recipes`;
     const res = await apiClient<Recipe[]>(url, { headers: headers() });
     return res.data ?? [];
   },
 
   get: async (id: string): Promise<Recipe> => {
-    const url = `${INVENTORY_URL}/v1/${slug()}/inventory/recipes/${id}`;
+    const url = `${INVENTORY_URL}/api/v1/${slug()}/inventory/recipes/${id}`;
     const res = await apiClient<Recipe>(url, { headers: headers() });
     if (!res.data) throw new Error('Recipe not found');
     return res.data;
   },
 
   create: async (recipe: Recipe): Promise<Recipe> => {
-    const url = `${INVENTORY_URL}/v1/${slug()}/inventory/recipes`;
+    const url = `${INVENTORY_URL}/api/v1/${slug()}/inventory/recipes`;
     const res = await apiClient<Recipe>(url, {
       method: 'POST',
       headers: headers(),
@@ -69,7 +69,7 @@ export const recipesApi = {
   },
 
   update: async (id: string, recipe: Recipe): Promise<Recipe> => {
-    const url = `${INVENTORY_URL}/v1/${slug()}/inventory/recipes/${id}`;
+    const url = `${INVENTORY_URL}/api/v1/${slug()}/inventory/recipes/${id}`;
     const res = await apiClient<Recipe>(url, {
       method: 'PUT',
       headers: headers(),
@@ -80,7 +80,7 @@ export const recipesApi = {
   },
 
   delete: async (id: string): Promise<void> => {
-    const url = `${INVENTORY_URL}/v1/${slug()}/inventory/recipes/${id}`;
+    const url = `${INVENTORY_URL}/api/v1/${slug()}/inventory/recipes/${id}`;
     await apiClient(url, { method: 'DELETE', headers: headers() });
   },
 };

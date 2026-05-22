@@ -30,9 +30,11 @@ export interface AnalyticsSummary {
 }
 
 export interface InventoryStats {
-  totalItems: number;
-  lowStockItems: number;
-  outOfStockItems: number;
+  total_items: number;
+  low_stock_items: number;
+  out_of_stock_items: number;
+  pending_reservations: number;
+  warehouse_count: number;
 }
 
 const slug = () => getTenantSlug();
@@ -45,7 +47,7 @@ export const analyticsApi = {
     return res.data;
   },
   getInventoryStats: async (): Promise<InventoryStats> => {
-    const url = `${INVENTORY_URL}/v1/${slug()}/inventory/summary`;
+    const url = `${INVENTORY_URL}/api/v1/${slug()}/inventory/summary`;
     const res = await apiClient<InventoryStats>(url, { headers: headers() });
     if (!res.data) throw new Error('Failed to fetch inventory stats');
     return res.data;

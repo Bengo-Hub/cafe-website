@@ -18,6 +18,7 @@ import {
   AlertTriangle,
   ArrowDown,
   Box,
+  Clock,
   Loader2,
   Package,
   Plus,
@@ -126,7 +127,8 @@ export default function InventoryOverview() {
       .filter((item) => {
         if (search && !item.name.toLowerCase().includes(search.toLowerCase()) &&
             !item.sku.toLowerCase().includes(search.toLowerCase())) return false;
-        if (filter === 'low') return item.quantity > 0 && item.quantity <= 10;
+        const threshold = item.stock?.reorder_level ?? 10;
+        if (filter === 'low') return item.quantity > 0 && item.quantity <= threshold;
         if (filter === 'out') return item.quantity === 0;
         return true;
       });
@@ -139,6 +141,7 @@ export default function InventoryOverview() {
   const totalItems = summary?.total_items ?? allItems.length;
   const lowStockCount = summary?.low_stock_items ?? 0;
   const outOfStockCount = summary?.out_of_stock_items ?? 0;
+  const pendingReservations = summary?.pending_reservations ?? 0;
 
   const isLoading = loadingItems || loadingStock;
 
@@ -217,7 +220,7 @@ export default function InventoryOverview() {
       </header>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <Card className="border border-brand-beige/10 p-5">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10">
@@ -254,6 +257,19 @@ export default function InventoryOverview() {
                 Out of Stock
               </p>
               <p className="text-2xl font-black text-red-500">{outOfStockCount}</p>
+            </div>
+          </div>
+        </Card>
+        <Card className="border border-brand-beige/10 p-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10">
+              <Clock className="h-5 w-5 text-purple-500" />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-purple-500">
+                Reserved
+              </p>
+              <p className="text-2xl font-black text-purple-500">{pendingReservations}</p>
             </div>
           </div>
         </Card>
@@ -325,7 +341,8 @@ export default function InventoryOverview() {
             </thead>
             <tbody>
               {paginatedInventory.map((item) => {
-                const isLow = item.quantity > 0 && item.quantity <= 10;
+                const threshold = item.stock?.reorder_level ?? item.reorder_level ?? 10;
+                const isLow = item.quantity > 0 && item.quantity <= threshold;
                 const isOut = item.quantity === 0;
                 return (
                   <tr

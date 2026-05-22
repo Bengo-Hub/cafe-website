@@ -31,13 +31,25 @@ export interface InventoryItem {
   name: string;
   description?: string;
   category_id?: string;
+  category_name?: string;
   unit_id?: string;
   type: 'GOODS' | 'SERVICE' | 'RECIPE' | 'INGREDIENT' | 'VOUCHER' | 'EQUIPMENT';
   is_active: boolean;
   image_url?: string;
+  tags?: string[];
   metadata?: Record<string, unknown>;
   initial_quantity?: number;
   reorder_level?: number;
+  reorder_quantity?: number;
+  barcode?: string;
+  barcode_type?: string;
+  requires_age_verification?: boolean;
+  is_perishable?: boolean;
+  track_lots?: boolean;
+  track_serial_numbers?: boolean;
+  weight_kg?: number;
+  dimensions_cm?: Record<string, number>;
+  add_to_all_outlets?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -58,6 +70,9 @@ export interface StockAvailability {
   available: number;
   reserved: number;
   unit_of_measure: string;
+  reorder_level: number;
+  reorder_quantity: number;
+  preferred_supplier_id?: string;
   updated_at: string;
 }
 
@@ -65,6 +80,8 @@ export interface InventorySummary {
   total_items: number;
   low_stock_items: number;
   out_of_stock_items: number;
+  pending_reservations: number;
+  warehouse_count: number;
 }
 
 export interface Reservation {
@@ -89,21 +106,21 @@ export interface Unit {
 
 export async function fetchInventoryItems(type?: string): Promise<{ data: InventoryItem[]; total: number }> {
   const query = type ? `?type=${encodeURIComponent(type)}` : '';
-  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/items${query}`;
+  const url = `${INVENTORY_URL}/api/v1/${getTenantSlug()}/inventory/items${query}`;
   const resp = await fetch(url, { headers: headers() });
   if (!resp.ok) throw new Error(`Fetch inventory items failed: ${resp.statusText}`);
   return resp.json();
 }
 
 export async function fetchStockAvailability(sku: string): Promise<StockAvailability> {
-  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/items/${sku}`;
+  const url = `${INVENTORY_URL}/api/v1/${getTenantSlug()}/inventory/items/${sku}`;
   const resp = await fetch(url, { headers: headers() });
   if (!resp.ok) throw new Error(`Stock check failed: ${resp.statusText}`);
   return resp.json();
 }
 
 export async function fetchBulkAvailability(skus: string[]): Promise<StockAvailability[]> {
-  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/availability`;
+  const url = `${INVENTORY_URL}/api/v1/${getTenantSlug()}/inventory/availability`;
   const resp = await fetch(url, {
     method: 'POST',
     headers: headers(),
@@ -114,7 +131,7 @@ export async function fetchBulkAvailability(skus: string[]): Promise<StockAvaila
 }
 
 export async function fetchInventorySummary(): Promise<InventorySummary> {
-  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/summary`;
+  const url = `${INVENTORY_URL}/api/v1/${getTenantSlug()}/inventory/summary`;
   const resp = await fetch(url, { headers: headers() });
   if (!resp.ok) throw new Error(`Fetch inventory summary failed: ${resp.statusText}`);
   return resp.json();
@@ -131,9 +148,14 @@ export async function createInventoryItem(data: {
   image_url?: string;
   initial_quantity?: number;
   reorder_level?: number;
+  reorder_quantity?: number;
+  barcode?: string;
+  requires_age_verification?: boolean;
+  is_perishable?: boolean;
+  track_lots?: boolean;
   add_to_all_outlets?: boolean;
 }): Promise<InventoryItem> {
-  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/items`;
+  const url = `${INVENTORY_URL}/api/v1/${getTenantSlug()}/inventory/items`;
   const resp = await fetch(url, {
     method: 'POST',
     headers: headers(),
@@ -151,8 +173,14 @@ export async function updateInventoryItem(sku: string, data: {
   type?: string;
   is_active?: boolean;
   image_url?: string;
+  reorder_level?: number;
+  reorder_quantity?: number;
+  barcode?: string;
+  requires_age_verification?: boolean;
+  is_perishable?: boolean;
+  track_lots?: boolean;
 }): Promise<InventoryItem> {
-  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/items/${sku}`;
+  const url = `${INVENTORY_URL}/api/v1/${getTenantSlug()}/inventory/items/${sku}`;
   const resp = await fetch(url, {
     method: 'PUT',
     headers: headers(),
@@ -163,7 +191,7 @@ export async function updateInventoryItem(sku: string, data: {
 }
 
 export async function deleteInventoryItem(sku: string) {
-  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/items/${sku}`;
+  const url = `${INVENTORY_URL}/api/v1/${getTenantSlug()}/inventory/items/${sku}`;
   const resp = await fetch(url, {
     method: 'DELETE',
     headers: headers(),
@@ -179,8 +207,9 @@ export async function adjustStock(data: {
   adjustment: number;
   reason: string;
   reference?: string;
+  notes?: string;
 }) {
-  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/adjust`;
+  const url = `${INVENTORY_URL}/api/v1/${getTenantSlug()}/inventory/adjustments`;
   const resp = await fetch(url, {
     method: 'POST',
     headers: headers(),
@@ -193,7 +222,7 @@ export async function adjustStock(data: {
 // ─── Reservations ───────────────────────────────────────────────────────
 
 export async function fetchReservationsByOrder(orderId: string): Promise<Reservation[]> {
-  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/reservations?order_id=${orderId}`;
+  const url = `${INVENTORY_URL}/api/v1/${getTenantSlug()}/inventory/reservations?order_id=${orderId}`;
   const resp = await fetch(url, { headers: headers() });
   if (!resp.ok) throw new Error(`Reservations fetch failed: ${resp.statusText}`);
   return resp.json();
@@ -202,7 +231,7 @@ export async function fetchReservationsByOrder(orderId: string): Promise<Reserva
 // ─── Categories ─────────────────────────────────────────────────────────
 
 export async function fetchInventoryCategories(): Promise<{ data: InventoryCategory[]; total: number }> {
-  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/categories`;
+  const url = `${INVENTORY_URL}/api/v1/${getTenantSlug()}/inventory/categories`;
   const resp = await fetch(url, { headers: headers() });
   if (!resp.ok) throw new Error(`Fetch categories failed: ${resp.statusText}`);
   return resp.json();
@@ -211,14 +240,14 @@ export async function fetchInventoryCategories(): Promise<{ data: InventoryCateg
 // ─── Units ──────────────────────────────────────────────────────────────
 
 export async function fetchUnits(): Promise<Unit[]> {
-  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/units`;
+  const url = `${INVENTORY_URL}/api/v1/${getTenantSlug()}/inventory/units`;
   const resp = await fetch(url, { headers: headers() });
   if (!resp.ok) throw new Error(`Fetch units failed: ${resp.statusText}`);
   return resp.json();
 }
 
 export async function createUnit(data: { name: string; abbreviation?: string }): Promise<Unit> {
-  const url = `${INVENTORY_URL}/v1/${getTenantSlug()}/inventory/units`;
+  const url = `${INVENTORY_URL}/api/v1/${getTenantSlug()}/inventory/units`;
   const resp = await fetch(url, {
     method: 'POST',
     headers: headers(),
