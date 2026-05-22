@@ -24,6 +24,19 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react"],
   },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "frame-src 'self' https://pos.codevertexitsolutions.com;",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

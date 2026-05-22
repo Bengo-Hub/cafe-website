@@ -28,6 +28,8 @@ export function useSubscription() {
   const tenantSlug = (user as any)?.tenant_slug as string | undefined;
   const isPlatformOwner =
     !!(user as any)?.is_platform_owner || tenantSlug === "codevertex";
+  const isServiceCharge = (user as any)?.billing_mode === "service_charge";
+  const isDemo = !!(user as any)?.is_demo || tenantSlug === "codevertex-demo";
 
   // Hydrate from IndexedDB immediately on auth so gating works offline
   useEffect(() => {
@@ -166,17 +168,19 @@ export function useSubscription() {
     /** Plan code (e.g. "starter", "growth", "professional") */
     plan: info?.planCode ?? null,
     /** Whether subscription is active (active or trial) */
-    isActive: subStatus === "active" || subStatus === "trial",
+    isActive: subStatus === "active" || subStatus === "trial" || isServiceCharge || isDemo,
     /** Whether the subscription is in a warning state */
     isPastDue: subStatus === "past_due" || subStatus === "suspended",
     /** Whether the subscription has expired */
     isExpired: subStatus === "expired" || subStatus === "cancelled",
     /** Whether no subscription exists */
-    needsSubscription: subStatus === "none",
+    needsSubscription: subStatus === "none" && !isServiceCharge && !isDemo,
     /** Whether subscription info is still loading */
     isLoading: subscriptionInfo === null || subscriptionInfo === undefined,
     /** Whether this is the platform owner (codevertex) — always has full access */
     isPlatformOwner,
+    isServiceCharge,
+    isDemo,
     /** Check if a specific feature is available */
     hasFeature: (code: string) => info?.features?.includes(code) ?? false,
     /** Get a usage limit value (defaults to Infinity if not set) */

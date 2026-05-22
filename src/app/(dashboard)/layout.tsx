@@ -15,8 +15,10 @@ import {
     LayoutDashboard,
     LogOut,
     Menu,
+    MonitorPlay,
     Settings,
     ShoppingBag,
+    ShoppingCart,
     Users,
     X
 } from 'lucide-react';
@@ -38,6 +40,8 @@ const SIDEBAR_ITEMS: Array<{
   { label: 'Recipes', icon: BookOpen, href: '/dashboard/recipes', permission: 'ordering.catalog.view' },
   { label: 'Inventory', icon: Box, href: '/dashboard/inventory', permission: 'inventory.items.view' },
   { label: 'Riders', icon: Bike, href: '/dashboard/riders', adminOnly: true, permission: 'logistics.fleet.view' },
+  { label: 'Kitchen Display', icon: MonitorPlay, href: '/dashboard/kds' },
+  { label: 'POS Terminal', icon: ShoppingCart, href: '/dashboard/pos' },
   { label: 'Shifts', icon: Clock, href: '/dashboard/shifts' },
   { label: 'Payments', icon: CreditCard, href: '/dashboard/payments', permission: 'treasury.payments.view' },
   { label: 'Analytics', icon: BarChart3, href: '/dashboard/analytics' },
