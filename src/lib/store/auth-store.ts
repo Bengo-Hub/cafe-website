@@ -179,7 +179,8 @@ export const useAuthStore = create<AuthState>()(
           try { localStorage.removeItem('tenantSlug'); } catch { /* no-op */ }
           try { sessionStorage.clear(); } catch { /* no-op */ }
           // Redirect to SSO logout → clears session cookie → accounts login page
-          window.location.href = buildLogoutUrl('https://accounts.codevertexitsolutions.com');
+          const returnTo = encodeURIComponent(window.location.origin);
+          window.location.href = buildLogoutUrl(`https://accounts.codevertexitsolutions.com/login?return_to=${returnTo}`);
         }
       },
 
