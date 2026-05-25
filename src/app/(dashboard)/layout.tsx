@@ -1,6 +1,7 @@
 'use client';
 
 import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
+import { SubscriptionBanner } from '@/components/subscription/subscription-banner';
 import { useAuth } from '@/hooks/use-auth';
 import { useMe } from '@/hooks/use-me';
 import { hasPermission, hasRole, hasStaffOrAdminRole } from '@/lib/auth/roles';
@@ -9,47 +10,83 @@ import {
     Bike,
     BookOpen,
     Box,
+    Calendar,
     ChefHat,
+    ChevronDown,
     Clock,
     CreditCard,
+    Gift,
     LayoutDashboard,
     LogOut,
     Menu,
-    MonitorPlay,
     Settings,
     ShoppingBag,
-    ShoppingCart,
     Users,
-    X
+    X,
 } from 'lucide-react';
-import { SubscriptionBanner } from '@/components/subscription/subscription-banner';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-const SIDEBAR_ITEMS: Array<{
+type NavItem = {
   label: string;
   icon: typeof LayoutDashboard;
   href: string;
   adminOnly?: boolean;
   permission?: string;
-}> = [
-  { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-  { label: 'Orders', icon: ShoppingBag, href: '/dashboard/orders', permission: 'ordering.orders.view' },
-  { label: 'Menu', icon: ChefHat, href: '/dashboard/menu', permission: 'ordering.catalog.view' },
-  { label: 'Recipes', icon: BookOpen, href: '/dashboard/recipes', permission: 'ordering.catalog.view' },
-  { label: 'Inventory', icon: Box, href: '/dashboard/inventory', permission: 'inventory.items.view' },
-  { label: 'Riders', icon: Bike, href: '/dashboard/riders', adminOnly: true, permission: 'logistics.fleet.view' },
-  { label: 'Kitchen Display', icon: MonitorPlay, href: '/dashboard/kds' },
-  { label: 'POS Terminal', icon: ShoppingCart, href: '/dashboard/pos' },
-  { label: 'Shifts', icon: Clock, href: '/dashboard/shifts' },
-  { label: 'Payments', icon: CreditCard, href: '/dashboard/payments', permission: 'treasury.payments.view' },
-  { label: 'Analytics', icon: BarChart3, href: '/dashboard/analytics' },
-  { label: 'Team', icon: Users, href: '/dashboard/team', adminOnly: true, permission: 'auth.users.view' },
-  { label: 'Settings', icon: Settings, href: '/dashboard/settings' },
+};
+
+type NavGroup = {
+  label: string;
+  items: NavItem[];
+};
+
+const SIDEBAR_GROUPS: NavGroup[] = [
+  {
+    label: 'Overview',
+    items: [
+      { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
+    ],
+  },
+  {
+    label: 'Operations',
+    items: [
+      { label: 'Orders', icon: ShoppingBag, href: '/dashboard/orders', permission: 'ordering.orders.view' },
+      { label: 'Shifts', icon: Clock, href: '/dashboard/shifts' },
+      { label: 'Payments', icon: CreditCard, href: '/dashboard/payments', permission: 'treasury.payments.view' },
+      { label: 'Analytics', icon: BarChart3, href: '/dashboard/analytics' },
+    ],
+  },
+  {
+    label: 'Menu & Stock',
+    items: [
+      { label: 'Menu', icon: ChefHat, href: '/dashboard/menu', permission: 'ordering.catalog.view' },
+      { label: 'Recipes', icon: BookOpen, href: '/dashboard/recipes', permission: 'ordering.catalog.view' },
+      { label: 'Inventory', icon: Box, href: '/dashboard/inventory', permission: 'inventory.items.view' },
+    ],
+  },
+  {
+    label: 'Content',
+    items: [
+      { label: 'Events', icon: Calendar, href: '/dashboard/events' },
+      { label: 'Loyalty', icon: Gift, href: '/dashboard/loyalty', adminOnly: true },
+    ],
+  },
+  {
+    label: 'People',
+    items: [
+      { label: 'Team', icon: Users, href: '/dashboard/team', adminOnly: true, permission: 'auth.users.view' },
+      { label: 'Riders', icon: Bike, href: '/dashboard/riders', adminOnly: true, permission: 'logistics.fleet.view' },
+    ],
+  },
+  {
+    label: 'Settings',
+    items: [
+      { label: 'Settings', icon: Settings, href: '/dashboard/settings' },
+    ],
+  },
 ];
 
-/** User-like shape for RBAC: prefer roles from auth-api /me when available. */
 function effectiveUserForRbac(
   sessionUser: { role?: string; roles?: string[] } | null | undefined,
   meRoles: string[] | undefined
@@ -57,6 +94,19 @@ function effectiveUserForRbac(
   if (!sessionUser) return undefined;
   const roles = (meRoles?.length ? meRoles : sessionUser.roles) ?? (sessionUser.role ? [sessionUser.role] : []);
   return { ...sessionUser, roles, role: roles[0] ?? sessionUser.role };
+}
+
+function filterItems(items: NavItem[], rbacUser: ReturnType<typeof effectiveUserForRbac>) {
+  return items.filter((item) => {
+    if (item.adminOnly && !hasRole(rbacUser, 'admin')) return false;
+    if (item.permission) {
+      const perms = (rbacUser as { permissions?: string[] } | undefined)?.permissions;
+      if (hasPermission({ permissions: perms }, item.permission)) return true;
+      if (hasStaffOrAdminRole(rbacUser) && (!perms || perms.length === 0)) return true;
+      return false;
+    }
+    return true;
+  });
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -69,12 +119,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const rbacUser = effectiveUserForRbac(user ?? undefined, me?.roles ?? meRoles);
 
-  // Redirect unauthenticated users to login (which redirects to SSO)
+  // Default open: any group containing the current path
+  const [openGroups, setOpenGroups] = useState<Set<string>>(() => {
+    const open = new Set<string>();
+    SIDEBAR_GROUPS.forEach((g) => {
+      if (g.items.some((item) => pathname?.startsWith(item.href) && item.href !== '/dashboard')) {
+        open.add(g.label);
+      }
+    });
+    // Overview always open
+    open.add('Overview');
+    return open;
+  });
+
   useEffect(() => {
     if (isLoading) return;
     if (!isAuthenticated) {
-      const returnTo = pathname ? `/login?return_to=${encodeURIComponent(pathname)}` : '/login';
-      router.replace(returnTo);
+      router.replace(pathname ? `/login?return_to=${encodeURIComponent(pathname)}` : '/login');
       return;
     }
     if (user && !hasStaffOrAdminRole(rbacUser ?? user)) {
@@ -82,26 +143,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [isLoading, isAuthenticated, user, rbacUser, router]);
 
-  const visibleSidebarItems = SIDEBAR_ITEMS.filter((item) => {
-    const u = rbacUser ?? user ?? undefined;
-    if (item.adminOnly && !hasRole(u, 'admin')) return false;
-    if (item.permission) {
-      const perms = (u as { permissions?: string[] } | undefined)?.permissions;
-      if (hasPermission({ permissions: perms }, item.permission)) return true;
-      if (hasStaffOrAdminRole(u) && (!perms || perms.length === 0)) return true;
-      return false;
-    }
-    return true;
-  });
+  const toggleGroup = (label: string) => {
+    setOpenGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(label)) next.delete(label);
+      else next.add(label);
+      return next;
+    });
+  };
 
-  const canAccessDashboard = isLoading || !user || hasStaffOrAdminRole(rbacUser ?? user);
-  if (!canAccessDashboard) {
-    return null;
-  }
+  if (!isLoading && user && !hasStaffOrAdminRole(rbacUser ?? user)) return null;
+
+  const sidebarBg = { backgroundColor: 'var(--sidebar-bg)', color: 'var(--sidebar-foreground)' } as const;
 
   return (
     <div className="min-h-screen section-blend-cream flex">
-      {/* Sidebar mobile overlay */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
@@ -110,18 +166,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         />
       )}
 
-      {/* Sidebar — theme-aware via CSS variables */}
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-72 flex flex-col transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:z-auto lg:translate-x-0 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
-        style={{
-          backgroundColor: 'var(--sidebar-bg)',
-          color: 'var(--sidebar-foreground)',
-        }}
+        style={sidebarBg}
       >
-        <div className="flex flex-col h-full p-8">
-          <div className="flex items-center justify-between mb-12">
+        <div className="flex flex-col h-full p-6">
+          {/* Logo */}
+          <div className="flex items-center justify-between mb-8">
             <Link href="/" className="flex items-center gap-2">
               {tenant?.logoUrl ? (
                 <img src={tenant.logoUrl} alt={tenant.name} className="h-10 w-auto object-contain" />
@@ -133,52 +186,85 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </Link>
             <button
               onClick={() => setIsSidebarOpen(false)}
-              className="lg:hidden opacity-80 hover:opacity-100 p-2 rounded-xl hover:bg-white/10 transition-colors"
+              className="lg:hidden p-2 rounded-xl transition-colors"
+              style={{ color: 'var(--sidebar-muted)' }}
               aria-label="Close menu"
             >
-              <X className="h-6 w-6" />
+              <X className="h-5 w-5" />
             </button>
           </div>
 
-          <nav className="flex-grow space-y-2 overflow-y-auto pr-2 custom-scrollbar">
-            {visibleSidebarItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setIsSidebarOpen(false)}
-                className={`flex items-center gap-4 px-6 py-4 rounded-2xl transition-all ${
-                  pathname === item.href
-                    ? 'shadow-lg'
-                    : 'opacity-70 hover:opacity-100 hover:bg-white/5'
-                }`}
-                style={
-                  pathname === item.href
-                    ? { backgroundColor: 'var(--sidebar-accent)', color: 'white' }
-                    : { color: 'var(--sidebar-muted)' }
-                }
-              >
-                <item.icon className="h-5 w-5" />
-                <span className="font-bold tracking-tight">{item.label}</span>
-              </Link>
-            ))}
+          {/* Nav groups */}
+          <nav className="flex-grow overflow-y-auto space-y-1 custom-scrollbar pr-1">
+            {SIDEBAR_GROUPS.map((group) => {
+              const visibleItems = filterItems(group.items, rbacUser);
+              if (visibleItems.length === 0) return null;
+
+              const isOpen = openGroups.has(group.label);
+              const hasActive = visibleItems.some((i) => pathname === i.href || (i.href !== '/dashboard' && pathname?.startsWith(i.href)));
+
+              return (
+                <div key={group.label}>
+                  {/* Group header — skip for single-item Overview */}
+                  {group.label !== 'Overview' && (
+                    <button
+                      onClick={() => toggleGroup(group.label)}
+                      className="flex w-full items-center justify-between px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-colors"
+                      style={{ color: hasActive ? 'var(--sidebar-accent)' : 'var(--sidebar-muted)' }}
+                    >
+                      <span>{group.label}</span>
+                      <ChevronDown
+                        className={`h-3 w-3 transition-transform ${isOpen ? 'rotate-0' : '-rotate-90'}`}
+                      />
+                    </button>
+                  )}
+
+                  {/* Items */}
+                  {(group.label === 'Overview' || isOpen) && (
+                    <div className={group.label !== 'Overview' ? 'mt-1 space-y-0.5' : 'space-y-0.5'}>
+                      {visibleItems.map((item) => {
+                        const active = pathname === item.href || (item.href !== '/dashboard' && pathname?.startsWith(item.href));
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setIsSidebarOpen(false)}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all text-sm font-bold tracking-tight ${
+                              active ? 'shadow-md' : 'hover:opacity-100'
+                            }`}
+                            style={
+                              active
+                                ? { backgroundColor: 'var(--sidebar-accent)', color: 'white' }
+                                : { color: 'var(--sidebar-muted)', opacity: 0.85 }
+                            }
+                          >
+                            <item.icon className="h-4 w-4 flex-shrink-0" />
+                            <span>{item.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </nav>
 
-          <div className="mt-auto pt-8 border-t" style={{ borderColor: 'var(--sidebar-border)' }}>
+          {/* Logout */}
+          <div className="mt-auto pt-4 border-t" style={{ borderColor: 'var(--sidebar-border)' }}>
             <button
               onClick={logout}
-              className="flex items-center gap-4 px-6 py-4 w-full opacity-70 hover:opacity-100 hover:text-red-400 transition-colors rounded-2xl"
+              className="flex items-center gap-3 px-4 py-3 w-full rounded-2xl transition-colors text-sm font-bold hover:text-red-400"
               style={{ color: 'var(--sidebar-muted)' }}
             >
-              <LogOut className="h-5 w-5" />
-              <span className="font-bold tracking-tight">Logout</span>
+              <LogOut className="h-4 w-4" />
+              <span>Logout</span>
             </button>
           </div>
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-grow flex flex-col min-w-0">
-        {/* Mobile sidebar toggle — floats over content on small screens */}
         <button
           onClick={() => setIsSidebarOpen(true)}
           className="lg:hidden fixed bottom-6 left-6 z-30 p-3 rounded-2xl bg-brand-orange text-white shadow-lg shadow-brand-orange/30 hover:brightness-110 transition-all"
@@ -188,7 +274,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </button>
 
         <SubscriptionBanner />
-        {/* Page Content */}
         <div className="p-6 lg:p-10 overflow-y-auto flex-1">
           {children}
         </div>

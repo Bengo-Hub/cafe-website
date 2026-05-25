@@ -15,6 +15,7 @@ import {
     Clock,
     ExternalLink,
     Loader2,
+    Monitor,
     Package,
     ShoppingBag,
 } from 'lucide-react';
@@ -28,6 +29,7 @@ function buildServiceLinks(orgSlug: string | undefined) {
     { label: 'Ordering', href: `https://ordersapp.codevertexitsolutions.com${slug}`, permission: 'ordering.orders.view' as const, icon: ShoppingBag },
     { label: 'Logistics', href: `https://logistics.codevertexitsolutions.com${slug}`, permission: 'logistics.fleet.view' as const, icon: Bike },
     { label: 'Treasury', href: `https://books.codevertexitsolutions.com${slug}`, permission: null as null, icon: BookOpen },
+    { label: 'POS Terminal', href: `https://pos.codevertexitsolutions.com${slug}`, permission: null as null, icon: Monitor },
   ];
 }
 
