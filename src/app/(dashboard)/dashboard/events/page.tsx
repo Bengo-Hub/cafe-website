@@ -1,10 +1,12 @@
 'use client';
 
 import { Badge, Button, Card } from '@/components/ui';
+import { SubscriptionGate } from '@/components/subscription/subscription-gate';
 import { useEvents } from '@/hooks/use-events';
+import { useSubscription } from '@/hooks/use-subscription';
 import { updateEventAvailability } from '@/lib/api/events';
 import { motion } from 'framer-motion';
-import { Calendar, Eye, EyeOff, Globe, Loader2, Plus, RefreshCw } from 'lucide-react';
+import { AlertTriangle, Calendar, Eye, EyeOff, Globe, Loader2, Plus, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
@@ -21,8 +23,21 @@ export default function EventsDashboard() {
   const { data: events = [], isLoading, refetch } = useEvents();
   const qc = useQueryClient();
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const { hasFeature, getLimit, isPlatformOwner } = useSubscription();
+
+  const canPublishEvents = isPlatformOwner || hasFeature('cafe_website_events');
+  const maxPublished = isPlatformOwner ? Infinity : (getLimit('cafe_website_max_events_published') as number);
 
   async function togglePublish(event: { id: string; sku: string; name: string; isAvailable: boolean }) {
+    if (!canPublishEvents) {
+      toast.error('Upgrade your plan to publish events on the website.');
+      return;
+    }
+    const currentPublished = events.filter((e) => e.isAvailable).length;
+    if (!event.isAvailable && maxPublished !== -1 && currentPublished >= maxPublished) {
+      toast.error(`Your plan allows up to ${maxPublished} published events. Upgrade to publish more.`);
+      return;
+    }
     setTogglingId(event.id);
     try {
       await updateEventAvailability(event.sku, !event.isAvailable);
@@ -37,6 +52,7 @@ export default function EventsDashboard() {
 
   const published = events.filter((e) => e.isAvailable).length;
   const total = events.length;
+  const atLimit = maxPublished !== -1 && maxPublished !== Infinity && published >= maxPublished;
 
   return (
     <div className="space-y-10">
@@ -88,8 +104,24 @@ export default function EventsDashboard() {
         </Card>
       </div>
 
-      {/* Events Table */}
-      <Card className="magical-card border-none overflow-hidden">
+      {/* Subscription limit warning */}
+      {atLimit && (
+        <div className="flex items-start gap-4 p-6 rounded-2xl bg-amber-500/10 border border-amber-500/20">
+          <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-bold text-primary-brand">Event publish limit reached</p>
+            <p className="text-sm text-secondary-brand font-light mt-1">
+              You have published {published} of {maxPublished} events allowed on your plan.
+              Upgrade to Growth or Professional to publish more events, or unpublish existing ones.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Feature gate for non-subscribers */}
+      <SubscriptionGate feature="cafe_website_events">
+        {/* Events Table */}
+        <Card className="magical-card border-none overflow-hidden">
         <div className="p-8 border-b border-brand-beige/10">
           <h2 className="text-2xl font-black text-primary-brand tracking-tight">Event Catalog</h2>
           <p className="text-xs text-secondary-brand opacity-60 mt-1 font-light">
@@ -160,7 +192,8 @@ export default function EventsDashboard() {
             </tbody>
           </table>
         </div>
-      </Card>
+        </Card>
+      </SubscriptionGate>
     </div>
   );
 }

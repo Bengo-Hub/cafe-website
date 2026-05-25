@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { ExternalLink, Facebook, Heart, Instagram, Mail, MapPin, Phone, Twitter } from 'lucide-react';
 import Image from 'next/image';
@@ -32,7 +32,7 @@ export function Footer() {
                     className="h-3.5 w-auto brightness-0 invert dark:brightness-100 dark:invert-0" 
                   />
                   <span className="text-[10px] font-black tracking-tight uppercase">
-                    Powered by <span className="text-brand-orange">Codevertex IT Solutions</span>
+                    Powered by <span className="text-brand-orange">Codevertex Africa Limited</span>
                   </span>
                 </a>
               </div>
@@ -224,7 +224,7 @@ export function Footer() {
             className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-brand-orange/20 to-brand-gold/20 border border-brand-orange/30 text-brand-muted dark:text-brand-beige/70 hover:text-brand-orange dark:hover:text-brand-orange hover:border-brand-orange/60 transition-all duration-300 group/codevertex hover:bg-brand-orange/30"
           >
             <span className="text-xs font-bold uppercase tracking-widest">Powered by</span>
-            <span className="text-xs font-black uppercase tracking-wider text-brand-orange group-hover/codevertex:text-brand-gold transition-colors">Codevertex IT Solutions</span>
+            <span className="text-xs font-black uppercase tracking-wider text-brand-orange group-hover/codevertex:text-brand-gold transition-colors">Codevertex Africa Limited</span>
             <ExternalLink className="h-3.5 w-3.5 text-brand-orange/60 group-hover/codevertex:text-brand-orange transition-colors" />
           </a>
         </div>

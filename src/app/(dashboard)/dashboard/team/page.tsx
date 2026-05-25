@@ -2,9 +2,11 @@
 
 import { Badge, Button, Card } from '@/components/ui';
 import { useERPStaff } from '@/hooks/use-erp-staff';
+import { useSubscription } from '@/hooks/use-subscription';
 import { useTeam } from '@/hooks/use-team';
 import { motion } from 'framer-motion';
 import {
+  AlertTriangle,
   Eye,
   EyeOff,
   Loader2,
@@ -31,6 +33,11 @@ export default function TeamManagement() {
   const { data: websiteTeam = [], createMutation, deleteMutation } = useTeam();
   const [search, setSearch] = useState('');
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const { hasFeature, getLimit, isPlatformOwner } = useSubscription();
+
+  const canShowcaseTeam = isPlatformOwner || hasFeature('cafe_website_team_showcase');
+  const maxDisplayed = isPlatformOwner ? Infinity : (getLimit('cafe_website_max_team_displayed') as number);
+  const atDisplayLimit = maxDisplayed !== -1 && maxDisplayed !== Infinity && websiteTeam.length >= maxDisplayed;
 
   // Build lookup: ERP employee id → website team member
   const websiteByEmail = new Map(websiteTeam.map((m) => [m.email?.toLowerCase(), m]));
@@ -44,9 +51,17 @@ export default function TeamManagement() {
   );
 
   async function toggleWebsiteVisibility(employee: (typeof erpStaff)[0]) {
+    if (!canShowcaseTeam) {
+      toast.error('Upgrade your plan to showcase team members on your website.');
+      return;
+    }
+    const existing = websiteByEmail.get(employee.email?.toLowerCase());
+    if (!existing && atDisplayLimit) {
+      toast.error(`Your plan allows up to ${maxDisplayed} team members on the website. Upgrade to show more.`);
+      return;
+    }
     setTogglingId(employee.id);
     try {
-      const existing = websiteByEmail.get(employee.email?.toLowerCase());
       if (existing) {
         await deleteMutation.mutateAsync(existing.id);
         toast.success(`${employee.full_name} removed from website`);
@@ -105,13 +120,18 @@ export default function TeamManagement() {
             <p className="text-3xl font-black text-primary-brand">{erpLoading ? '—' : activeCount}</p>
           </div>
         </Card>
-        <Card className="magical-card border-none p-8 flex items-center gap-6">
-          <div className="h-16 w-16 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
-            <Eye className="h-8 w-8" />
+        <Card className={`magical-card border-none p-8 flex items-center gap-6 ${atDisplayLimit ? 'border border-amber-500/30' : ''}`}>
+          <div className={`h-16 w-16 rounded-2xl flex items-center justify-center ${atDisplayLimit ? 'bg-amber-500/10 text-amber-500' : 'bg-blue-500/10 text-blue-500'}`}>
+            {atDisplayLimit ? <AlertTriangle className="h-8 w-8" /> : <Eye className="h-8 w-8" />}
           </div>
           <div>
             <p className="text-sm font-bold text-secondary-brand opacity-40 uppercase tracking-widest">On Website</p>
-            <p className="text-3xl font-black text-primary-brand">{websiteTeam.length}</p>
+            <p className="text-3xl font-black text-primary-brand">
+              {websiteTeam.length}
+              {maxDisplayed !== Infinity && maxDisplayed !== -1 && (
+                <span className="text-sm font-medium text-secondary-brand opacity-60 ml-2">/ {maxDisplayed}</span>
+              )}
+            </p>
           </div>
         </Card>
       </div>
