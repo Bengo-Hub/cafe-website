@@ -91,6 +91,7 @@ export const useAuthStore = create<AuthState>()(
             codeChallenge: challenge,
             state,
             redirectUri: callbackUrl,
+            tenant: process.env.NEXT_PUBLIC_TENANT_SLUG || 'urban-loft',
           });
 
           window.location.href = authorizeUrl;
@@ -105,11 +106,12 @@ export const useAuthStore = create<AuthState>()(
         const verifier = consumeVerifier();
 
         if (!verifier) {
-          set({ status: 'error', error: 'Session expired' });
+          set({ status: 'error', error: 'Session expired — please sign in again.' });
           return;
         }
 
         try {
+          // Step 1: Exchange auth code for tokens at SSO
           const tokens = await exchangeCodeForTokens({
             code,
             codeVerifier: verifier,
@@ -122,61 +124,37 @@ export const useAuthStore = create<AuthState>()(
             expiresAt: new Date(Date.now() + (tokens.expires_in || 3600) * 1000).toISOString(),
           };
 
-          set({
-            session,
-            accessToken: session.accessToken,
-            refreshToken: session.refreshToken,
-          });
+          set({ session, accessToken: session.accessToken, refreshToken: session.refreshToken });
 
-          // Fetch user profile (retry up to 5 times)
-          let profile: UserProfile | null = null;
-          let attempts = 0;
-          while (attempts < 5 && !profile) {
-            try {
-              const user = await fetchProfile(session.accessToken);
-              profile = {
-                id: user.id ?? user.sub,
-                email: user.email,
-                name: user.name ?? user.fullName,
-                fullName: user.fullName ?? user.name,
-                roles: user.roles ?? [],
-                role: (user.roles as string[])?.[0] ?? user.role,
-                permissions: user.permissions ?? [],
-                tenant_id: user.tenant_id,
-                tenant_slug: user.tenant_slug,
-                ...user,
-              };
-            } catch {
-              attempts++;
-              await new Promise((r) => setTimeout(r, 1500));
-            }
-          }
-
-          // Always store profile first (even if subscription check follows)
-          if (profile) {
-            set({ user: profile });
-          }
-
-          // Set cookie server-side BEFORE marking as authenticated so it is
-          // present on the very next navigation (edge middleware reads it).
+          // Step 2: Fetch profile from SSO /me — always available, no JIT sync delay.
+          // Do NOT call any backend /auth/me here: the user may not be JIT-provisioned
+          // yet and a 401 from any backend fires the on401 interceptor → clears session.
           try {
-            await fetch('/api/auth/session', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                accessToken: tokens.access_token,
-                expiresIn: tokens.expires_in,
-              }),
-            });
-          } catch {
-            // Fallback: set client-side if the API call fails
-            if (typeof document !== 'undefined') {
-              const maxAge = tokens.expires_in || 3600;
-              document.cookie = `access_token=${tokens.access_token}; path=/; max-age=${maxAge}; SameSite=Lax`;
+            const ssoUser = await fetchProfile(session.accessToken);
+            const profile: UserProfile = {
+              id: ssoUser.id ?? ssoUser.sub,
+              email: ssoUser.email,
+              name: ssoUser.name ?? ssoUser.fullName,
+              fullName: ssoUser.fullName ?? ssoUser.name,
+              roles: ssoUser.roles ?? [],
+              role: (ssoUser.roles as string[])?.[0] ?? ssoUser.role,
+              permissions: ssoUser.permissions ?? [],
+              tenant_id: ssoUser.tenant_id,
+              tenant_slug: ssoUser.tenant_slug,
+              ...ssoUser,
+            };
+            if (ssoUser.tenant_id && typeof window !== 'undefined') {
+              localStorage.setItem('tenantId', ssoUser.tenant_id);
             }
+            if (ssoUser.tenant_slug && typeof window !== 'undefined') {
+              localStorage.setItem('tenantSlug', ssoUser.tenant_slug);
+            }
+            set({ user: profile, status: 'authenticated', lastAuthenticatedAt: Date.now() });
+          } catch (profileErr) {
+            // SSO /me failed — show error so user can retry (never silently proceed
+            // without a user: the callback page would navigate to /profile with no data)
+            set({ status: 'error', error: (profileErr as Error).message || 'Failed to load profile' });
           }
-
-          set({ status: 'authenticated', lastAuthenticatedAt: Date.now() });
         } catch (error) {
           set({ status: 'error', error: (error as Error).message || 'Sign-in failed' });
         }
@@ -185,8 +163,6 @@ export const useAuthStore = create<AuthState>()(
       logout: async () => {
         set({ status: 'idle', user: null, session: null, accessToken: null, refreshToken: null, subscriptionInfo: undefined, lastAuthenticatedAt: null });
         if (typeof window !== 'undefined') {
-          // Clear the middleware auth cookie (server-side for reliability)
-          try { await fetch('/api/auth/session', { method: 'DELETE' }); } catch { /* no-op */ }
           try { document.cookie = 'access_token=; path=/; max-age=0'; } catch { /* no-op */ }
           try { localStorage.removeItem('cafe-auth-storage'); } catch { /* no-op */ }
           try { localStorage.removeItem('tenantId'); } catch { /* no-op */ }
