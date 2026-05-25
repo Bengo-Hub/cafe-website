@@ -1,6 +1,6 @@
 'use client';
 
-import { TeamMember } from '@/types';
+import { TeamMember } from '@/hooks/use-team';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import React from 'react';
@@ -22,7 +22,7 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({ member, classNam
         {/* Image Section */}
         <div className="relative h-64 w-full overflow-hidden bg-gray-100">
           <Image
-            src={member.image || '/images/team/placeholder-team.svg'}
+            src={member.image_url || '/images/team/placeholder-team.svg'}
             alt={member.name}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-110"
@@ -35,14 +35,14 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({ member, classNam
         <div className="p-6">
           <h3 className="mb-1 text-xl font-bold text-gray-900">{member.name}</h3>
           <p className="mb-3 text-sm font-medium text-primary">{member.role}</p>
-          <p className="text-sm text-gray-600">{member.bio}</p>
+          {member.bio && <p className="text-sm text-gray-600">{member.bio}</p>}
 
           {/* Social Links */}
-          {member.social && (
+          {(member.linkedin_url || member.twitter_url || member.email) && (
             <div className="mt-4 flex justify-center gap-3">
-              {member.social.linkedin && (
+              {member.linkedin_url && (
                 <a
-                  href={member.social.linkedin}
+                  href={member.linkedin_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-400 transition-colors hover:text-primary"
@@ -53,9 +53,9 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({ member, classNam
                   </svg>
                 </a>
               )}
-              {member.social.twitter && (
+              {member.twitter_url && (
                 <a
-                  href={member.social.twitter}
+                  href={member.twitter_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-400 transition-colors hover:text-primary"
@@ -66,9 +66,9 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({ member, classNam
                   </svg>
                 </a>
               )}
-              {member.social.email && (
+              {member.email && (
                 <a
-                  href={`mailto:${member.social.email}`}
+                  href={`mailto:${member.email}`}
                   className="text-gray-400 transition-colors hover:text-primary"
                   aria-label="Email"
                 >

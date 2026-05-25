@@ -8,6 +8,8 @@ const PRODUCTION = {
   booking: 'https://booking.codevertexitsolutions.com',
   notifications: 'https://notificationsapi.codevertexitsolutions.com',
   inventory: 'https://inventoryapi.codevertexitsolutions.com',
+  pos: 'https://posapi.codevertexitsolutions.com',
+  erp: 'https://erp.codevertexitsolutions.com',
   site: 'https://theurbanloftcafe.com',
 };
 
@@ -21,6 +23,8 @@ export const config = {
     booking: process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL || PRODUCTION.booking,
     notifications: process.env.NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL || PRODUCTION.notifications,
     inventory: process.env.NEXT_PUBLIC_INVENTORY_SERVICE_URL || PRODUCTION.inventory,
+    pos: process.env.NEXT_PUBLIC_POS_API_URL || PRODUCTION.pos,
+    erp: process.env.NEXT_PUBLIC_ERP_API_URL || PRODUCTION.erp,
   },
   
   features: {

@@ -48,5 +48,20 @@ export function useTeam(tenantId?: string) {
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['team', tenant] }),
   });
-  return { ...query, createMutation };
+
+  const deleteMutation = useMutation({
+    mutationFn: async (memberId: string) => {
+      const res = await fetch(`/api/team/${memberId}`, {
+        method: 'DELETE',
+        headers: { 'x-tenant-id': tenant },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? 'Failed to remove from website');
+      }
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['team', tenant] }),
+  });
+
+  return { ...query, createMutation, deleteMutation };
 }

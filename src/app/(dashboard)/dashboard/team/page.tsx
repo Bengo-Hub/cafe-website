@@ -1,18 +1,21 @@
 'use client';
 
 import { Badge, Button, Card } from '@/components/ui';
+import { useERPStaff } from '@/hooks/use-erp-staff';
 import { useTeam } from '@/hooks/use-team';
-import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
-    Mail,
-    MoreVertical,
-    Plus,
-    Search,
-    Shield,
-    UserPlus,
-    Users
+  Eye,
+  EyeOff,
+  Loader2,
+  Mail,
+  Search,
+  Shield,
+  UserPlus,
+  Users,
 } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 function initials(name: string): string {
   return name
@@ -23,46 +26,62 @@ function initials(name: string): string {
     .slice(0, 2);
 }
 
-interface POSUser {
-  id: string;
-  name: string;
-  email: string;
-  role?: string;
-}
-
-function usePOSUsers() {
-  return useQuery<POSUser[]>({
-    queryKey: ['pos-staff', 'users'],
-    queryFn: async () => {
-      const res = await fetch('/api/pos-staff?type=users');
-      const json = await res.json();
-      return json.data ?? [];
-    },
-    staleTime: 2 * 60 * 1000,
-  });
-}
-
 export default function TeamManagement() {
-  const { data: teamMembers = [], isLoading, isError } = useTeam();
-  const { data: posUsers = [] } = usePOSUsers();
+  const { data: erpStaff = [], isLoading: erpLoading, isError } = useERPStaff();
+  const { data: websiteTeam = [], createMutation, deleteMutation } = useTeam();
+  const [search, setSearch] = useState('');
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
-  // Build a lookup from email → POS role
-  const posRoleByEmail = new Map<string, string>();
-  for (const u of posUsers) {
-    if (u.email && u.role) posRoleByEmail.set(u.email.toLowerCase(), u.role);
+  // Build lookup: ERP employee id → website team member
+  const websiteByEmail = new Map(websiteTeam.map((m) => [m.email?.toLowerCase(), m]));
+
+  const filtered = erpStaff.filter(
+    (e) =>
+      !search ||
+      e.full_name.toLowerCase().includes(search.toLowerCase()) ||
+      e.email?.toLowerCase().includes(search.toLowerCase()) ||
+      e.job_title?.name?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  async function toggleWebsiteVisibility(employee: (typeof erpStaff)[0]) {
+    setTogglingId(employee.id);
+    try {
+      const existing = websiteByEmail.get(employee.email?.toLowerCase());
+      if (existing) {
+        await deleteMutation.mutateAsync(existing.id);
+        toast.success(`${employee.full_name} removed from website`);
+      } else {
+        await createMutation.mutateAsync({
+          name: employee.full_name,
+          role: employee.job_title?.name ?? 'Staff',
+          bio: null,
+          image_url: null,
+          email: employee.email ?? null,
+          linkedin_url: null,
+          twitter_url: null,
+          display_order: websiteTeam.length,
+        });
+        toast.success(`${employee.full_name} added to website`);
+      }
+    } catch {
+      toast.error('Failed to update website visibility');
+    } finally {
+      setTogglingId(null);
+    }
   }
+
+  const activeCount = erpStaff.filter((e) => e.status === 'active').length;
 
   return (
     <div className="space-y-10">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h1 className="text-4xl font-black text-primary-brand tracking-tight">Team Management</h1>
-          <p className="text-secondary-brand font-light">Manage your cafe staff, roles, and permissions.</p>
+          <p className="text-secondary-brand font-light">Manage staff and control who appears on your public website.</p>
         </div>
-
         <Button className="h-14 px-8 rounded-2xl bg-brand-orange hover:bg-brand-orange/90 text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-brand-orange/20">
           <UserPlus className="h-4 w-4 mr-2" />
-          Add Team Member
+          Add Staff
         </Button>
       </header>
 
@@ -74,7 +93,7 @@ export default function TeamManagement() {
           </div>
           <div>
             <p className="text-sm font-bold text-secondary-brand opacity-40 uppercase tracking-widest">Total Staff</p>
-            <p className="text-3xl font-black text-primary-brand">{isLoading ? '—' : teamMembers.length}</p>
+            <p className="text-3xl font-black text-primary-brand">{erpLoading ? '—' : erpStaff.length}</p>
           </div>
         </Card>
         <Card className="magical-card border-none p-8 flex items-center gap-6">
@@ -82,29 +101,34 @@ export default function TeamManagement() {
             <Shield className="h-8 w-8" />
           </div>
           <div>
-            <p className="text-sm font-bold text-secondary-brand opacity-40 uppercase tracking-widest">Admins</p>
-            <p className="text-3xl font-black text-primary-brand">{isLoading ? '—' : teamMembers.filter((m) => m.role?.toLowerCase().includes('admin')).length}</p>
+            <p className="text-sm font-bold text-secondary-brand opacity-40 uppercase tracking-widest">Active Staff</p>
+            <p className="text-3xl font-black text-primary-brand">{erpLoading ? '—' : activeCount}</p>
           </div>
         </Card>
         <Card className="magical-card border-none p-8 flex items-center gap-6">
           <div className="h-16 w-16 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
-            <Plus className="h-8 w-8" />
+            <Eye className="h-8 w-8" />
           </div>
           <div>
-            <p className="text-sm font-bold text-secondary-brand opacity-40 uppercase tracking-widest">New Hires</p>
-            <p className="text-3xl font-black text-primary-brand">—</p>
+            <p className="text-sm font-bold text-secondary-brand opacity-40 uppercase tracking-widest">On Website</p>
+            <p className="text-3xl font-black text-primary-brand">{websiteTeam.length}</p>
           </div>
         </Card>
       </div>
 
-      {/* Team List */}
+      {/* Staff Table */}
       <Card className="magical-card border-none overflow-hidden">
         <div className="p-8 border-b border-brand-beige/10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <h2 className="text-2xl font-black text-primary-brand tracking-tight">Staff Directory</h2>
+          <div>
+            <h2 className="text-2xl font-black text-primary-brand tracking-tight">Staff Directory</h2>
+            <p className="text-xs text-secondary-brand opacity-60 mt-1 font-light">Toggle the eye icon to show/hide staff on your public About page.</p>
+          </div>
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-secondary-brand opacity-40" />
             <input
               type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name or role..."
               className="h-12 pl-12 pr-6 rounded-xl bg-brand-beige/5 border border-brand-beige/10 text-primary-brand focus:outline-none focus:border-brand-orange/50 transition-all w-64"
             />
@@ -116,34 +140,32 @@ export default function TeamManagement() {
             <thead>
               <tr className="bg-brand-beige/5">
                 <th className="p-6 text-xs font-black text-secondary-brand uppercase tracking-widest">Member</th>
-                <th className="p-6 text-xs font-black text-secondary-brand uppercase tracking-widest">Role</th>
-                <th className="p-6 text-xs font-black text-secondary-brand uppercase tracking-widest">POS Role</th>
+                <th className="p-6 text-xs font-black text-secondary-brand uppercase tracking-widest">Department</th>
                 <th className="p-6 text-xs font-black text-secondary-brand uppercase tracking-widest">Contact</th>
                 <th className="p-6 text-xs font-black text-secondary-brand uppercase tracking-widest">Status</th>
-                <th className="p-6 text-xs font-black text-secondary-brand uppercase tracking-widest text-right">Actions</th>
+                <th className="p-6 text-xs font-black text-secondary-brand uppercase tracking-widest text-center">Website</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-brand-beige/10">
-              {isLoading ? (
+              {erpLoading ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-muted-foreground">Loading team…</td>
+                  <td colSpan={5} className="p-8 text-center text-muted-foreground">Loading staff from HR system…</td>
                 </tr>
               ) : isError ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-destructive">Failed to load team. Check Supabase configuration.</td>
+                  <td colSpan={5} className="p-8 text-center text-destructive">Failed to load staff from ERP. Check your connection.</td>
                 </tr>
-              ) : teamMembers.length === 0 ? (
+              ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-muted-foreground">No team members yet. Add your first member above.</td>
+                  <td colSpan={5} className="p-8 text-center text-muted-foreground">No staff found.</td>
                 </tr>
               ) : (
-                teamMembers.map((member) => {
-                  const posRole = member.email
-                    ? posRoleByEmail.get(member.email.toLowerCase())
-                    : undefined;
+                filtered.map((employee) => {
+                  const isOnWebsite = websiteByEmail.has(employee.email?.toLowerCase());
+                  const isToggling = togglingId === employee.id;
                   return (
                     <motion.tr
-                      key={member.id}
+                      key={employee.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       className="hover:bg-brand-beige/5 transition-colors"
@@ -151,50 +173,54 @@ export default function TeamManagement() {
                       <td className="p-6">
                         <div className="flex items-center gap-4">
                           <div className="h-12 w-12 rounded-xl bg-brand-orange/10 flex items-center justify-center text-brand-orange font-black text-sm">
-                            {initials(member.name)}
+                            {initials(employee.full_name)}
                           </div>
                           <div>
-                            <p className="font-black text-primary-brand">{member.name}</p>
-                            <p className="text-xs text-secondary-brand opacity-60">ID: {member.id.slice(0, 8)}</p>
+                            <p className="font-black text-primary-brand">{employee.full_name}</p>
+                            <p className="text-xs text-secondary-brand opacity-60">{employee.job_title?.name ?? '—'}</p>
                           </div>
                         </div>
                       </td>
                       <td className="p-6">
-                        <Badge className={
-                          member.role?.toLowerCase().includes('admin') ? 'bg-brand-orange/10 text-brand-orange' :
-                          member.role?.toLowerCase().includes('barista') ? 'bg-brand-gold/10 text-brand-gold' :
-                          'bg-blue-500/10 text-blue-500'
-                        }>
-                          {member.role}
-                        </Badge>
-                      </td>
-                      <td className="p-6">
-                        {posRole ? (
-                          <Badge className="bg-purple-500/10 text-purple-500">{posRole}</Badge>
+                        {employee.department?.name ? (
+                          <Badge className="bg-blue-500/10 text-blue-500">{employee.department.name}</Badge>
                         ) : (
                           <span className="text-xs text-secondary-brand opacity-40">—</span>
                         )}
                       </td>
                       <td className="p-6">
-                        <div className="space-y-1">
-                          {member.email && (
-                            <div className="flex items-center gap-2 text-xs text-secondary-brand">
-                              <Mail className="h-3 w-3 opacity-40" />
-                              {member.email}
-                            </div>
-                          )}
-                        </div>
+                        {employee.email && (
+                          <div className="flex items-center gap-2 text-xs text-secondary-brand">
+                            <Mail className="h-3 w-3 opacity-40" />
+                            {employee.email}
+                          </div>
+                        )}
                       </td>
                       <td className="p-6">
                         <div className="flex items-center gap-2">
-                          <div className="h-2 w-2 rounded-full bg-green-500" />
-                          <span className="text-sm font-bold text-primary-brand">Active</span>
+                          <div className={`h-2 w-2 rounded-full ${employee.status === 'active' ? 'bg-green-500' : 'bg-gray-400'}`} />
+                          <span className="text-sm font-bold text-primary-brand capitalize">{employee.status}</span>
                         </div>
                       </td>
-                      <td className="p-6 text-right">
-                        <Button variant="ghost" size="icon" className="text-secondary-brand hover:text-primary-brand">
-                          <MoreVertical className="h-5 w-5" />
-                        </Button>
+                      <td className="p-6 text-center">
+                        <button
+                          onClick={() => toggleWebsiteVisibility(employee)}
+                          disabled={isToggling}
+                          title={isOnWebsite ? 'Remove from website' : 'Show on website'}
+                          className={`h-10 w-10 rounded-xl inline-flex items-center justify-center transition-all ${
+                            isOnWebsite
+                              ? 'bg-brand-orange/10 text-brand-orange hover:bg-brand-orange/20'
+                              : 'bg-brand-beige/5 text-secondary-brand opacity-40 hover:opacity-80 hover:bg-brand-beige/10'
+                          }`}
+                        >
+                          {isToggling ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : isOnWebsite ? (
+                            <Eye className="h-4 w-4" />
+                          ) : (
+                            <EyeOff className="h-4 w-4" />
+                          )}
+                        </button>
                       </td>
                     </motion.tr>
                   );

@@ -38,5 +38,5 @@ export type { LoyaltyAccount, LoyaltyTier, Reward } from '@/lib/dummy-data/loyal
 export type { DietaryTag, MenuCategory, MenuItem } from '@/lib/dummy-data/menu';
 export type { LogisticsTask, Order, OrderItem, OrderStatus } from '@/lib/dummy-data/orders';
 export type { BookableSpace } from '@/lib/dummy-data/spaces';
-export type { TeamMember } from '@/lib/dummy-data/team';
+export type { TeamMember } from '@/hooks/use-team';
 

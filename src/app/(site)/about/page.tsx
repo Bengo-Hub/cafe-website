@@ -1,13 +1,15 @@
 'use client';
 
 import { TeamMemberCard, ValueCard } from '@/components/sections';
-import { teamMembers } from '@/lib/dummy-data';
+import { useTeam } from '@/hooks/use-team';
 import { motion } from 'framer-motion';
 import { Award, Handshake, Heart, History, Target, TrendingUp, Users } from 'lucide-react';
 import Image from 'next/image';
 import Script from 'next/script';
 
 export default function AboutPage() {
+  const { data: teamMembers = [], isLoading: teamLoading } = useTeam();
+
   const organizationSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -277,18 +279,24 @@ export default function AboutPage() {
             </div>
 
             <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
-              {teamMembers.map((member, index) => (
-                <motion.div
-                  key={member.name}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="electrical-border rounded-[3rem]"
-                >
-                  <TeamMemberCard member={member} />
-                </motion.div>
-              ))}
+              {teamLoading
+                ? Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="electrical-border rounded-[3rem] animate-pulse">
+                      <div className="rounded-[3rem] bg-brand-beige/10 h-80" />
+                    </div>
+                  ))
+                : teamMembers.map((member, index) => (
+                    <motion.div
+                      key={member.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 }}
+                      className="electrical-border rounded-[3rem]"
+                    >
+                      <TeamMemberCard member={member} />
+                    </motion.div>
+                  ))}
             </div>
           </div>
         </section>
