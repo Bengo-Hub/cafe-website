@@ -25,12 +25,12 @@
   --text-light: #1a0f01;  /* Very dark for light mode text */
   --text-dark: #f5f1ec;   /* Creamy for dark mode text */
 
-  /* Sidebar (theme-aware for dashboard) */
-  --sidebar-bg: #2c1a02;
-  --sidebar-foreground: #f5f1ec;
+  /* Sidebar — light mode: creamy parchment with dark-brown text */
+  --sidebar-bg: #ede7df;
+  --sidebar-foreground: #2c1a02;
   --sidebar-accent: #ea8022;
-  --sidebar-muted: rgba(245, 241, 236, 0.6);
-  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-muted: rgba(44, 26, 2, 0.45);
+  --sidebar-border: rgba(44, 26, 2, 0.1);
 }
 
 .dark {
@@ -46,11 +46,11 @@
 }
 
 .light {
-  --sidebar-bg: #2c1a02;
-  --sidebar-foreground: #f5f1ec;
+  --sidebar-bg: #ede7df;
+  --sidebar-foreground: #2c1a02;
   --sidebar-accent: #ea8022;
-  --sidebar-muted: rgba(245, 241, 236, 0.6);
-  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-muted: rgba(44, 26, 2, 0.45);
+  --sidebar-border: rgba(44, 26, 2, 0.1);
 }
 
 html {

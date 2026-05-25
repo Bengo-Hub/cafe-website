@@ -119,7 +119,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const rbacUser = effectiveUserForRbac(user ?? undefined, me?.roles ?? meRoles);
 
-  // Default open: any group containing the current path
+  // Default open: Overview + Operations always open; any other group containing the current path
   const [openGroups, setOpenGroups] = useState<Set<string>>(() => {
     const open = new Set<string>();
     SIDEBAR_GROUPS.forEach((g) => {
@@ -127,8 +127,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         open.add(g.label);
       }
     });
-    // Overview always open
     open.add('Overview');
+    open.add('Operations');
     return open;
   });
 
