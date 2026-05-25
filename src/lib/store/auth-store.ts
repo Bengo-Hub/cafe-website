@@ -157,13 +157,26 @@ export const useAuthStore = create<AuthState>()(
             set({ user: profile });
           }
 
-          set({ status: 'authenticated', lastAuthenticatedAt: Date.now() });
-
-          // Set a cookie so the middleware can gate /dashboard/* server-side
-          if (typeof document !== 'undefined') {
-            const maxAge = tokens.expires_in || 3600;
-            document.cookie = `access_token=${tokens.access_token}; path=/; max-age=${maxAge}; SameSite=Lax`;
+          // Set cookie server-side BEFORE marking as authenticated so it is
+          // present on the very next navigation (edge middleware reads it).
+          try {
+            await fetch('/api/auth/session', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                accessToken: tokens.access_token,
+                expiresIn: tokens.expires_in,
+              }),
+            });
+          } catch {
+            // Fallback: set client-side if the API call fails
+            if (typeof document !== 'undefined') {
+              const maxAge = tokens.expires_in || 3600;
+              document.cookie = `access_token=${tokens.access_token}; path=/; max-age=${maxAge}; SameSite=Lax`;
+            }
           }
+
+          set({ status: 'authenticated', lastAuthenticatedAt: Date.now() });
         } catch (error) {
           set({ status: 'error', error: (error as Error).message || 'Sign-in failed' });
         }
@@ -172,7 +185,8 @@ export const useAuthStore = create<AuthState>()(
       logout: async () => {
         set({ status: 'idle', user: null, session: null, accessToken: null, refreshToken: null, subscriptionInfo: undefined, lastAuthenticatedAt: null });
         if (typeof window !== 'undefined') {
-          // Clear the middleware auth cookie
+          // Clear the middleware auth cookie (server-side for reliability)
+          try { await fetch('/api/auth/session', { method: 'DELETE' }); } catch { /* no-op */ }
           try { document.cookie = 'access_token=; path=/; max-age=0'; } catch { /* no-op */ }
           try { localStorage.removeItem('cafe-auth-storage'); } catch { /* no-op */ }
           try { localStorage.removeItem('tenantId'); } catch { /* no-op */ }

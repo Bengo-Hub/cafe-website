@@ -1,14 +1,31 @@
 'use client';
 
 import { TeamMemberCard, ValueCard } from '@/components/sections';
-import { useTeam } from '@/hooks/use-team';
+import { useERPStaff } from '@/hooks/use-erp-staff';
+import { TeamMember } from '@/hooks/use-team';
 import { motion } from 'framer-motion';
 import { Award, Handshake, Heart, History, Target, TrendingUp, Users } from 'lucide-react';
 import Image from 'next/image';
 import Script from 'next/script';
 
 export default function AboutPage() {
-  const { data: teamMembers = [], isLoading: teamLoading } = useTeam();
+  const { data: erpStaff = [], isLoading: teamLoading } = useERPStaff();
+
+  // Map active ERP employees to the TeamMember shape expected by TeamMemberCard
+  const teamMembers: TeamMember[] = erpStaff
+    .filter((e) => e.status === 'active')
+    .map((e) => ({
+      id: e.id,
+      tenant_id: '',
+      name: e.full_name,
+      role: e.job_title?.name ?? e.department?.name ?? 'Team Member',
+      bio: null,
+      image_url: null,
+      email: e.email ?? null,
+      linkedin_url: null,
+      twitter_url: null,
+      display_order: 0,
+    }));
 
   const organizationSchema = {
     '@context': 'https://schema.org',

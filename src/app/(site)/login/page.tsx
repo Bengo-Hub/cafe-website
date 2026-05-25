@@ -11,7 +11,7 @@ function LoginContent() {
   const searchParams = useSearchParams();
   const redirectToSSO = useAuthStore((s) => s.redirectToSSO);
 
-  const returnTo = searchParams?.get('return_to') ?? '/';
+  const returnTo = searchParams?.get('return_to') ?? searchParams?.get('redirect') ?? '/';
 
   useEffect(() => {
     redirectToSSO(returnTo);

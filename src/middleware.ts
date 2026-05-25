@@ -9,7 +9,7 @@ export function middleware(req: NextRequest) {
     const token = req.cookies.get('access_token')?.value;
     if (!token) {
       const loginUrl = new URL('/login', req.url);
-      loginUrl.searchParams.set('redirect', pathname);
+      loginUrl.searchParams.set('return_to', pathname);
       return NextResponse.redirect(loginUrl);
     }
   }
