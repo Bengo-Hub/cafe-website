@@ -48,12 +48,12 @@ export default function ServicesPage() {
       features: ['Premium rooms', 'Quiet environment', 'Room service', 'Workspace in room'],
     },
     {
-      title: 'Themed Days & Events',
-      description: 'Join us for Pizza Fridays, Couples Nights, and other exciting community gatherings.',
+      title: 'Events & Reservations',
+      description: 'Join themed nights and community events — or reserve your perfect table online in seconds.',
       icon: <Music className="h-8 w-8" />,
       image: '/images/services/events.jpg',
       link: '/events',
-      features: ['Pizza Friday', 'Couples Night', 'Live music', 'Networking events'],
+      features: ['Pizza Friday', 'Couples Night', 'Table reservations', 'Private events'],
     },
     {
       title: 'Loyalty Program',
