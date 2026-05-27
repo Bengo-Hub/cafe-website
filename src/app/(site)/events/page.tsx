@@ -164,10 +164,16 @@ export default function EventsPage() {
   const [selectedEvent, setSelectedEvent] = useState<CatalogEvent | null>(null);
   const [activeTab, setActiveTab] = useState<'events' | 'reserve'>('events');
   const [tableModalOpen, setTableModalOpen] = useState(false);
+  const [tableModalEvent, setTableModalEvent] = useState<CatalogEvent | null>(null);
+
+  function openTableModal(event?: CatalogEvent) {
+    setTableModalEvent(event ?? null);
+    setTableModalOpen(true);
+  }
 
   useEffect(() => {
-    const w = window as typeof window & { __openTableBooking?: () => void };
-    w.__openTableBooking = () => setTableModalOpen(true);
+    const w = window as typeof window & { __openTableBooking?: (event?: CatalogEvent) => void };
+    w.__openTableBooking = openTableModal;
     return () => { delete w.__openTableBooking; };
   }, []);
 
@@ -319,7 +325,7 @@ export default function EventsPage() {
                                     Book a Spot
                                   </button>
                                   <button
-                                    onClick={() => setActiveTab('reserve')}
+                                    onClick={() => openTableModal(event)}
                                     className="h-16 rounded-2xl bg-white/5 border border-white/10 px-8 font-black uppercase tracking-widest text-white/70 hover:text-white hover:bg-white/10 transition-all text-sm flex items-center gap-2"
                                   >
                                     <CalendarCheck className="h-4 w-4" />
@@ -349,7 +355,7 @@ export default function EventsPage() {
 
             {activeTab === 'reserve' && (
               <motion.div key="reserve" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-                <ReserveTab onOpenModal={() => setTableModalOpen(true)} />
+                <ReserveTab onOpenModal={() => openTableModal()} />
               </motion.div>
             )}
           </AnimatePresence>
@@ -396,7 +402,10 @@ export default function EventsPage() {
       {/* Table reservation modal */}
       <AnimatePresence>
         {tableModalOpen && (
-          <TableReservationModal onClose={() => setTableModalOpen(false)} />
+          <TableReservationModal
+            onClose={() => { setTableModalOpen(false); setTableModalEvent(null); }}
+            selectedEvent={tableModalEvent ?? undefined}
+          />
         )}
       </AnimatePresence>
     </main>

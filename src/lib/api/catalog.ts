@@ -226,7 +226,14 @@ export async function deleteMenuItem(sku: string) {
 export interface OutletSummary {
   id: string;
   name: string;
+  slug?: string;
+  description?: string;
+  address?: string;
+  phone?: string;
+  location?: string;
   imageUrl?: string;
+  status?: string;
+  isOpen?: boolean;
 }
 
 export async function fetchOutlets() {
