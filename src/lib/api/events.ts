@@ -51,11 +51,27 @@ interface ListResponse<T> {
   total: number;
 }
 
-export async function fetchEvents(): Promise<CatalogEvent[]> {
-  const slug = getTenantSlug();
-  const url = `${ORDERING_URL}/api/v1/${slug}/catalog/items?item_type=service&tags=event&is_available=true`;
+export interface EventsPage {
+  data: CatalogEvent[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+}
+
+export async function fetchEvents(page = 1, limit = 6): Promise<EventsPage> {
+  const slug   = getTenantSlug();
+  const offset = (page - 1) * limit;
+  const url = `${ORDERING_URL}/api/v1/${slug}/catalog/items?item_type=service&tags=event&is_available=true&limit=${limit}&offset=${offset}`;
   const res = await apiClient<ListResponse<CatalogEvent>>(url, { headers: publicHeaders() });
-  return res.data?.data ?? [];
+  const total = res.data?.total ?? 0;
+  return {
+    data: res.data?.data ?? [],
+    total,
+    page,
+    limit,
+    hasMore: page * limit < total,
+  };
 }
 
 export async function createBooking(input: BookingInput): Promise<BookingOrder> {

@@ -1,8 +1,8 @@
 'use client';
 
-import { Card } from '@/components/ui';
+import { Card, Pagination } from '@/components/ui';
 import { BookingModal } from '@/components/events/BookingModal';
-import { useEvents, type CatalogEvent } from '@/hooks/use-events';
+import { EVENTS_PER_PAGE, useEvents, type CatalogEvent } from '@/hooks/use-events';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Calendar, CalendarCheck, Clock, MapPin, PhoneCall, Shield, Users } from 'lucide-react';
 import Image from 'next/image';
@@ -203,9 +203,19 @@ function ReserveTab() {
 }
 
 export default function EventsPage() {
-  const { data: events = [], isLoading } = useEvents();
+  const [page, setPage] = useState(1);
+  const { data: eventsPage, isLoading } = useEvents(page, EVENTS_PER_PAGE);
+  const events  = eventsPage?.data ?? [];
+  const total   = eventsPage?.total ?? 0;
+  const hasMore = eventsPage?.hasMore ?? false;
   const [selectedEvent, setSelectedEvent] = useState<CatalogEvent | null>(null);
   const [activeTab, setActiveTab] = useState<'events' | 'reserve'>('events');
+
+  function handlePageChange(newPage: number) {
+    setPage(newPage);
+    // Scroll back to the events section smoothly
+    document.getElementById('events-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 
   return (
     <main className="relative min-h-screen overflow-hidden section-blend-cream">
@@ -289,7 +299,7 @@ export default function EventsPage() {
                     </button>
                   </div>
                 ) : (
-                  <div className="grid gap-16">
+                  <div className="grid gap-16" id="events-list">
                     {events.map((event, index) => (
                       <motion.div key={event.id} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: index * 0.1 }}>
                         <div className="electrical-border rounded-[3rem]">
@@ -361,6 +371,15 @@ export default function EventsPage() {
                         </div>
                       </motion.div>
                     ))}
+                    <Pagination
+                      page={page}
+                      total={total}
+                      limit={EVENTS_PER_PAGE}
+                      hasMore={hasMore}
+                      onPageChange={handlePageChange}
+                      itemLabel="events"
+                      dark
+                    />
                   </div>
                 )}
               </motion.div>

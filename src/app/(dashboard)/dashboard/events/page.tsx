@@ -20,7 +20,9 @@ function tagLabel(tags: string[] = []): string {
 }
 
 export default function EventsDashboard() {
-  const { data: events = [], isLoading, refetch } = useEvents();
+  // Dashboard loads all events (high limit — no UI pagination needed here)
+  const { data: eventsPage, isLoading, refetch } = useEvents(1, 200);
+  const events = eventsPage?.data ?? [];
   const qc = useQueryClient();
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const { hasFeature, getLimit, isPlatformOwner } = useSubscription();

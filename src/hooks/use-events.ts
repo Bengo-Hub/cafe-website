@@ -1,15 +1,18 @@
 'use client';
 
-import { createBooking, fetchEvents, type BookingInput, type BookingOrder, type CatalogEvent } from '@/lib/api/events';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createBooking, fetchEvents, type BookingInput, type BookingOrder, type CatalogEvent, type EventsPage } from '@/lib/api/events';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-export type { BookingInput, BookingOrder, CatalogEvent };
+export type { BookingInput, BookingOrder, CatalogEvent, EventsPage };
 
-export function useEvents() {
-  return useQuery<CatalogEvent[]>({
-    queryKey: ['events'],
-    queryFn: fetchEvents,
+export const EVENTS_PER_PAGE = 6;
+
+export function useEvents(page = 1, limit = EVENTS_PER_PAGE) {
+  return useQuery<EventsPage>({
+    queryKey: ['events', page, limit],
+    queryFn: () => fetchEvents(page, limit),
     staleTime: 5 * 60 * 1000,
+    placeholderData: keepPreviousData,
   });
 }
 
