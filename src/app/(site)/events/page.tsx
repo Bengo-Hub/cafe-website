@@ -299,7 +299,8 @@ export default function EventsPage() {
                     </button>
                   </div>
                 ) : (
-                  <div className="grid gap-16" id="events-list">
+                  <div id="events-list">
+                  <div className="grid gap-16">
                     {events.map((event, index) => (
                       <motion.div key={event.id} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: index * 0.1 }}>
                         <div className="electrical-border rounded-[3rem]">
@@ -371,15 +372,16 @@ export default function EventsPage() {
                         </div>
                       </motion.div>
                     ))}
-                    <Pagination
-                      page={page}
-                      total={total}
-                      limit={EVENTS_PER_PAGE}
-                      hasMore={hasMore}
-                      onPageChange={handlePageChange}
-                      itemLabel="events"
-                      dark
-                    />
+                  </div>
+                  <Pagination
+                    page={page}
+                    total={total}
+                    limit={EVENTS_PER_PAGE}
+                    hasMore={hasMore}
+                    onPageChange={handlePageChange}
+                    itemLabel="events"
+                    dark
+                  />
                   </div>
                 )}
               </motion.div>
