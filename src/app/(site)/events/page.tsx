@@ -2,11 +2,12 @@
 
 import { Card, Pagination } from '@/components/ui';
 import { BookingModal } from '@/components/events/BookingModal';
+import { TableReservationModal } from '@/components/events/TableReservationModal';
 import { EVENTS_PER_PAGE, useEvents, type CatalogEvent } from '@/hooks/use-events';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Calendar, CalendarCheck, Clock, MapPin, PhoneCall, Shield, Users } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const EVENT_IMAGES: Record<string, string> = {
   'Pizza Friday Night': '/images/events/pizza-friday.jpg',
@@ -49,55 +50,7 @@ const RESERVATION_FEATURES = [
   { icon: Shield, title: 'Flexible Cancellation', desc: 'Cancel or reschedule up to 24 hours before — no charge.' },
 ];
 
-function ReserveTab() {
-  const widgetLoaded = useRef(false);
-
-  useEffect(() => {
-    if (widgetLoaded.current) return;
-    widgetLoaded.current = true;
-
-    const posUiUrl = process.env.NEXT_PUBLIC_POS_UI_URL || 'https://pos.codevertexitsolutions.com';
-    const posApiUrl = process.env.NEXT_PUBLIC_POS_API_URL || 'https://posapi.codevertexitsolutions.com';
-    const tenantSlug = process.env.NEXT_PUBLIC_TENANT_SLUG || 'urban-loft';
-
-    // Set config before injecting script (document.currentScript is null for dynamic injection)
-    (window as typeof window & { __cvBookingConfig?: Record<string, string> }).__cvBookingConfig = {
-      tenant: tenantSlug,
-      apiUrl: posApiUrl,
-      restaurantName: 'Urban Loft Cafe',
-      primaryColor: '#f97316',
-      accentColor: '#dc6b19',
-      openingTime: '08:00',
-      closingTime: '22:00',
-      slotInterval: '30',
-      maxPartySize: '20',
-      cancellationPolicy: 'Free cancellation up to 24 hours before your reservation. Same-day cancellations may incur a KES 500 fee.',
-      depositInfo: 'A KES 500 deposit is required for parties of 6 or more. Deposit credited to your bill.',
-      whatsapp: '254712345678',
-    };
-
-    const el = document.createElement('script');
-    el.src = `${posUiUrl}/widget/booking.js`;
-    el.async = true;
-    document.body.appendChild(el);
-
-    return () => {
-      document.body.removeChild(el);
-      const root = document.getElementById('cv-booking-root');
-      if (root) root.remove();
-      (window as typeof window & { __cvBookingLoaded?: boolean; __cvBooking?: unknown; __cvBookingConfig?: unknown }).__cvBookingLoaded = false;
-      delete (window as typeof window & { __cvBooking?: unknown }).__cvBooking;
-      delete (window as typeof window & { __cvBookingConfig?: unknown }).__cvBookingConfig;
-      widgetLoaded.current = false;
-    };
-  }, []);
-
-  function openWidget() {
-    const w = window as typeof window & { __cvBooking?: { open: () => void } };
-    if (w.__cvBooking) {
-      w.__cvBooking.open();
-    }
-  }
+function ReserveTab({ onOpenModal }: { onOpenModal: () => void }) {
 
   return (
     <div className="space-y-24">
@@ -115,14 +68,14 @@ function ReserveTab() {
             Skip the wait. Book your table online in under 60 seconds. Our team will personally confirm your reservation and ensure everything is set for your arrival.
           </p>
           <button
-            onClick={openWidget}
+            onClick={onOpenModal}
             className="inline-flex items-center gap-3 h-16 px-12 rounded-2xl bg-brand-orange hover:bg-brand-burnt text-white font-black uppercase tracking-widest shadow-xl shadow-brand-orange/25 transition-all hover:scale-105 active:scale-95"
           >
             <CalendarCheck className="h-5 w-5" />
             Reserve a Table
           </button>
           <p className="mt-4 text-sm text-secondary-brand font-light">
-            Or look for the <span className="text-brand-orange font-bold">🍽️ button</span> in the bottom-right corner.
+            Confirmed within 30 minutes during opening hours.
           </p>
         </motion.div>
         <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="relative h-[420px] overflow-hidden rounded-[2.5rem] shadow-2xl">
@@ -188,7 +141,7 @@ function ReserveTab() {
       {/* CTA */}
       <div className="text-center py-8">
         <button
-          onClick={openWidget}
+          onClick={onOpenModal}
           className="inline-flex items-center gap-3 h-16 px-14 rounded-2xl bg-brand-orange hover:bg-brand-burnt text-white font-black uppercase tracking-widest shadow-xl shadow-brand-orange/25 transition-all hover:scale-105 active:scale-95"
         >
           <CalendarCheck className="h-5 w-5" />
@@ -210,6 +163,13 @@ export default function EventsPage() {
   const hasMore = eventsPage?.hasMore ?? false;
   const [selectedEvent, setSelectedEvent] = useState<CatalogEvent | null>(null);
   const [activeTab, setActiveTab] = useState<'events' | 'reserve'>('events');
+  const [tableModalOpen, setTableModalOpen] = useState(false);
+
+  useEffect(() => {
+    const w = window as typeof window & { __openTableBooking?: () => void };
+    w.__openTableBooking = () => setTableModalOpen(true);
+    return () => { delete w.__openTableBooking; };
+  }, []);
 
   function handlePageChange(newPage: number) {
     setPage(newPage);
@@ -389,7 +349,7 @@ export default function EventsPage() {
 
             {activeTab === 'reserve' && (
               <motion.div key="reserve" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-                <ReserveTab />
+                <ReserveTab onOpenModal={() => setTableModalOpen(true)} />
               </motion.div>
             )}
           </AnimatePresence>
@@ -426,10 +386,17 @@ export default function EventsPage() {
         </section>
       )}
 
-      {/* Booking Modal */}
+      {/* Event booking modal */}
       <AnimatePresence>
         {selectedEvent && (
           <BookingModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
+        )}
+      </AnimatePresence>
+
+      {/* Table reservation modal */}
+      <AnimatePresence>
+        {tableModalOpen && (
+          <TableReservationModal onClose={() => setTableModalOpen(false)} />
         )}
       </AnimatePresence>
     </main>
