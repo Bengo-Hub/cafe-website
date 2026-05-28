@@ -20,6 +20,7 @@ export interface Vehicle {
   image_side_view?: string;
 }
 
+/** @deprecated Backend flattens user fields to top-level in FleetMember */
 export interface RiderUser {
   id: string;
   email: string;
@@ -28,33 +29,47 @@ export interface RiderUser {
   status: string;
 }
 
+// FleetMember matches the backend FleetMemberResponse DTO (fleet_dto.go).
+// User identity fields are flattened to top-level (first_name, last_name, email, phone, role).
+// Vehicle is in edges.vehicles (array), not edges.vehicle (single).
 export interface FleetMember {
   id: string;
   tenant_id: string;
   fleet_id: string;
   user_id: string;
+  // Flattened from User edge
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  role: string;
+  // Member fields
   driver_code?: string;
-  id_number?: string;
-  license_no?: string;
-  status: RiderStatus;
+  /** ID or passport number — backend field: id_passport_number */
+  id_passport_number?: string;
   id_passport_attachment?: string;
   rider_photo?: string;
-  vehicle_id?: string;
   joined_at: string;
-  suspended_at?: string;
-  metadata?: Record<string, any>;
+  status: RiderStatus;
+  average_rating: number;
+  total_ratings: number;
   specialization_tags?: string[];
   has_cold_storage?: boolean;
   max_weight_capacity_kg?: number;
-  average_rating?: number;
-  total_ratings?: number;
+  metadata?: Record<string, any>;
   created_at: string;
   updated_at: string;
-  // Edges (populated when WithVehicle / WithUser)
+  // Edges — vehicles is an array
   edges?: {
-    vehicle?: Vehicle;
-    user?: RiderUser;
+    vehicles?: Vehicle[];
   };
+}
+
+interface PaginatedFleetMembers {
+  data: FleetMember[];
+  total: number;
+  page?: number;
+  limit?: number;
 }
 
 /**
@@ -65,8 +80,6 @@ export function hasSubmittedKyc(rider: FleetMember): boolean {
   return !!(rider.id_passport_attachment && rider.rider_photo);
 }
 
-/** @deprecated Use FleetMember instead */
-export type Rider = FleetMember;
 
 // --- Fleet ---
 
@@ -89,8 +102,8 @@ export async function fetchRiders(params?: {
   if (params?.status) query.set('status', params.status);
   const qs = query.toString();
   const url = `${LOGISTICS_URL}/api/v1/${getTenantSlug()}/fleet/members${qs ? `?${qs}` : ''}`;
-  const resp = await api.get<FleetMember[]>(url);
-  return resp.data ?? [];
+  const resp = await api.get<PaginatedFleetMembers>(url);
+  return resp.data?.data ?? [];
 }
 
 /**

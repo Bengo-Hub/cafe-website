@@ -26,8 +26,12 @@ export interface RecipeIngredient {
   item_name?: string;
   quantity: number;
   unit_of_measure: string;
+  unit_id?: string;
+  waste_percent?: number;
   notes?: string;
   display_order?: number;
+  sub_recipe_id?: string;
+  sub_recipe_name?: string;
 }
 
 export interface Recipe {
@@ -35,10 +39,26 @@ export interface Recipe {
   tenant_id?: string;
   sku: string;
   name: string;
+  item_name?: string;
+  item_id?: string;
   output_qty: number;
+  servings?: number;
   unit_of_measure: string;
   is_active: boolean;
+  total_cost?: number;
+  cost_per_portion?: number;
+  target_margin_percent?: number;
+  suggested_price?: number;
+  prep_time_minutes?: number;
+  allergens?: string[];
   ingredients: RecipeIngredient[];
+}
+
+interface PaginatedRecipes {
+  data: Recipe[];
+  total: number;
+  page?: number;
+  limit?: number;
 }
 
 const slug = () => getTenantSlug();
@@ -46,8 +66,8 @@ const slug = () => getTenantSlug();
 export const recipesApi = {
   list: async (): Promise<Recipe[]> => {
     const url = `${INVENTORY_URL}/api/v1/${slug()}/inventory/recipes`;
-    const res = await apiClient<Recipe[]>(url, { headers: headers() });
-    return res.data ?? [];
+    const res = await apiClient<PaginatedRecipes>(url, { headers: headers() });
+    return res.data?.data ?? [];
   },
 
   get: async (id: string): Promise<Recipe> => {

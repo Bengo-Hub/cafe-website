@@ -1,173 +1,21 @@
 'use client';
 
-import { Button, Card, Input, Label, Switch } from '@/components/ui';
-import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
-import {
-    Bell,
-    Globe,
-    Lock,
-    Moon,
-    Palette,
-    Save,
-    User
-} from 'lucide-react';
+import { Button, Card, Label, Switch } from '@/components/ui';
+import { Bell, Globe, Moon } from 'lucide-react';
 import { useState } from 'react';
 
 export default function StaffSettings() {
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
-  const { tenant, isLoading: tenantLoading } = useTenantBrand();
 
   return (
     <div className="space-y-10">
       <header>
         <h1 className="text-4xl font-black text-primary-brand tracking-tight">Settings</h1>
-        <p className="text-secondary-brand font-light">Manage your account preferences and application settings.</p>
+        <p className="text-secondary-brand font-light">Manage your application preferences.</p>
       </header>
 
-      <div className="grid gap-10 lg:grid-cols-3">
-        {/* Branding (tenant/brand config) */}
-        <div className="lg:col-span-2 space-y-8">
-          <Card className="p-8 magical-card border-none space-y-8">
-            <div className="flex items-center gap-4 border-b border-brand-beige/10 pb-6">
-              <div className="p-3 rounded-2xl bg-brand-orange/10 text-brand-orange">
-                <Palette className="h-6 w-6" />
-              </div>
-              <h2 className="text-xl font-black text-primary-brand">Branding</h2>
-            </div>
-            {tenantLoading ? (
-              <p className="text-sm text-secondary-brand">Loading brand settings…</p>
-            ) : (
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Organization name</Label>
-                  <Input
-                    readOnly
-                    value={tenant?.orgName ?? tenant?.name ?? '—'}
-                    className="bg-brand-beige/5 border-brand-beige/10"
-                  />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Logo URL</Label>
-                  <Input
-                    readOnly
-                    value={tenant?.logoUrl ?? '—'}
-                    placeholder="Set via tenant metadata in auth-service"
-                    className="bg-brand-beige/5 border-brand-beige/10"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Primary color</Label>
-                  <div className="flex items-center gap-3">
-                    <Input
-                      readOnly
-                      value={tenant?.primaryColor ?? '—'}
-                      className="bg-brand-beige/5 border-brand-beige/10 flex-1"
-                    />
-                    {tenant?.primaryColor && (
-                      <div
-                        className="h-10 w-10 rounded-xl border border-brand-beige/20 shrink-0"
-                        style={{ backgroundColor: tenant.primaryColor }}
-                        title="Primary"
-                      />
-                    )}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Secondary color</Label>
-                  <div className="flex items-center gap-3">
-                    <Input
-                      readOnly
-                      value={tenant?.secondaryColor ?? '—'}
-                      className="bg-brand-beige/5 border-brand-beige/10 flex-1"
-                    />
-                    {tenant?.secondaryColor && (
-                      <div
-                        className="h-10 w-10 rounded-xl border border-brand-beige/20 shrink-0"
-                        style={{ backgroundColor: tenant.secondaryColor }}
-                        title="Secondary"
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-            <p className="text-xs text-secondary-brand">
-              Brand data is loaded from auth-service (GET /api/v1/tenants/by-slug/…). Logo and colors can be set in tenant metadata.
-            </p>
-          </Card>
-        </div>
-
-        {/* Profile Settings */}
-        <div className="lg:col-span-2 space-y-8">
-          <Card className="p-8 magical-card border-none space-y-8">
-            <div className="flex items-center gap-4 border-b border-brand-beige/10 pb-6">
-              <div className="p-3 rounded-2xl bg-brand-orange/10 text-brand-orange">
-                <User className="h-6 w-6" />
-              </div>
-              <h2 className="text-xl font-black text-primary-brand">Profile Information</h2>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" defaultValue="Alex" className="bg-brand-beige/5 border-brand-beige/10" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" defaultValue="Staff" className="bg-brand-beige/5 border-brand-beige/10" />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input id="email" type="email" defaultValue="alex@bengobox.cafe" className="bg-brand-beige/5 border-brand-beige/10" />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input id="phone" type="tel" defaultValue="+254 700 000 000" className="bg-brand-beige/5 border-brand-beige/10" />
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-4">
-              <Button className="bg-brand-orange hover:bg-brand-orange/90 text-white font-black uppercase tracking-widest text-xs h-12 px-8 rounded-xl">
-                <Save className="h-4 w-4 mr-2" />
-                Save Changes
-              </Button>
-            </div>
-          </Card>
-
-          <Card className="p-8 magical-card border-none space-y-8">
-            <div className="flex items-center gap-4 border-b border-brand-beige/10 pb-6">
-              <div className="p-3 rounded-2xl bg-brand-gold/10 text-brand-gold">
-                <Lock className="h-6 w-6" />
-              </div>
-              <h2 className="text-xl font-black text-primary-brand">Security</h2>
-            </div>
-
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="currentPassword">Current Password</Label>
-                <Input id="currentPassword" type="password" className="bg-brand-beige/5 border-brand-beige/10" />
-              </div>
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="newPassword">New Password</Label>
-                  <Input id="newPassword" type="password" className="bg-brand-beige/5 border-brand-beige/10" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                  <Input id="confirmPassword" type="password" className="bg-brand-beige/5 border-brand-beige/10" />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-4">
-              <Button variant="outline" className="border-brand-beige/10 bg-brand-beige/5 text-primary-brand font-black uppercase tracking-widest text-xs h-12 px-8 rounded-xl">
-                Update Password
-              </Button>
-            </div>
-          </Card>
-        </div>
-
+      <div className="grid gap-8 lg:grid-cols-3">
         {/* Preferences */}
         <div className="space-y-8">
           <Card className="p-8 magical-card border-none space-y-8">
@@ -186,7 +34,7 @@ export default function StaffSettings() {
                 </div>
                 <Switch checked={notifications} onCheckedChange={setNotifications} />
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label className="text-base">Dark Mode</Label>
@@ -214,7 +62,10 @@ export default function StaffSettings() {
                 <h3 className="text-lg font-black text-primary-brand">Night Shift Mode</h3>
                 <p className="text-sm text-secondary-brand mt-1">Automatically switch to dark mode during night shifts.</p>
               </div>
-              <Button className="w-full bg-brand-orange text-white font-black uppercase tracking-widest text-[10px] h-10 rounded-lg">
+              <Button
+                onClick={() => setDarkMode(true)}
+                className="w-full bg-brand-orange text-white font-black uppercase tracking-widest text-[10px] h-10 rounded-lg"
+              >
                 Enable Now
               </Button>
             </div>

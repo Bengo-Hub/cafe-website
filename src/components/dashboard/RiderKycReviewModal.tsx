@@ -35,8 +35,8 @@ export const RiderKycReviewModal: React.FC<RiderKycReviewModalProps> = ({
 }) => {
   if (!rider) return null;
 
-  const user = rider.edges?.user;
-  const vehicle = rider.edges?.vehicle;
+  const vehicle = rider.edges?.vehicles?.[0];
+  const fullName = `${rider.first_name} ${rider.last_name}`.trim();
 
   const kycDocuments: { label: string; url?: string; type: string }[] = [
     { label: 'ID / Passport', url: rider.id_passport_attachment, type: 'image' },
@@ -86,11 +86,11 @@ export const RiderKycReviewModal: React.FC<RiderKycReviewModalProps> = ({
           </h3>
 
           <div className="grid grid-cols-2 gap-4">
-            <InfoRow icon={User} label="Name" value={user?.full_name || rider.driver_code || 'N/A'} />
-            <InfoRow icon={Mail} label="Email" value={user?.email || 'N/A'} />
-            <InfoRow icon={Phone} label="Phone" value={user?.phone || 'N/A'} />
-            <InfoRow icon={IdCard} label="ID / Passport" value={rider.id_number || 'Not provided'} />
-            <InfoRow icon={IdCard} label="License No." value={rider.license_no || 'Not provided'} />
+            <InfoRow icon={User} label="Name" value={fullName || rider.driver_code || 'N/A'} />
+            <InfoRow icon={Mail} label="Email" value={rider.email || 'N/A'} />
+            <InfoRow icon={Phone} label="Phone" value={rider.phone || 'N/A'} />
+            <InfoRow icon={IdCard} label="ID / Passport" value={rider.id_passport_number || 'Not provided'} />
+            <InfoRow icon={IdCard} label="License No." value={rider.driver_code || 'Not provided'} />
             <InfoRow icon={MapPin} label="Driver Code" value={rider.driver_code || 'Auto-generated'} />
           </div>
         </section>

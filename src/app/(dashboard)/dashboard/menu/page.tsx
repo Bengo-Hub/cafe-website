@@ -46,6 +46,7 @@ export default function MenuManagement() {
   const [showAddItem, setShowAddItem] = useState(false);
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<MenuItem | null>(null);
   const [page, setPage] = useState(1);
   const pageSize = 9;
 
@@ -127,7 +128,9 @@ export default function MenuManagement() {
     mutationFn: (sku: string) => deleteMenuItem(sku),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['catalog-items'] });
-      toast.success('Item deleted');
+      queryClient.invalidateQueries({ queryKey: ['recipes'] });
+      setDeleteTarget(null);
+      toast.success('Menu item permanently deleted');
     },
     onError: (err: Error) => toast.error(`Failed to delete: ${err.message}`),
   });
@@ -486,9 +489,7 @@ export default function MenuManagement() {
                         <Edit2 className="h-4 w-4 text-secondary-brand" />
                       </button>
                       <button
-                        onClick={() => {
-                          if (confirm(`Delete "${item.name}"?`)) removeItem.mutate(item.sku);
-                        }}
+                        onClick={() => setDeleteTarget(item)}
                         className="rounded-lg p-2 hover:bg-red-500/10 transition-colors"
                         title="Delete"
                       >
@@ -585,6 +586,35 @@ export default function MenuManagement() {
           onCategoryCreated={(name) => addCategory.mutate(name)}
         />
         </CrudModal>
+      )}
+
+      {/* Delete Confirm Dialog */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-[2rem] bg-white p-8 shadow-2xl space-y-5">
+            <div>
+              <h3 className="text-xl font-black text-primary-brand">Delete Menu Item?</h3>
+              <p className="text-secondary-brand text-sm mt-2">
+                <span className="font-bold text-primary-brand">{deleteTarget.name}</span> will be permanently removed from the catalog. This action cannot be undone.
+              </p>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="flex-1 h-11 rounded-xl border border-brand-beige/20 bg-brand-beige/5 text-sm font-bold text-primary-brand hover:bg-brand-beige/10 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => removeItem.mutate(deleteTarget.sku)}
+                disabled={removeItem.isPending}
+                className="flex-1 h-11 rounded-xl bg-red-500 text-white text-sm font-black uppercase tracking-widest hover:bg-red-600 transition-colors disabled:opacity-60"
+              >
+                {removeItem.isPending ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

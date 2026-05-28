@@ -115,18 +115,19 @@ export default function RiderManagement() {
     enabled: !!reviewingRider,
   });
 
-  const pendingCount = riders.filter((r) => ['invited', 'pending', 'pending_review'].includes(r.status)).length;
-  const activeCount = riders.filter((r) => r.status === 'active').length;
-  const suspendedCount = riders.filter((r) => r.status === 'suspended').length;
+  const riderList = Array.isArray(riders) ? riders : [];
+  const pendingCount = riderList.filter((r) => ['invited', 'pending', 'pending_review'].includes(r.status)).length;
+  const activeCount = riderList.filter((r) => r.status === 'active').length;
+  const suspendedCount = riderList.filter((r) => r.status === 'suspended').length;
 
   // Split riders by tab context
   const inviteRiders = useMemo(() => {
-    return riders.filter((r) => ['invited', 'pending', 'pending_review', 'rejected'].includes(r.status));
-  }, [riders]);
+    return riderList.filter((r) => ['invited', 'pending', 'pending_review', 'rejected'].includes(r.status));
+  }, [riderList]);
 
   const fleetMembers = useMemo(() => {
-    return riders.filter((r) => r.status === 'active' || r.status === 'suspended');
-  }, [riders]);
+    return riderList.filter((r) => r.status === 'active' || r.status === 'suspended');
+  }, [riderList]);
 
   const currentList = activeTab === 'invites' ? inviteRiders : fleetMembers;
 
@@ -175,7 +176,7 @@ export default function RiderManagement() {
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <Card className="border border-brand-beige/10 p-4">
           <p className="text-xs font-bold uppercase tracking-widest text-secondary-brand opacity-60">Total</p>
-          <p className="text-2xl font-black text-primary-brand">{riders.length}</p>
+          <p className="text-2xl font-black text-primary-brand">{riderList.length}</p>
         </Card>
         <Card className="border border-brand-beige/10 p-4">
           <p className="text-xs font-bold uppercase tracking-widest text-green-600">Active</p>
@@ -268,29 +269,29 @@ export default function RiderManagement() {
                     {rider.rider_photo ? (
                       <img src={rider.rider_photo} alt="" className="h-full w-full rounded-xl object-cover" />
                     ) : (
-                      rider.driver_code?.[0]?.toUpperCase() || rider.user_id?.[0]?.toUpperCase() || '?'
+                      rider.first_name?.[0]?.toUpperCase() || rider.driver_code?.[0]?.toUpperCase() || '?'
                     )}
                   </div>
                   <div>
                     <p className="font-black text-primary-brand">
-                      {rider.edges?.user?.full_name || rider.driver_code || rider.user_id.slice(0, 8)}
+                      {`${rider.first_name} ${rider.last_name}`.trim() || rider.driver_code || rider.user_id.slice(0, 8)}
                     </p>
-                    {rider.edges?.user?.email && (
-                      <p className="text-xs text-secondary-brand">{rider.edges.user.email}</p>
+                    {rider.email && (
+                      <p className="text-xs text-secondary-brand">{rider.email}</p>
                     )}
                     <div className="flex flex-wrap items-center gap-3 text-xs text-secondary-brand">
-                      {rider.edges?.user?.phone && (
-                        <span>{rider.edges.user.phone}</span>
+                      {rider.phone && (
+                        <span>{rider.phone}</span>
                       )}
-                      {rider.id_number && (
-                        <span>ID: {rider.id_number}</span>
+                      {rider.id_passport_number && (
+                        <span>ID: {rider.id_passport_number}</span>
                       )}
-                      {rider.edges?.vehicle?.vehicle_type && (
+                      {rider.edges?.vehicles?.[0]?.vehicle_type && (
                         <span className="flex items-center gap-1">
-                          <Truck className="h-3 w-3" /> {rider.edges.vehicle.vehicle_type}
+                          <Truck className="h-3 w-3" /> {rider.edges.vehicles[0].vehicle_type}
                         </span>
                       )}
-                      {rider.average_rating !== undefined && rider.average_rating > 0 && (
+                      {rider.average_rating > 0 && (
                         <span className="flex items-center gap-1">
                           <Star className="h-3 w-3 text-yellow-500" fill="currentColor" />
                           {rider.average_rating.toFixed(1)}
@@ -325,7 +326,7 @@ export default function RiderManagement() {
                         variant="outline"
                         className="h-8 rounded-lg border-red-500/20 px-3 text-xs text-red-500 hover:bg-red-500/10"
                         onClick={() => {
-                          if (confirm(`Remove invite for ${rider.edges?.user?.email || rider.driver_code || rider.user_id.slice(0, 8)}?`)) {
+                          if (confirm(`Remove invite for ${rider.email || rider.driver_code || rider.user_id.slice(0, 8)}?`)) {
                             deleteMember.mutate(rider.id);
                           }
                         }}
@@ -378,7 +379,7 @@ export default function RiderManagement() {
                         variant="outline"
                         className="h-8 rounded-lg border-red-500/20 px-3 text-xs text-red-500 hover:bg-red-500/10"
                         onClick={() => {
-                          if (confirm(`Permanently remove ${rider.edges?.user?.full_name || rider.driver_code || 'this rider'} from the fleet?`)) {
+                          if (confirm(`Permanently remove ${`${rider.first_name} ${rider.last_name}`.trim() || rider.driver_code || 'this rider'} from the fleet?`)) {
                             deleteMember.mutate(rider.id);
                           }
                         }}

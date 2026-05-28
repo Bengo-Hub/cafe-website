@@ -14,6 +14,7 @@ export default function RecipesPage() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Recipe | null>(null);
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
@@ -51,6 +52,7 @@ export default function RecipesPage() {
     mutationFn: (id: string) => recipesApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] });
+      setDeleteTarget(null);
       toast.success('Recipe deleted');
     },
     onError: (err: Error) => toast.error(`Failed to delete: ${err.message}`),
@@ -167,9 +169,9 @@ export default function RecipesPage() {
                             >
                               <Edit2 className="h-3.5 w-3.5" />
                             </Button>
-                            <Button 
-                              onClick={() => deleteMutation.mutate(recipe.id!)}
-                              variant="ghost" 
+                            <Button
+                              onClick={() => setDeleteTarget(recipe)}
+                              variant="ghost"
                               className="h-8 w-8 p-0 rounded-lg hover:bg-red-500/10 hover:text-red-500"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -239,6 +241,35 @@ export default function RecipesPage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Delete Confirm Dialog */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-[2rem] bg-white p-8 shadow-2xl space-y-5">
+            <div>
+              <h3 className="text-xl font-black text-primary-brand">Delete Recipe?</h3>
+              <p className="text-secondary-brand text-sm mt-2">
+                The recipe <span className="font-bold text-primary-brand">{deleteTarget.name}</span> (SKU: {deleteTarget.sku}) will be permanently removed. Stock deductions for this menu item will stop.
+              </p>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="flex-1 h-11 rounded-xl border border-brand-beige/20 bg-brand-beige/5 text-sm font-bold text-primary-brand hover:bg-brand-beige/10 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => deleteMutation.mutate(deleteTarget.id!)}
+                disabled={deleteMutation.isPending}
+                className="flex-1 h-11 rounded-xl bg-red-500 text-white text-sm font-black uppercase tracking-widest hover:bg-red-600 transition-colors disabled:opacity-60"
+              >
+                {deleteMutation.isPending ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

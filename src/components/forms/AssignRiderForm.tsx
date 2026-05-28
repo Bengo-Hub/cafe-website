@@ -11,8 +11,8 @@ interface AssignRiderFormProps {
 }
 
 function riderDisplayName(rider: FleetMember): string {
-  // Try user edge first, then driver_code, then truncated user_id
-  if (rider.edges?.user?.full_name) return rider.edges.user.full_name;
+  const fullName = `${rider.first_name} ${rider.last_name}`.trim();
+  if (fullName) return fullName;
   if (rider.driver_code) return `Rider ${rider.driver_code}`;
   return `Rider ${rider.user_id.substring(0, 8)}`;
 }
@@ -41,7 +41,7 @@ export const AssignRiderForm: React.FC<AssignRiderFormProps> = ({
           <option value="">Choose a rider...</option>
           {riders.map((rider) => (
             <option key={rider.id} value={rider.id}>
-              {riderDisplayName(rider)} {rider.license_no ? `(${rider.license_no})` : ''}
+              {riderDisplayName(rider)} {rider.driver_code ? `(${rider.driver_code})` : ''}
             </option>
           ))}
         </select>
