@@ -25,14 +25,20 @@ function tagLabel(tags: string[] = []): string {
   return 'Event';
 }
 
+function eventDateSrc(event: CatalogEvent): string | undefined {
+  return event.eventStartAt || event.scheduledFor;
+}
+
 function eventDate(event: CatalogEvent): string {
-  if (!event.scheduledFor) return 'Recurring';
-  return new Date(event.scheduledFor).toLocaleDateString('en-KE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const src = eventDateSrc(event);
+  if (!src) return event.metadata?.is_recurring ? (event.metadata.recurrence_pattern as string || 'Recurring') : 'Date TBA';
+  return new Date(src).toLocaleDateString('en-KE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 }
 
 function eventTime(event: CatalogEvent): string {
-  if (!event.scheduledFor) return 'See details';
-  return new Date(event.scheduledFor).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
+  const src = eventDateSrc(event);
+  if (!src) return '';
+  return new Date(src).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
 }
 
 function EventSkeleton() {
@@ -159,9 +165,12 @@ export default function EventsPage() {
   const [page, setPage] = useState(1);
   const { data: eventsPage, isLoading } = useEvents(page, EVENTS_PER_PAGE);
   const now = new Date();
-  const events = (eventsPage?.data ?? []).filter(
-    (e) => !e.scheduledFor || new Date(e.scheduledFor) >= now
-  );
+  const events = (eventsPage?.data ?? []).filter((e) => {
+    const src = e.eventStartAt || e.scheduledFor;
+    // Always show recurring events; hide one-time events that have already passed
+    if (!src) return true;
+    return new Date(src) >= now;
+  });
   const total   = eventsPage?.total ?? 0;
   const hasMore = eventsPage?.hasMore ?? false;
   const [selectedEvent, setSelectedEvent] = useState<CatalogEvent | null>(null);
@@ -299,26 +308,41 @@ export default function EventsPage() {
                                     </div>
                                     <span className="text-lg font-medium">{eventDate(event)}</span>
                                   </div>
-                                  <div className="flex items-center gap-4 text-secondary-brand">
-                                    <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-                                      <Clock className="h-6 w-6 text-brand-orange" />
+                                  {eventTime(event) && (
+                                    <div className="flex items-center gap-4 text-secondary-brand">
+                                      <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
+                                        <Clock className="h-6 w-6 text-brand-orange" />
+                                      </div>
+                                      <span className="text-lg font-medium">{eventTime(event)}</span>
                                     </div>
-                                    <span className="text-lg font-medium">{eventTime(event)}</span>
-                                  </div>
+                                  )}
                                   <div className="flex items-center gap-4 text-secondary-brand">
                                     <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
                                       <MapPin className="h-6 w-6 text-brand-orange" />
                                     </div>
-                                    <span className="text-lg font-medium">Urban Loft Busia</span>
+                                    <span className="text-lg font-medium">{event.eventVenue || 'Urban Loft Busia'}</span>
                                   </div>
-                                  {event.basePrice > 0 && (
+                                  {/* Ticket tiers — if defined, show tier pricing; else fall back to basePrice */}
+                                  {event.metadata?.ticket_tiers && event.metadata.ticket_tiers.length > 0 ? (
+                                    <div className="space-y-3">
+                                      {event.metadata.ticket_tiers.map((tier, ti) => (
+                                        <div key={ti} className="flex items-center justify-between rounded-xl bg-white/5 border border-white/10 px-4 py-3">
+                                          <span className="font-bold text-primary-brand">{tier.name}</span>
+                                          <div className="flex items-center gap-4">
+                                            <span className="text-sm text-secondary-brand">{tier.capacity} slots</span>
+                                            <span className="font-black text-brand-orange">{event.currency} {tier.price.toLocaleString()}</span>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : event.basePrice > 0 ? (
                                     <div className="flex items-center gap-4 text-secondary-brand">
                                       <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
                                         <Users className="h-6 w-6 text-brand-orange" />
                                       </div>
                                       <span className="text-lg font-medium">{event.currency} {event.basePrice.toLocaleString()} per person</span>
                                     </div>
-                                  )}
+                                  ) : null}
                                 </div>
                                 <div className="mt-12 flex flex-wrap gap-3">
                                   <button

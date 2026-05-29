@@ -23,6 +23,12 @@ function adminHeaders(): Record<string, string> {
   return { ...authHeaders(), ...getTenantHeaders() };
 }
 
+export interface TicketTier {
+  name: string;
+  price: number;
+  capacity: number;
+}
+
 export interface CatalogEvent {
   id: string;
   name: string;
@@ -33,9 +39,19 @@ export interface CatalogEvent {
   imageUrl?: string;
   isAvailable: boolean;
   tags?: string[];
-  /** scheduledFor set by admin when the event has a fixed date */
+  /** eventStartAt from inventory item's event_start_at field */
+  eventStartAt?: string;
+  eventEndAt?: string;
+  eventVenue?: string;
+  totalCapacity?: number;
+  metadata?: {
+    ticket_tiers?: TicketTier[];
+    is_recurring?: boolean;
+    recurrence_pattern?: string;
+    [key: string]: unknown;
+  };
+  /** Legacy scheduledFor — kept for backward compat */
   scheduledFor?: string;
-  metadata?: Record<string, unknown>;
 }
 
 export interface BookingInput {

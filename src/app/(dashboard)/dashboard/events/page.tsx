@@ -5,10 +5,10 @@ import { ImageUpload } from '@/components/ui/ImageUpload';
 import { SubscriptionGate } from '@/components/subscription/subscription-gate';
 import { useEvents } from '@/hooks/use-events';
 import { useSubscription } from '@/hooks/use-subscription';
-import { updateEventAvailability, updateEventBanner, type CatalogEvent } from '@/lib/api/events';
+import { updateEventAvailability, updateEventBanner, type CatalogEvent, type TicketTier } from '@/lib/api/events';
 import { fetchOutlets } from '@/lib/api/catalog';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, Calendar, Eye, EyeOff, Globe, Image as ImageIcon, Loader2, Plus, RefreshCw, X } from 'lucide-react';
+import { AlertTriangle, Calendar, Clock, Eye, EyeOff, Globe, Image as ImageIcon, Loader2, MapPin, Plus, RefreshCw, Users, X } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -172,18 +172,19 @@ export default function EventsDashboard() {
                 <tr className="bg-brand-beige/5">
                   <th className="p-6 text-xs font-black text-secondary-brand uppercase tracking-widest">Event</th>
                   <th className="p-6 text-xs font-black text-secondary-brand uppercase tracking-widest">Type</th>
-                  <th className="p-6 text-xs font-black text-secondary-brand uppercase tracking-widest">Price</th>
-                  <th className="p-6 text-xs font-black text-secondary-brand uppercase tracking-widest">SKU</th>
+                  <th className="p-6 text-xs font-black text-secondary-brand uppercase tracking-widest">Date / Schedule</th>
+                  <th className="p-6 text-xs font-black text-secondary-brand uppercase tracking-widest">Pricing</th>
+                  <th className="p-6 text-xs font-black text-secondary-brand uppercase tracking-widest">Capacity</th>
                   <th className="p-6 text-xs font-black text-secondary-brand uppercase tracking-widest text-center">Banner</th>
                   <th className="p-6 text-xs font-black text-secondary-brand uppercase tracking-widest text-center">Published</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-beige/10">
                 {isLoading ? (
-                  <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">Loading events…</td></tr>
+                  <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">Loading events…</td></tr>
                 ) : events.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center">
+                    <td colSpan={7} className="p-8 text-center">
                       <p className="font-bold text-primary-brand">No events found in catalog</p>
                       <p className="text-sm text-secondary-brand mt-1 font-light">Add service catalog items with tag &quot;event&quot; in the ordering backend.</p>
                     </td>
@@ -191,6 +192,15 @@ export default function EventsDashboard() {
                 ) : (
                   events.map((event) => {
                     const isToggling = togglingId === event.id;
+                    const tiers = event.metadata?.ticket_tiers as TicketTier[] | undefined;
+                    const isRecurring = !!(event.metadata?.is_recurring);
+                    const recurrencePattern = event.metadata?.recurrence_pattern as string | undefined;
+                    const startDate = event.eventStartAt
+                      ? new Date(event.eventStartAt).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })
+                      : null;
+                    const startTime = event.eventStartAt
+                      ? new Date(event.eventStartAt).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })
+                      : null;
                     return (
                       <motion.tr key={event.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="hover:bg-brand-beige/5 transition-colors">
                         <td className="p-6">
@@ -205,17 +215,68 @@ export default function EventsDashboard() {
                             )}
                             <div>
                               <p className="font-black text-primary-brand">{event.name}</p>
-                              {event.description && <p className="text-xs text-secondary-brand opacity-60 mt-0.5 font-light max-w-xs truncate">{event.description}</p>}
+                              {event.eventVenue && (
+                                <p className="text-xs text-secondary-brand opacity-60 mt-0.5 flex items-center gap-1">
+                                  <MapPin className="h-3 w-3" />{event.eventVenue}
+                                </p>
+                              )}
+                              {!event.eventVenue && event.description && (
+                                <p className="text-xs text-secondary-brand opacity-60 mt-0.5 font-light max-w-xs truncate">{event.description}</p>
+                              )}
                             </div>
                           </div>
                         </td>
                         <td className="p-6">
                           <Badge className="bg-brand-orange/10 text-brand-orange">{tagLabel(event.tags)}</Badge>
                         </td>
-                        <td className="p-6 font-bold text-primary-brand">
-                          {event.basePrice > 0 ? `${event.currency} ${event.basePrice.toLocaleString()}` : 'Free'}
+                        <td className="p-6">
+                          {isRecurring ? (
+                            <div>
+                              <Badge className="bg-blue-500/10 text-blue-500 text-[10px] border-none">Recurring</Badge>
+                              {recurrencePattern && <p className="text-xs text-secondary-brand mt-1 opacity-70">{recurrencePattern}</p>}
+                            </div>
+                          ) : startDate ? (
+                            <div>
+                              <div className="flex items-center gap-1 text-sm font-bold text-primary-brand">
+                                <Calendar className="h-3.5 w-3.5 text-brand-orange" />
+                                {startDate}
+                              </div>
+                              {startTime && (
+                                <div className="flex items-center gap-1 text-xs text-secondary-brand opacity-70 mt-0.5">
+                                  <Clock className="h-3 w-3" />{startTime}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-secondary-brand opacity-40">Not set</span>
+                          )}
                         </td>
-                        <td className="p-6 text-xs text-secondary-brand font-mono opacity-60">{event.sku}</td>
+                        <td className="p-6">
+                          {tiers && tiers.length > 0 ? (
+                            <div className="space-y-0.5">
+                              {tiers.map((t, ti) => (
+                                <div key={ti} className="flex items-center gap-2 text-xs">
+                                  <span className="font-bold text-primary-brand">{t.name}</span>
+                                  <span className="text-secondary-brand opacity-70">{event.currency} {t.price.toLocaleString()}</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="font-bold text-primary-brand">
+                              {event.basePrice > 0 ? `${event.currency} ${event.basePrice.toLocaleString()}` : 'Free'}
+                            </span>
+                          )}
+                        </td>
+                        <td className="p-6">
+                          {event.totalCapacity ? (
+                            <div className="flex items-center gap-1 text-sm text-secondary-brand">
+                              <Users className="h-3.5 w-3.5 text-brand-orange" />
+                              {event.totalCapacity} slots
+                            </div>
+                          ) : (
+                            <span className="text-xs text-secondary-brand opacity-40">—</span>
+                          )}
+                        </td>
                         <td className="p-6 text-center">
                           <button
                             onClick={() => openBannerModal(event)}
