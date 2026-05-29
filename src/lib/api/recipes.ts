@@ -54,7 +54,7 @@ export interface Recipe {
   ingredients: RecipeIngredient[];
 }
 
-interface PaginatedRecipes {
+export interface PaginatedRecipes {
   data: Recipe[];
   total: number;
   page?: number;
@@ -64,10 +64,15 @@ interface PaginatedRecipes {
 const slug = () => getTenantSlug();
 
 export const recipesApi = {
-  list: async (): Promise<Recipe[]> => {
-    const url = `${INVENTORY_URL}/api/v1/${slug()}/inventory/recipes`;
+  list: async (params?: { page?: number; limit?: number; sku?: string }): Promise<PaginatedRecipes> => {
+    const q = new URLSearchParams();
+    if (params?.page) q.set('page', String(params.page));
+    if (params?.limit) q.set('limit', String(params.limit));
+    if (params?.sku) q.set('sku', params.sku);
+    const qs = q.toString();
+    const url = `${INVENTORY_URL}/api/v1/${slug()}/inventory/recipes${qs ? `?${qs}` : ''}`;
     const res = await apiClient<PaginatedRecipes>(url, { headers: headers() });
-    return res.data?.data ?? [];
+    return res.data ?? { data: [], total: 0 };
   },
 
   get: async (id: string): Promise<Recipe> => {

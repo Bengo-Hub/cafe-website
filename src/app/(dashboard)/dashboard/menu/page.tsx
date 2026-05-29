@@ -99,10 +99,11 @@ export default function MenuManagement() {
   const itemsData = itemsRes?.data;
   const items = itemsData?.data ?? [];
 
-  const { data: allRecipes = [] } = useQuery({
+  const { data: recipesRes } = useQuery({
     queryKey: ['recipes'],
-    queryFn: () => recipesApi.list(),
+    queryFn: () => recipesApi.list({ limit: 500 }),
   });
+  const allRecipes = recipesRes?.data ?? [];
 
   const toggleAvailability = useMutation({
     mutationFn: ({ sku, available }: { sku: string; available: boolean }) =>
@@ -246,8 +247,8 @@ export default function MenuManagement() {
 
       if (bomIngredients.length > 0 && editingItem.sku) {
         try {
-          const existingRecipes = await recipesApi.list();
-          const existingRecipe = existingRecipes.find(r => r.sku === editingItem.sku);
+          const existingRecipes = await recipesApi.list({ sku: editingItem.sku });
+          const existingRecipe = existingRecipes.data.find(r => r.sku === editingItem.sku);
 
           if (existingRecipe?.id) {
             await recipesApi.update(existingRecipe.id, {

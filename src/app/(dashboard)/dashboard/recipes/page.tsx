@@ -5,27 +5,32 @@ import { Badge, Button, Card, Pagination } from '@/components/ui';
 import { fetchMenuItems, type MenuItem } from '@/lib/api/catalog';
 import { recipesApi, type Recipe } from '@/lib/api/recipes';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { BookOpen, Link2, Loader2, Plus, Edit2, Trash2, X } from 'lucide-react';
+import { BookOpen, Link2, Loader2, Plus, Edit2, Trash2, X, Search, SlidersHorizontal } from 'lucide-react';
 import RecipeForm from '@/components/forms/RecipeForm';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+
+const PAGE_SIZE = 20;
 
 export default function RecipesPage() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Recipe | null>(null);
+
+  // Filters
   const [page, setPage] = useState(1);
-  const pageSize = 20;
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
 
   const { data: itemsRes, isLoading: itemsLoading } = useQuery({
     queryKey: ['catalog-items-recipes', page],
-    queryFn: () => fetchMenuItems({ limit: pageSize, page }),
+    queryFn: () => fetchMenuItems({ limit: PAGE_SIZE, page }),
   });
 
-  const { data: recipes, isLoading: recipesLoading } = useQuery({
-    queryKey: ['recipes'],
-    queryFn: () => recipesApi.list(),
+  const { data: recipesRes, isLoading: recipesLoading } = useQuery({
+    queryKey: ['recipes', page, PAGE_SIZE],
+    queryFn: () => recipesApi.list({ page, limit: PAGE_SIZE }),
   });
 
   const createMutation = useMutation({
@@ -58,8 +63,21 @@ export default function RecipesPage() {
     onError: (err: Error) => toast.error(`Failed to delete: ${err.message}`),
   });
 
-  const items = itemsRes?.data?.data ?? [];
-  const recipeMap = new Map(recipes?.map(r => [r.sku, r]));
+  const allRecipes: Recipe[] = recipesRes?.data ?? [];
+  const recipeTotal = recipesRes?.total ?? 0;
+
+  // Build a map from SKU → recipe for the current page of menu items
+  const recipeMap = new Map(allRecipes.map(r => [r.sku, r]));
+
+  // Apply client-side search and status filters to the loaded items
+  const items = (itemsRes?.data?.data ?? []).filter((item: MenuItem) => {
+    const recipe = recipeMap.get(item.sku);
+    if (search && !item.name.toLowerCase().includes(search.toLowerCase()) &&
+        !item.sku.toLowerCase().includes(search.toLowerCase())) return false;
+    if (statusFilter === 'active') return !!(recipe?.is_active);
+    if (statusFilter === 'inactive') return recipe ? !recipe.is_active : false;
+    return true;
+  });
 
   const openModal = (recipe?: Recipe) => {
     if (recipe) setEditingRecipe(recipe);
@@ -92,7 +110,7 @@ export default function RecipesPage() {
             Link menu items to inventory BOMs for automatic stock deduction.
           </p>
         </div>
-        <Button 
+        <Button
           onClick={() => openModal()}
           className="rounded-xl bg-brand-orange text-white h-12 px-6 font-black flex items-center gap-2"
         >
@@ -115,8 +133,45 @@ export default function RecipesPage() {
         </div>
       </Card>
 
+      {/* Filters */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2">
+          <SlidersHorizontal className="h-4 w-4 text-secondary-brand opacity-40" />
+          {(['all', 'active', 'inactive'] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => { setStatusFilter(s); setPage(1); }}
+              className={`rounded-full px-4 py-1.5 text-sm font-bold transition-all ${
+                statusFilter === s
+                  ? 'bg-brand-orange text-white'
+                  : 'bg-brand-beige/5 text-secondary-brand hover:bg-brand-beige/10'
+              }`}
+            >
+              {s === 'all' ? 'All' : s === 'active' ? 'Active' : 'Inactive'}
+            </button>
+          ))}
+        </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary-brand opacity-40" />
+          <input
+            type="text"
+            placeholder="Search by name or SKU..."
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            className="h-10 w-56 rounded-xl border border-brand-beige/10 bg-brand-beige/5 pl-10 pr-4 text-sm text-primary-brand focus:border-brand-orange/50 focus:outline-none"
+          />
+        </div>
+      </div>
+
       <section>
-        <h2 className="mb-4 text-lg font-bold text-primary-brand">Active Linkages</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-primary-brand">Active Linkages</h2>
+          {!isLoading && (
+            <span className="text-xs text-secondary-brand opacity-60 font-medium">
+              {items.length} item{items.length !== 1 ? 's' : ''} shown · {recipeTotal} recipes total
+            </span>
+          )}
+        </div>
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-brand-orange" />
@@ -125,6 +180,14 @@ export default function RecipesPage() {
           <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-brand-beige/10 rounded-3xl">
             <BookOpen className="mb-3 h-10 w-10 text-secondary-brand opacity-30" />
             <p className="font-bold text-primary-brand">No menu items found</p>
+            {(search || statusFilter !== 'all') && (
+              <button
+                onClick={() => { setSearch(''); setStatusFilter('all'); setPage(1); }}
+                className="mt-3 text-sm text-brand-orange hover:underline font-bold"
+              >
+                Clear filters
+              </button>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto rounded-3xl border border-brand-beige/10">
@@ -133,6 +196,7 @@ export default function RecipesPage() {
                 <tr className="bg-brand-beige/5 text-left text-xs font-black uppercase tracking-widest text-secondary-brand opacity-60">
                   <th className="p-4">Menu Item</th>
                   <th className="p-4">SKU</th>
+                  <th className="p-4">Status</th>
                   <th className="p-4">Ingredients</th>
                   <th className="p-4 text-right">Actions</th>
                 </tr>
@@ -148,6 +212,15 @@ export default function RecipesPage() {
                       <td className="p-4 font-mono text-xs text-secondary-brand">{item.sku}</td>
                       <td className="p-4">
                         {recipe ? (
+                          <Badge className={`text-[10px] border-none ${recipe.is_active ? 'bg-green-500/10 text-green-600' : 'bg-brand-beige/10 text-secondary-brand'}`}>
+                            {recipe.is_active ? 'Active' : 'Inactive'}
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-red-500/10 text-red-500 text-[10px] border-none">No Recipe</Badge>
+                        )}
+                      </td>
+                      <td className="p-4">
+                        {recipe ? (
                           <div className="flex flex-wrap gap-1">
                             {recipe.ingredients.map((ing, i) => (
                               <Badge key={i} className="bg-brand-beige/10 text-[10px] text-secondary-brand border-none">
@@ -156,15 +229,15 @@ export default function RecipesPage() {
                             ))}
                           </div>
                         ) : (
-                          <span className="text-xs text-red-500 font-medium">No recipe linked</span>
+                          <span className="text-xs text-secondary-brand opacity-50">—</span>
                         )}
                       </td>
                       <td className="p-4 text-right space-x-2">
                         {recipe ? (
                           <>
-                            <Button 
+                            <Button
                               onClick={() => openModal(recipe)}
-                              variant="ghost" 
+                              variant="ghost"
                               className="h-8 w-8 p-0 rounded-lg hover:bg-brand-orange/10 hover:text-brand-orange"
                             >
                               <Edit2 className="h-3.5 w-3.5" />
@@ -178,7 +251,7 @@ export default function RecipesPage() {
                             </Button>
                           </>
                         ) : (
-                          <Button 
+                          <Button
                             onClick={() => openModal({ sku: item.sku, name: item.name, output_qty: 1, unit_of_measure: 'PORTION', is_active: true, ingredients: [] })}
                             variant="ghost"
                             className="text-[10px] font-black uppercase tracking-widest text-brand-orange hover:bg-brand-orange/10"
@@ -199,7 +272,7 @@ export default function RecipesPage() {
       {/* Pagination */}
       <Pagination
         page={page}
-        pageSize={pageSize}
+        pageSize={PAGE_SIZE}
         total={itemsRes?.data?.total ?? 0}
         onPageChange={setPage}
         itemLabel="items"
@@ -209,13 +282,13 @@ export default function RecipesPage() {
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="bg-white rounded-[2rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto p-10 shadow-2xl space-y-8 relative"
             >
-              <button 
+              <button
                 onClick={closeModal}
                 className="absolute right-8 top-8 h-10 w-10 rounded-full bg-brand-beige/5 flex items-center justify-center text-secondary-brand hover:bg-red-500 hover:text-white transition-all"
               >

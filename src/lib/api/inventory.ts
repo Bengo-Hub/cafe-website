@@ -104,9 +104,21 @@ export interface Unit {
 
 // ─── Inventory Items ────────────────────────────────────────────────────
 
-export async function fetchInventoryItems(type?: string): Promise<{ data: InventoryItem[]; total: number }> {
-  const query = type ? `?type=${encodeURIComponent(type)}` : '';
-  const url = `${INVENTORY_URL}/api/v1/${getTenantSlug()}/inventory/items${query}`;
+export async function fetchInventoryItems(params?: {
+  type?: string;
+  search?: string;
+  status?: string;
+  limit?: number;
+  page?: number;
+}): Promise<{ data: InventoryItem[]; total: number }> {
+  const q = new URLSearchParams();
+  if (params?.type) q.set('type', params.type);
+  if (params?.search) q.set('search', params.search);
+  if (params?.status) q.set('status', params.status);
+  if (params?.limit) q.set('limit', String(params.limit));
+  if (params?.page) q.set('page', String(params.page));
+  const qs = q.toString();
+  const url = `${INVENTORY_URL}/api/v1/${getTenantSlug()}/inventory/items${qs ? `?${qs}` : ''}`;
   const resp = await fetch(url, { headers: headers() });
   if (!resp.ok) throw new Error(`Fetch inventory items failed: ${resp.statusText}`);
   return resp.json();

@@ -59,7 +59,7 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
 
   const { data: inventoryData } = useQuery({
     queryKey: ['inventory-items-ingredients'],
-    queryFn: () => fetchInventoryItems('INGREDIENT'),
+    queryFn: () => fetchInventoryItems({ type: 'INGREDIENT', limit: 500 }),
   });
   const inventoryItems: InventoryItem[] = inventoryData?.data ?? [];
 

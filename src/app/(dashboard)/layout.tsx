@@ -175,18 +175,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex flex-col h-full p-6">
           {/* Logo */}
           <div className="flex items-center justify-between mb-8">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-3 min-w-0">
               {tenant?.logoUrl ? (
-                <img src={tenant.logoUrl} alt={tenant.name} className="h-10 w-auto object-contain" />
+                <img src={tenant.logoUrl} alt={tenant.name ?? 'Logo'} className="h-9 w-auto max-w-[140px] object-contain" />
               ) : (
-                <div className="h-10 w-10 bg-brand-orange rounded-xl flex items-center justify-center text-white font-black text-xl shadow-glow-orange">
-                  {tenant?.name?.[0] || 'U'}
-                </div>
+                <span className="text-base font-black tracking-tight truncate" style={{ color: 'var(--sidebar-foreground)' }}>
+                  {tenant?.name ?? 'Dashboard'}
+                </span>
               )}
             </Link>
             <button
               onClick={() => setIsSidebarOpen(false)}
-              className="lg:hidden p-2 rounded-xl transition-colors"
+              className="lg:hidden p-2 rounded-xl transition-colors flex-shrink-0"
               style={{ color: 'var(--sidebar-muted)' }}
               aria-label="Close menu"
             >

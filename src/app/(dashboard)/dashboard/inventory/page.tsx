@@ -73,6 +73,7 @@ export default function InventoryOverview() {
     unit_id?: string;
     type?: string;
   } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<InventoryItem | null>(null);
 
   useEffect(() => {
     if (skuParam) {
@@ -80,10 +81,10 @@ export default function InventoryOverview() {
     }
   }, [skuParam]);
 
-  // Fetch inventory items from inventory-api
+  // Fetch all inventory items — pass high limit so client-side stock filters work across full dataset
   const { data: itemsRes, isLoading: loadingItems, refetch } = useQuery({
     queryKey: ['inventory-items'],
-    queryFn: () => fetchInventoryItems(),
+    queryFn: () => fetchInventoryItems({ limit: 1000 }),
   });
 
   const allItems: InventoryItem[] = itemsRes?.data ?? [];
@@ -186,6 +187,7 @@ export default function InventoryOverview() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
       queryClient.invalidateQueries({ queryKey: ['inventory-summary'] });
+      setDeleteTarget(null);
       toast.success('Item deleted');
     },
     onError: (err: Error) => toast.error(`Failed to delete: ${err.message}`),
@@ -405,11 +407,7 @@ export default function InventoryOverview() {
                           <Settings className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => {
-                            if (confirm(`Delete inventory record for ${item.sku}?`)) {
-                              deleteMutation.mutate(item.sku);
-                            }
-                          }}
+                          onClick={() => setDeleteTarget(item)}
                           className="p-2 rounded-lg hover:bg-red-500/10 text-red-400"
                           title="Delete"
                         >
@@ -513,6 +511,36 @@ export default function InventoryOverview() {
             isEdit
           />
         </CrudModal>
+      )}
+
+      {/* Delete Confirm Dialog */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-[2rem] bg-white p-8 shadow-2xl space-y-5">
+            <div>
+              <h3 className="text-xl font-black text-primary-brand">Delete Inventory Item?</h3>
+              <p className="text-secondary-brand text-sm mt-2">
+                This will permanently remove <span className="font-bold text-primary-brand">{deleteTarget.name}</span>{' '}
+                <span className="font-mono text-xs">({deleteTarget.sku})</span> from inventory. Stock records will be lost.
+              </p>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="flex-1 h-11 rounded-xl border border-brand-beige/20 bg-brand-beige/5 text-sm font-bold text-primary-brand hover:bg-brand-beige/10 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => deleteMutation.mutate(deleteTarget.sku)}
+                disabled={deleteMutation.isPending}
+                className="flex-1 h-11 rounded-xl bg-red-500 text-white text-sm font-black uppercase tracking-widest hover:bg-red-600 transition-colors disabled:opacity-60"
+              >
+                {deleteMutation.isPending ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
