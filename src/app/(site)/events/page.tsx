@@ -158,7 +158,10 @@ function ReserveTab({ onOpenModal }: { onOpenModal: () => void }) {
 export default function EventsPage() {
   const [page, setPage] = useState(1);
   const { data: eventsPage, isLoading } = useEvents(page, EVENTS_PER_PAGE);
-  const events  = eventsPage?.data ?? [];
+  const now = new Date();
+  const events = (eventsPage?.data ?? []).filter(
+    (e) => !e.scheduledFor || new Date(e.scheduledFor) >= now
+  );
   const total   = eventsPage?.total ?? 0;
   const hasMore = eventsPage?.hasMore ?? false;
   const [selectedEvent, setSelectedEvent] = useState<CatalogEvent | null>(null);

@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Box, Plus, Tag } from 'lucide-react';
+import { Box, Image as ImageIcon, Plus, Tag } from 'lucide-react';
 import { Input } from '@/components/ui';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 import { CrudModal } from '@/components/dashboard/CrudModal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -260,6 +261,19 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             </div>
           </div>
         )}
+      </div>
+
+      {/* Section: Media */}
+      <div className="space-y-4 pt-2 border-t border-brand-beige/10">
+        <div className="flex items-center gap-2 pb-1">
+          <ImageIcon className="h-4 w-4 text-brand-orange" />
+          <h3 className="text-xs font-black uppercase tracking-widest text-primary-brand">Media</h3>
+        </div>
+        <ImageUpload
+          label="Item Image"
+          value={data.image_url}
+          onChange={(url) => onChange({ ...data, image_url: url })}
+        />
       </div>
 
       {/* Add Unit Modal */}

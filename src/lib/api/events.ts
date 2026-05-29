@@ -7,6 +7,22 @@ function publicHeaders(): Record<string, string> {
   return getTenantHeaders();
 }
 
+function authHeaders(): Record<string, string> {
+  if (typeof window === 'undefined') return {};
+  const stored = localStorage.getItem('cafe-auth-storage');
+  if (!stored) return {};
+  try {
+    const { state } = JSON.parse(stored);
+    return state?.accessToken ? { Authorization: `Bearer ${state.accessToken}` } : {};
+  } catch {
+    return {};
+  }
+}
+
+function adminHeaders(): Record<string, string> {
+  return { ...authHeaders(), ...getTenantHeaders() };
+}
+
 export interface CatalogEvent {
   id: string;
   name: string;
@@ -108,12 +124,32 @@ export async function createBooking(input: BookingInput): Promise<BookingOrder> 
   return res.data;
 }
 
-export async function updateEventAvailability(sku: string, isAvailable: boolean) {
+export async function updateEventAvailability(event: CatalogEvent, isAvailable: boolean, outletId: string): Promise<void> {
   const slug = getTenantSlug();
-  const url = `${ORDERING_URL}/api/v1/${slug}/catalog/overrides/${sku}`;
-  return apiClient(url, {
-    method: 'PATCH',
-    headers: { ...getTenantHeaders() },
-    body: JSON.stringify({ isAvailable }),
+  const url = `${ORDERING_URL}/api/v1/${slug}/catalog/overrides/${event.sku}`;
+  await apiClient(url, {
+    method: 'PUT',
+    headers: adminHeaders(),
+    body: JSON.stringify({
+      outletId,
+      basePrice: event.basePrice,
+      isAvailable,
+      imageUrlOverride: event.imageUrl,
+    }),
+  });
+}
+
+export async function updateEventBanner(event: CatalogEvent, imageUrl: string, outletId: string): Promise<void> {
+  const slug = getTenantSlug();
+  const url = `${ORDERING_URL}/api/v1/${slug}/catalog/overrides/${event.sku}`;
+  await apiClient(url, {
+    method: 'PUT',
+    headers: adminHeaders(),
+    body: JSON.stringify({
+      outletId,
+      basePrice: event.basePrice,
+      isAvailable: event.isAvailable,
+      imageUrlOverride: imageUrl,
+    }),
   });
 }
