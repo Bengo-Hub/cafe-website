@@ -3,7 +3,7 @@
 import { Badge, Button, Card } from '@/components/ui';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { SubscriptionGate } from '@/components/subscription/subscription-gate';
-import { useEvents } from '@/hooks/use-events';
+import { useAllEvents } from '@/hooks/use-events';
 import { useSubscription } from '@/hooks/use-subscription';
 import { updateEventAvailability, updateEventBanner, type CatalogEvent, type TicketTier } from '@/lib/api/events';
 import { fetchOutlets } from '@/lib/api/catalog';
@@ -22,7 +22,7 @@ function tagLabel(tags: string[] = []): string {
 }
 
 export default function EventsDashboard() {
-  const { data: eventsPage, isLoading, refetch } = useEvents(1, 200);
+  const { data: eventsPage, isLoading, refetch } = useAllEvents(1, 200);
   const events = eventsPage?.data ?? [];
   const qc = useQueryClient();
   const [togglingId, setTogglingId] = useState<string | null>(null);
@@ -55,10 +55,13 @@ export default function EventsDashboard() {
       toast.error('No outlet found — cannot update event visibility.');
       return;
     }
-    setTogglingId(event.id);
+    setTogglingId(event.sku);
     try {
       await updateEventAvailability(event, !event.isAvailable, defaultOutletId);
-      await qc.invalidateQueries({ queryKey: ['events'] });
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ['events'] }),
+        qc.invalidateQueries({ queryKey: ['events-admin'] }),
+      ]);
       toast.success(`${event.name} ${event.isAvailable ? 'unpublished' : 'published'}`);
     } catch {
       toast.error('Failed to update event visibility');
@@ -80,7 +83,10 @@ export default function EventsDashboard() {
     setSavingBanner(true);
     try {
       await updateEventBanner(bannerTarget, bannerUrl, defaultOutletId);
-      await qc.invalidateQueries({ queryKey: ['events'] });
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ['events'] }),
+        qc.invalidateQueries({ queryKey: ['events-admin'] }),
+      ]);
       toast.success('Banner updated');
       setBannerTarget(null);
       setBannerUrl('');
@@ -191,7 +197,7 @@ export default function EventsDashboard() {
                   </tr>
                 ) : (
                   events.map((event) => {
-                    const isToggling = togglingId === event.id;
+                    const isToggling = togglingId === event.sku;
                     const tiers = event.metadata?.ticket_tiers as TicketTier[] | undefined;
                     const isRecurring = !!(event.metadata?.is_recurring);
                     const recurrencePattern = event.metadata?.recurrence_pattern as string | undefined;
@@ -202,7 +208,7 @@ export default function EventsDashboard() {
                       ? new Date(event.eventStartAt).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })
                       : null;
                     return (
-                      <motion.tr key={event.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="hover:bg-brand-beige/5 transition-colors">
+                      <motion.tr key={event.sku} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="hover:bg-brand-beige/5 transition-colors">
                         <td className="p-6">
                           <div className="flex items-center gap-3">
                             {event.imageUrl ? (

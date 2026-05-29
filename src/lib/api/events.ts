@@ -29,8 +29,20 @@ export interface TicketTier {
   capacity: number;
 }
 
+export interface RecurrenceConfig {
+  type: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  time?: string;        // "HH:MM"
+  days?: number[];      // weekly: 0=Sun..6=Sat
+  monthDay?: number;    // monthly by date: 1-31
+  weekNum?: number;     // monthly by weekday: 1-4 or -1 (last)
+  weekDay?: number;     // monthly by weekday: 0-6
+  yearMonth?: number;   // yearly: 1-12
+  yearDay?: number;     // yearly: 1-31
+}
+
 export interface CatalogEvent {
-  id: string;
+  /** inventoryId from the backend MergedCatalogItem */
+  inventoryId: string;
   name: string;
   description?: string;
   sku: string;
@@ -48,6 +60,8 @@ export interface CatalogEvent {
     ticket_tiers?: TicketTier[];
     is_recurring?: boolean;
     recurrence_pattern?: string;
+    recurrence_config?: RecurrenceConfig;
+    booked_capacity?: number;
     [key: string]: unknown;
   };
   /** Legacy scheduledFor — kept for backward compat */
@@ -168,4 +182,20 @@ export async function updateEventBanner(event: CatalogEvent, imageUrl: string, o
       imageUrlOverride: imageUrl,
     }),
   });
+}
+
+/** Admin fetch: returns ALL service catalog items regardless of availability or tags */
+export async function fetchAllEvents(page = 1, limit = 200): Promise<EventsPage> {
+  const slug   = getTenantSlug();
+  const offset = (page - 1) * limit;
+  const url = `${ORDERING_URL}/api/v1/${slug}/catalog/items?item_type=service&limit=${limit}&offset=${offset}`;
+  const res = await apiClient<ListResponse<CatalogEvent>>(url, { headers: adminHeaders() });
+  const total = res.data?.total ?? 0;
+  return {
+    data: res.data?.data ?? [],
+    total,
+    page,
+    limit,
+    hasMore: page * limit < total,
+  };
 }

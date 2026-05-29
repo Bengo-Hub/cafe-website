@@ -4,18 +4,56 @@ import { Card, Pagination } from '@/components/ui';
 import { BookingModal } from '@/components/events/BookingModal';
 import { TableReservationModal } from '@/components/events/TableReservationModal';
 import { EVENTS_PER_PAGE, useEvents, type CatalogEvent } from '@/hooks/use-events';
+import { type RecurrenceConfig } from '@/lib/api/events';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Calendar, CalendarCheck, Clock, MapPin, PhoneCall, Shield, Users } from 'lucide-react';
+import { Calendar, CalendarCheck, Clock, MapPin, PhoneCall, RefreshCw, Shield, Users } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
-const EVENT_IMAGES: Record<string, string> = {
-  'Pizza Friday Night': '/images/events/pizza-friday.jpg',
-  'Couples Night': '/images/events/couples-night.jpg',
-  'Game Night': '/images/events/events-3.jpg',
-  'Table Reservation': '/images/services/events.jpg',
-  'Private Venue Hire': '/images/services/events.jpg',
-};
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const WEEK_LABELS = ['1st', '2nd', '3rd', '4th', 'Last'];
+const WEEK_NUMS = [1, 2, 3, 4, -1];
+
+function ordinal(n: number): string {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0]);
+}
+
+function formatTime12(hhmm: string): string {
+  const [hStr, mStr] = hhmm.split(':');
+  const h = parseInt(hStr, 10);
+  const m = mStr ?? '00';
+  const suffix = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  return m === '00' ? `${h12}:00 ${suffix}` : `${h12}:${m} ${suffix}`;
+}
+
+function recurrenceLabel(rc: RecurrenceConfig): string {
+  const time = rc.time ? ` at ${formatTime12(rc.time)}` : '';
+  if (rc.type === 'daily') return `Every day${time}`;
+  if (rc.type === 'weekly') {
+    if (!rc.days || rc.days.length === 0) return `Every week${time}`;
+    const dayNames = rc.days.map((d) => DAYS[d] ?? '').filter(Boolean);
+    if (dayNames.length === 1) return `Every ${dayNames[0]}${time}`;
+    return `Every ${dayNames.slice(0, -1).join(', ')} & ${dayNames[dayNames.length - 1]}${time}`;
+  }
+  if (rc.type === 'monthly') {
+    if (rc.weekNum !== undefined && rc.weekDay !== undefined) {
+      const weekIdx = WEEK_NUMS.indexOf(rc.weekNum);
+      const weekLabel = weekIdx >= 0 ? WEEK_LABELS[weekIdx] : ordinal(rc.weekNum);
+      return `Monthly, ${weekLabel} ${DAYS[rc.weekDay] ?? ''}${time}`;
+    }
+    if (rc.monthDay !== undefined) return `Monthly on the ${ordinal(rc.monthDay)}${time}`;
+    return `Every month${time}`;
+  }
+  if (rc.type === 'yearly') {
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const m = months[(rc.yearMonth ?? 1) - 1] ?? '';
+    return `Annually on ${m} ${ordinal(rc.yearDay ?? 1)}${time}`;
+  }
+  return `Recurring${time}`;
+}
 
 function tagLabel(tags: string[] = []): string {
   if (tags.includes('special')) return 'Special Event';
@@ -31,14 +69,20 @@ function eventDateSrc(event: CatalogEvent): string | undefined {
 
 function eventDate(event: CatalogEvent): string {
   const src = eventDateSrc(event);
-  if (!src) return event.metadata?.is_recurring ? (event.metadata.recurrence_pattern as string || 'Recurring') : 'Date TBA';
+  if (!src) {
+    if (event.metadata?.recurrence_config) return recurrenceLabel(event.metadata.recurrence_config as RecurrenceConfig);
+    return event.metadata?.is_recurring ? (event.metadata.recurrence_pattern as string || 'Recurring') : 'Date TBA';
+  }
   return new Date(src).toLocaleDateString('en-KE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-function eventTime(event: CatalogEvent): string {
+function eventTimeRange(event: CatalogEvent): string {
   const src = eventDateSrc(event);
   if (!src) return '';
-  return new Date(src).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
+  const startStr = new Date(src).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
+  if (!event.eventEndAt) return startStr;
+  const endStr = new Date(event.eventEndAt).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
+  return `${startStr} – ${endStr}`;
 }
 
 function EventSkeleton() {
@@ -279,49 +323,113 @@ export default function EventsPage() {
                 ) : (
                   <div id="events-list">
                   <div className="grid gap-16">
-                    {events.map((event, index) => (
-                      <motion.div key={event.id} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: index * 0.1 }}>
+                    {events.map((event, index) => {
+                      const isRecurring = !!(event.metadata?.is_recurring);
+                      const rc = event.metadata?.recurrence_config as RecurrenceConfig | undefined;
+                      const recurringLabel = rc ? recurrenceLabel(rc) : (event.metadata?.recurrence_pattern as string | undefined) ?? null;
+                      const timeRange = eventTimeRange(event);
+                      const capacity = event.totalCapacity;
+                      const bookedCapacity = typeof event.metadata?.booked_capacity === 'number' ? event.metadata.booked_capacity : null;
+                      const availableSlots = bookedCapacity !== null && capacity ? capacity - bookedCapacity : null;
+                      const fillPct = bookedCapacity !== null && capacity ? Math.min(100, Math.round((bookedCapacity / capacity) * 100)) : null;
+                      const barColor = fillPct === null ? 'bg-green-500' : fillPct >= 90 ? 'bg-red-500' : fillPct >= 60 ? 'bg-yellow-500' : 'bg-green-500';
+                      return (
+                      <motion.div key={event.sku} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: index * 0.1 }}>
                         <div className="electrical-border rounded-[3rem]">
                           <Card className="overflow-hidden shadow-2xl border-none magical-card rounded-[3rem]">
                             <div className="grid md:grid-cols-2">
                               <div className="relative h-[350px] md:h-auto overflow-hidden">
                                 <Image
-                                  src={event.imageUrl ?? EVENT_IMAGES[event.name] ?? '/images/services/events.jpg'}
+                                  src={event.imageUrl ?? '/images/services/events.jpg'}
                                   alt={event.name}
                                   fill
                                   className="object-cover transition-transform duration-700 hover:scale-110"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent to-brand-dark/20" />
+                                {/* Recurring badge on image */}
+                                {isRecurring && (
+                                  <div className="absolute top-5 left-5">
+                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-600/90 backdrop-blur-sm px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-white border border-purple-400/30">
+                                      <RefreshCw className="h-3 w-3" />
+                                      {recurringLabel ?? 'Recurring'}
+                                    </span>
+                                  </div>
+                                )}
                               </div>
                               <div className="p-10 md:p-16 flex flex-col justify-center">
-                                <div className="mb-6 inline-flex w-fit rounded-full bg-brand-orange/10 px-5 py-1.5 text-[10px] font-black uppercase tracking-widest text-brand-orange border border-brand-orange/20">
-                                  {tagLabel(event.tags)}
+                                <div className="mb-4 flex flex-wrap items-center gap-2">
+                                  <span className="inline-flex w-fit rounded-full bg-brand-orange/10 px-5 py-1.5 text-[10px] font-black uppercase tracking-widest text-brand-orange border border-brand-orange/20">
+                                    {tagLabel(event.tags)}
+                                  </span>
+                                  {isRecurring && recurringLabel && (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-purple-600/15 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-purple-400 border border-purple-500/20">
+                                      <RefreshCw className="h-3 w-3" />
+                                      {recurringLabel}
+                                    </span>
+                                  )}
                                 </div>
                                 <h2 className="mb-6 text-4xl font-black text-primary-brand tracking-tight">{event.name}</h2>
                                 {event.description && (
                                   <p className="mb-10 text-xl text-secondary-brand font-light leading-relaxed">{event.description}</p>
                                 )}
                                 <div className="space-y-6 border-t border-white/5 pt-10">
-                                  <div className="flex items-center gap-4 text-secondary-brand">
-                                    <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-                                      <Calendar className="h-6 w-6 text-brand-orange" />
+                                  {/* Date — show only for non-recurring or if we have a specific date */}
+                                  {!isRecurring && (
+                                    <div className="flex items-center gap-4 text-secondary-brand">
+                                      <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
+                                        <Calendar className="h-6 w-6 text-brand-orange" />
+                                      </div>
+                                      <span className="text-lg font-medium">{eventDate(event)}</span>
                                     </div>
-                                    <span className="text-lg font-medium">{eventDate(event)}</span>
-                                  </div>
-                                  {eventTime(event) && (
+                                  )}
+                                  {/* Time range */}
+                                  {timeRange && (
                                     <div className="flex items-center gap-4 text-secondary-brand">
                                       <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
                                         <Clock className="h-6 w-6 text-brand-orange" />
                                       </div>
-                                      <span className="text-lg font-medium">{eventTime(event)}</span>
+                                      <span className="text-lg font-medium">{timeRange}</span>
                                     </div>
                                   )}
+                                  {/* Recurring: show recurrence pattern in place of date when no specific date */}
+                                  {isRecurring && !eventDateSrc(event) && (
+                                    <div className="flex items-center gap-4 text-secondary-brand">
+                                      <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
+                                        <RefreshCw className="h-6 w-6 text-brand-orange" />
+                                      </div>
+                                      <span className="text-lg font-medium">{recurringLabel ?? 'Recurring'}</span>
+                                    </div>
+                                  )}
+                                  {/* Venue */}
                                   <div className="flex items-center gap-4 text-secondary-brand">
                                     <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
                                       <MapPin className="h-6 w-6 text-brand-orange" />
                                     </div>
                                     <span className="text-lg font-medium">{event.eventVenue || 'Urban Loft Busia'}</span>
                                   </div>
+                                  {/* Capacity */}
+                                  {capacity && (
+                                    <div className="space-y-2">
+                                      <div className="flex items-center justify-between text-sm">
+                                        <div className="flex items-center gap-2 text-secondary-brand">
+                                          <Users className="h-4 w-4 text-brand-orange" />
+                                          {availableSlots !== null ? (
+                                            <span><strong className="text-primary-brand">{availableSlots}</strong> slots available / {capacity} total</span>
+                                          ) : (
+                                            <span><strong className="text-primary-brand">{capacity}</strong> total slots</span>
+                                          )}
+                                        </div>
+                                        {fillPct !== null && (
+                                          <span className="text-xs text-secondary-brand opacity-60">{fillPct}% full</span>
+                                        )}
+                                      </div>
+                                      {fillPct !== null && (
+                                        <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+                                          <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${fillPct}%` }} />
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
                                   {/* Ticket tiers — if defined, show tier pricing; else fall back to basePrice */}
                                   {event.metadata?.ticket_tiers && event.metadata.ticket_tiers.length > 0 ? (
                                     <div className="space-y-3">
@@ -364,7 +472,8 @@ export default function EventsPage() {
                           </Card>
                         </div>
                       </motion.div>
-                    ))}
+                      );
+                    })}
                   </div>
                   <Pagination
                     page={page}

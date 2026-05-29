@@ -2,8 +2,9 @@
 
 import { Button } from '@/components/ui';
 import { useCreateBooking, type BookingInput, type CatalogEvent } from '@/hooks/use-events';
+import { type TicketTier } from '@/lib/api/events';
 import { AnimatePresence, motion } from 'framer-motion';
-import { CalendarDays, CheckCircle2, ChevronRight, Loader2, Users, X } from 'lucide-react';
+import { CalendarDays, CheckCircle2, ChevronRight, Loader2, Tag, Users, X } from 'lucide-react';
 import { useState } from 'react';
 
 interface Props {
@@ -34,8 +35,12 @@ export function BookingModal({ event, onClose }: Props) {
   const [party, setParty] = useState<StepPartyData>({ name: '', email: '', phone: '', partySize: 2, occasion: '', specialRequests: '' });
   const [confirmedOrder, setConfirmedOrder] = useState<{ orderNumber: string } | null>(null);
 
+  const tiers = (event.metadata?.ticket_tiers ?? []) as TicketTier[];
+  const [selectedTier, setSelectedTier] = useState<TicketTier | null>(tiers.length > 0 ? tiers[0] : null);
+  const unitPrice = selectedTier?.price ?? event.basePrice;
+
   const createBooking = useCreateBooking();
-  const isPaid = event.basePrice > 0;
+  const isPaid = unitPrice > 0;
 
   function buildScheduledFor() {
     if (!dateTime.scheduledFor) return '';
@@ -47,7 +52,7 @@ export function BookingModal({ event, onClose }: Props) {
     const input: BookingInput = {
       eventSku: event.sku,
       eventName: event.name,
-      unitPrice: event.basePrice,
+      unitPrice: unitPrice,
       contactName: party.name,
       contactEmail: party.email,
       contactPhone: party.phone,
@@ -89,6 +94,41 @@ export function BookingModal({ event, onClose }: Props) {
             <AnimatePresence mode="wait">
               {step === 1 && (
                 <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-8 space-y-6">
+                  {/* Ticket tier selection */}
+                  {tiers.length > 0 && (
+                    <div>
+                      <label className="block text-xs font-black uppercase tracking-widest text-white/60 mb-3">
+                        <Tag className="inline h-3 w-3 mr-1" /> Ticket Tier
+                      </label>
+                      <div className="space-y-2">
+                        {tiers.map((tier) => {
+                          const isSelected = selectedTier?.name === tier.name;
+                          return (
+                            <button
+                              key={tier.name}
+                              onClick={() => setSelectedTier(tier)}
+                              className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl border transition-all text-left ${
+                                isSelected
+                                  ? 'bg-brand-orange/15 border-brand-orange/60 ring-1 ring-brand-orange/40'
+                                  : 'bg-white/5 border-white/10 hover:bg-white/10'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isSelected ? 'border-brand-orange' : 'border-white/30'}`}>
+                                  {isSelected && <div className="h-2 w-2 rounded-full bg-brand-orange" />}
+                                </div>
+                                <div>
+                                  <p className="font-black text-white text-sm">{tier.name}</p>
+                                  <p className="text-xs text-white/50 mt-0.5">{tier.capacity} slots available</p>
+                                </div>
+                              </div>
+                              <span className="font-black text-brand-orange text-base">{event.currency} {tier.price.toLocaleString()}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-xs font-black uppercase tracking-widest text-white/60 mb-3">
                       <CalendarDays className="inline h-3 w-3 mr-1" /> Date
@@ -160,8 +200,13 @@ export function BookingModal({ event, onClose }: Props) {
                   </div>
                   {isPaid && (
                     <div className="flex items-center justify-between p-4 rounded-2xl bg-brand-orange/10 border border-brand-orange/20">
-                      <span className="text-sm font-bold text-white">Total</span>
-                      <span className="text-xl font-black text-brand-orange">{event.currency} {(event.basePrice * party.partySize).toLocaleString()}</span>
+                      <div>
+                        <span className="text-sm font-bold text-white">Total</span>
+                        {selectedTier && (
+                          <p className="text-xs text-white/50 mt-0.5">{selectedTier.name} × {party.partySize}</p>
+                        )}
+                      </div>
+                      <span className="text-xl font-black text-brand-orange">{event.currency} {(unitPrice * party.partySize).toLocaleString()}</span>
                     </div>
                   )}
                   <div className="flex gap-3">
