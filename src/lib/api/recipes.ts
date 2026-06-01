@@ -45,11 +45,15 @@ export interface Recipe {
   servings?: number;
   unit_of_measure: string;
   is_active: boolean;
-  total_cost?: number;
-  cost_per_portion?: number;
-  target_margin_percent?: number;
-  suggested_price?: number;
-  prep_time_minutes?: number;
+  total_cost?: number | null;
+  cost_per_portion?: number | null;
+  target_margin_percent?: number | null;
+  suggested_price?: number | null;
+  // Selling-price based costing (2026-06-01)
+  selling_price?: number | null;   // user-set price; never overwritten
+  food_cost_pct?: number | null;   // cost_per_portion / selling_price
+  status?: string | null;          // "OK - healthy" | "OK - above target FC%" | "LOSS"
+  prep_time_minutes?: number | null;
   allergens?: string[];
   ingredients: RecipeIngredient[];
 }

@@ -24,6 +24,12 @@ interface InventoryItemFormData {
   reorder_level?: string | number;
   sku?: string;
   image_url?: string;
+  // Costing / purchase fields (2026-06-01)
+  cost_price?: string | number;
+  purchase_price?: string | number;
+  purchase_pack_size?: string | number;
+  purchase_unit?: string;
+  yield_pct?: string | number;
 }
 
 interface InventoryItemFormProps {

@@ -50,6 +50,17 @@ export interface InventoryItem {
   weight_kg?: number;
   dimensions_cm?: Record<string, number>;
   add_to_all_outlets?: boolean;
+  // Costing fields (2026-06-01)
+  cost_price?: number | null;
+  suggested_price?: number | null;
+  selling_price?: number | null;     // recipe menu-item selling price
+  food_cost_pct?: number | null;     // cost_per_portion / selling_price
+  status?: string | null;            // "OK - healthy" | "OK - above target FC%" | "LOSS"
+  // Purchase / supplier fields
+  purchase_price?: number | null;
+  purchase_pack_size?: number | null;
+  purchase_unit?: string | null;
+  yield_pct?: number | null;         // 0 < y <= 1
   created_at: string;
   updated_at: string;
 }
