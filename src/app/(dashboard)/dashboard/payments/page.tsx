@@ -3,6 +3,7 @@
 import { Button, Card } from '@/components/ui';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { getTenantSlug } from '@/lib/api/client';
+import { usePosSettings } from '@/hooks/use-pos-settings';
 import {
   CreditCard,
   ExternalLink,
@@ -30,6 +31,7 @@ export default function PaymentsPage() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const accessToken = useAuthStore((s) => s.accessToken);
   const tenantSlug = getTenantSlug();
+  const { data: posSettings } = usePosSettings();
 
   const currentView = VIEWS.find((v) => v.value === activeView) ?? VIEWS[0];
 
@@ -155,7 +157,13 @@ export default function PaymentsPage() {
               Payment Methods
             </p>
             <p className="text-sm text-primary-brand">
-              M-Pesa, Card, Airtel Money, Bank Transfer
+              {[
+                posSettings?.mpesa_paybill && `M-PESA ${posSettings.mpesa_paybill}`,
+                posSettings?.airtel_money_number && `Airtel Money ${posSettings.airtel_money_number}`,
+                posSettings?.bank_account_number && posSettings.bank_name,
+              ]
+                .filter(Boolean)
+                .join(', ') || 'M-Pesa, Card, Airtel Money, Bank Transfer'}
             </p>
           </div>
         </Card>
