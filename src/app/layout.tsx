@@ -1,6 +1,7 @@
 import { Footer, Header } from '@/components/layout';
 import PageTransition from '@/components/layout/PageTransition';
 import { Providers } from '@/components/providers/Providers';
+import { ChunkErrorHandler } from '@/components/ChunkErrorHandler';
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Toaster } from 'sonner';
@@ -103,6 +104,7 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <body className="antialiased font-sans">
         <Providers>
+          <ChunkErrorHandler />
           <div className="min-h-screen flex flex-col">
             <Header />
             <main className="flex-1">
