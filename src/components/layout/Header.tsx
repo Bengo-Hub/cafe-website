@@ -320,7 +320,7 @@ export function Header() {
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm font-bold text-brand-dark dark:text-white">Urban Loft</span>
-                    <span className="text-[10px] text-brand-muted dark:text-gray-400">Café</span>
+                    <span className="text-[10px] text-brand-muted dark:text-gray-400">Cafe</span>
                   </div>
                 </div>
                 <button
