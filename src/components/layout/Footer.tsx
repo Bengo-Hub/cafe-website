@@ -16,7 +16,7 @@ export function Footer() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="text-sm font-medium text-slate-500 dark:text-slate-400 text-center md:text-left">
-                All Rights Reserved. <span className="text-slate-900 dark:text-white font-bold">Urban Loft Café</span> &copy; {new Date().getFullYear()}.
+                All Rights Reserved. <span className="text-slate-900 dark:text-white font-bold">Urban Loft Cafe</span> &copy; {new Date().getFullYear()}.
               </div>
               
               <div className="flex items-center gap-2">
@@ -52,7 +52,7 @@ export function Footer() {
       { name: 'Careers', href: '/careers' },
     ],
     services: [
-      { name: 'The Café', href: '/services#cafe' },
+      { name: 'The Cafe', href: '/services#cafe' },
       { name: 'Business Hub', href: '/services/hub' },
       { name: 'Events & Catering', href: '/services/events' },
       { name: 'Training Center', href: '/services#training' },
@@ -94,13 +94,13 @@ export function Footer() {
               </div>
               <div>
               <h2 className="text-3xl font-black text-brand-dark dark:text-white tracking-tighter group-hover:text-brand-orange transition-all duration-300">
-                Urban Loft <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-gold">Café</span>
+                Urban Loft <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-gold">Cafe</span>
               </h2>
               <p className="text-xs font-bold uppercase tracking-widest text-brand-muted dark:text-brand-orange/70 mt-1">Eat. Work. Connect. Experience.</p>
               </div>
             </div>
             <p className="mt-6 text-base font-light text-brand-muted dark:text-brand-beige/70 max-w-md leading-relaxed">
-              More than just a café—a vibrant community space where creativity meets comfort, and every moment counts.
+              More than just a cafe—a vibrant community space where creativity meets comfort, and every moment counts.
             </p>
             
             {/* Contact Info with Enhanced Styling */}
@@ -195,7 +195,7 @@ export function Footer() {
           {/* Copyright */}
           <div className="text-center md:text-left">
             <p className="text-xs font-bold uppercase tracking-widest text-brand-muted/60 dark:text-brand-beige/40">
-              All Rights Reserved. Urban Loft Café &copy; {new Date().getFullYear()}.
+              All Rights Reserved. Urban Loft Cafe &copy; {new Date().getFullYear()}.
             </p>
             <p className="text-xs text-brand-muted/40 dark:text-brand-beige/30 mt-2 flex items-center justify-center md:justify-start gap-1.5">
               Made with <Heart className="h-3 w-3 text-brand-orange" /> in Busia, Kenya
