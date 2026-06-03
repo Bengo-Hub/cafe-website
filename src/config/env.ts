@@ -5,7 +5,8 @@ const PRODUCTION = {
   orderingPwa: 'https://ordersapp.codevertexitsolutions.com',
   logistics: 'https://logisticsapi.codevertexitsolutions.com',
   treasury: 'https://booksapi.codevertexitsolutions.com',
-  booking: 'https://booking.codevertexitsolutions.com',
+  // Event/room bookings are handled by the ordering backend (guest checkout against inventory SERVICE items) — matches the POS/inventory architecture; there is no separate booking service.
+  booking: 'https://orderingapi.codevertexitsolutions.com',
   notifications: 'https://notificationsapi.codevertexitsolutions.com',
   inventory: 'https://inventoryapi.codevertexitsolutions.com',
   pos: 'https://posapi.codevertexitsolutions.com',

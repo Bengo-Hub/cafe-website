@@ -170,7 +170,7 @@ const securityHeaders = [
 ]
 ```
 
-pos-ui must also send `X-Frame-Options: ALLOWFROM https://cafecodevertex.codevertexitsolutions.com` or set `frame-ancestors` CSP.
+pos-ui must also send `X-Frame-Options: ALLOWFROM https://theurbanloftcafe.com` or set `frame-ancestors` CSP.
 
 ---
 
