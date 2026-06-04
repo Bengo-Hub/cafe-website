@@ -150,7 +150,7 @@ export default function AboutPage() {
                 Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-gold">Story</span>
               </h1>
               <p className="mx-auto max-w-2xl text-xl font-light text-brand-beige/70 dark:text-brand-beige/80 leading-relaxed md:text-2xl">
-                More than just a café. We are a community-driven ecosystem designed to inspire,
+                More than just a cafe. We are a community-driven ecosystem designed to inspire,
                 connect, and nourish the modern urban lifestyle.
               </p>
             </motion.div>
@@ -173,17 +173,18 @@ export default function AboutPage() {
                   Crafting <span className="text-brand-orange">Meaningful</span> Experiences
                 </h2>
                 <p className="mb-8 text-xl font-light text-brand-muted dark:text-brand-beige/60 leading-relaxed">
-                  Urban Loft was born from a simple idea: that a café should be more than just a place to grab a coffee. 
+                  Urban Loft was born from a simple idea: that a cafe should be more than just a place to grab a coffee. 
                   It should be a sanctuary for productivity, a hub for connection, and a home for community.
                 </p>
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div className="p-6 rounded-3xl bg-brand-light/40 dark:bg-brand-dark/40 backdrop-blur-xl border border-brand-beige/20 dark:border-white/10">
                     <h4 className="mb-2 font-black text-brand-brown dark:text-brand-orange uppercase tracking-widest text-xs">Our Mission</h4>
-                    <p className="text-sm font-light text-brand-muted dark:text-brand-beige/60">To provide a premium ecosystem where people can eat, work, and connect seamlessly.</p>
+                    <p className="text-sm font-light text-brand-muted dark:text-brand-beige/60">To create a place where hospitality feels natural and memorable; where guests are welcomed warmly, conversations floweasily, and good food brings people together. We believe the simplestmoments shared over food, laughter, and community are often the most meaningful
+                    .</p>
                   </div>
                   <div className="p-6 rounded-3xl bg-brand-light/40 dark:bg-brand-dark/40 backdrop-blur-xl border border-brand-beige/20 dark:border-white/10">
                     <h4 className="mb-2 font-black text-brand-brown dark:text-brand-orange uppercase tracking-widest text-xs">Our Vision</h4>
-                    <p className="text-sm font-light text-brand-muted dark:text-brand-beige/60">To be the leading urban lifestyle hub across East Africa, fostering innovation and community.</p>
+                    <p className="text-sm font-light text-brand-muted dark:text-brand-beige/60">To build a brand known not just for food or coffee, but for character, warmth, and soul. A place where guests feel genuinelywelcomed, hospitality feels alive, and every detail reflects care,personality, and high standards. We want every guest to leave feeling that Urban Loft is a place with real character and soul.</p>
                   </div>
                 </div>
               </motion.div>
@@ -195,7 +196,7 @@ export default function AboutPage() {
                 className="relative aspect-square electrical-border rounded-[3rem]"
               >
                 <Image
-                  src="/images/hero/hero-food.jpg"
+                  src="/images/urban/urban-restaurant.jpeg"
                   alt="Urban Loft Experience"
                   fill
                   className="object-cover rounded-[3rem]"

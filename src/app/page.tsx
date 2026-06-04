@@ -76,7 +76,7 @@ export default function HomePage() {
             </div>
             <h2 className="mb-8 text-5xl font-black text-brand-dark dark:text-brand-light md:text-7xl tracking-tight leading-tight">Experience <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-gold">Urban Loft</span></h2>
             <p className="mx-auto max-w-2xl text-xl text-brand-muted dark:text-brand-beige/80 font-light leading-relaxed">
-              BEYOND FOOD — Our complete ecosystem combines premium dining, productive workspaces, and meaningful community experiences. More than café, it's a lifestyle destination.
+              BEYOND FOOD — Our complete ecosystem combines premium dining, productive workspaces, and meaningful community experiences. More than cafe, it's a lifestyle destination.
             </p>
           </motion.div>
 
@@ -89,12 +89,12 @@ export default function HomePage() {
               className="electrical-border rounded-3xl"
             >
               <ServiceCard
-                title="Urban Loft Café"
-                description="Premium café dining with signature meals and a modern ambience. Perfect for families, professionals, and travelers."
-                image="/images/services/thecafe.jpg"
+                title="Urban Loft Cafe"
+                description="Premium cafe dining with signature meals and a modern ambience. Perfect for families, professionals, and travelers."
+                image="/images/urban/urban-restaurant.jpeg"
                 href="/menu"
                 features={[
-                  'Signature café meals',
+                  'Signature cafe meals',
                   'Specialty coffee & tea',
                   'Healthy options',
                   'Vegan & vegetarian choices',
@@ -131,7 +131,7 @@ export default function HomePage() {
               <ServiceCard
                 title="Events & Catering"
                 description="Corporate meetings, private celebrations, and custom catering. We make every occasion special."
-                image="/images/services/events.jpg"
+                image="/images/urban/urban-park.jpeg"
                 href="/services/events"
                 features={[
                   'Corporate events',

@@ -7,11 +7,11 @@ import Link from 'next/link';
 const FAQ_ITEMS = [
   {
     q: 'What are your opening hours?',
-    a: 'Our café and Business Hub hours vary by outlet. Please check the Contact page or call us for the latest schedule.',
+    a: 'Our cafe and Business Hub hours vary by outlet. Please check the Contact page or call us for the latest schedule.',
   },
   {
     q: 'Do you take reservations?',
-    a: 'Yes. For the café, events, and accommodation you can enquire via the Contact page or call us.',
+    a: 'Yes. For the cafe, events, and accommodation you can enquire via the Contact page or call us.',
   },
   {
     q: 'Is the Business Hub available for hourly booking?',

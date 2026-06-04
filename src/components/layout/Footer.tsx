@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { ExternalLink, Facebook, Heart, Instagram, Mail, MapPin, Phone, Twitter } from 'lucide-react';
+import { FaTiktok } from 'react-icons/fa';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -66,9 +67,10 @@ export function Footer() {
   };
 
   const socialLinks = [
-    { name: 'Facebook', href: '#', icon: Facebook },
-    { name: 'Instagram', href: '#', icon: Instagram },
-    { name: 'Twitter', href: '#', icon: Twitter },
+    { name: 'Facebook', href: 'https://web.facebook.com/profile.php?id=61572312098329', icon: Facebook },
+    { name: 'Instagram', href: 'https://www.instagram.com/theurbanloftcafebusia/', icon: Instagram },
+    { name: 'TikTok', href: 'https://www.tiktok.com/@urbanloftcafe', icon: FaTiktok },
+    
   ];
 
   return (

@@ -97,7 +97,7 @@ export default function ContactPage() {
           {[
             { icon: Phone, title: "Call Us", details: ["0116010638"], color: "bg-brand-brown" },
             { icon: Mail, title: "Email Us", details: ["urbanloftc@gmail.com"], color: "bg-brand-orange" },
-            { icon: Clock, title: "Visit Us", details: ["Mon - Fri: 7AM - 9PM", "Sat - Sun: 8AM - 8PM"], color: "bg-brand-dark" }
+            { icon: Clock, title: "Visit Us", details: ["Everyday: 7:30AM - 10:00PM"], color: "bg-brand-dark" }
           ].map((item, idx) => (
             <motion.div
               key={idx}
@@ -247,7 +247,7 @@ export default function ContactPage() {
                       <div>
                         <h4 className="font-black text-brand-orange uppercase tracking-widest text-xs mb-1">Address</h4>
                         <p className="text-brand-beige/80 font-light leading-relaxed">
-                          The Urban Loft Café<br />
+                          The Urban Loft Cafe<br />
                           Busia, Kenya<br />
                           East Africa
                         </p>
