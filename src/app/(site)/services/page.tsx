@@ -16,7 +16,7 @@ import Image from 'next/image';
 export default function ServicesPage() {
   const services = [
     {
-      title: 'The Café',
+      title: 'The Cafe',
       description: 'Premium dining with urban boho ambience, perfect for families, professionals, and travelers.',
       icon: <Utensils className="h-8 w-8" />,
       image: '/images/services/urban-experience.jpg',
@@ -37,7 +37,7 @@ export default function ServicesPage() {
       icon: <GraduationCap className="h-8 w-8" />,
       image: '/images/hero/hero-team.jpg',
       link: '/contact',
-      features: ['Customer service', 'F&B service skills', 'Café operations', 'Team building'],
+      features: ['Customer service', 'F&B service skills', 'Cafe operations', 'Team building'],
     },
     {
       title: 'Executive Accommodation',

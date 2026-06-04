@@ -10,29 +10,29 @@ export interface Testimonial {
 export const testimonials: Testimonial[] = [
   {
     id: '1',
-    name: 'Sarah Johnson',
-    role: 'Freelance Designer',
+    name: 'Josephine Kock',
+    role: '',
     content:
-      'Urban Loft is my favorite place to work. The coffee is amazing, and the atmosphere is perfect for productivity. The high-speed Wi-Fi is a lifesaver!',
+      'The urban loft Busia is the place to stop for a meal when in Busia. You are welcomed by a homely atmosphere, and equally competent and friendly staff . We had cocktails Mojito, i give thumbs up for it, tried pancakes and samosas which were tasty. Main course was grilled meat and Hawaii pizza which was excellent but it lacked the ham which is the main ingredient for the Hawaii pizza . All in all the food was excellent made with love. I gave a four star because some things on the menu were lacking.5 points to the rest rooms which is also very important.',
     avatar: '/images/team/placeholder-team.svg',
-    rating: 5,
+    rating: 4,
   },
   {
     id: '2',
-    name: 'David Mwangi',
-    role: 'Software Engineer',
+    name: 'Maureen Onyango',
+    role: '',
     content:
-      'I love the community here. I\'ve met so many interesting people at the networking events. Plus, the food is consistently delicious.',
+      'I love the ambience amidst the flowers art and jazz. Great place to hang out. The board games and cards are brilliant.',
     avatar: '/images/team/placeholder-team.svg',
     rating: 5,
   },
   {
     id: '3',
-    name: 'Elena Rodriguez',
-    role: 'Student',
+    name: 'Vincent Kabiru',
+    role: 'Local Guide',
     content:
-      'The best study spot in town! It\'s quiet enough to focus but has a great vibe. The staff are always friendly and welcoming.',
+      'It is a cool place to relax, read a novel, have a romantic date or just meet up with a friend. Though prices are on the higher side for Busia town.',
     avatar: '/images/team/placeholder-team.svg',
-    rating: 4,
+    rating: 5,
   },
 ];

@@ -52,7 +52,7 @@ const SLIDES: SlideContent[] = [
     subtitle: 'EXECUTIVE STAY',
     title: 'Comfort & Privacy',
     description: 'Tailored accommodation for the modern business traveler.',
-    image: '/images/hero/hero-accommodation.jpg',
+    image: '/images/urban/urban-room.jpeg',
     primaryBtn: { text: 'Book a Stay', href: '/services/accommodation' },
     secondaryBtn: { text: 'View Rooms', href: '/services/accommodation#rooms' },
   },
