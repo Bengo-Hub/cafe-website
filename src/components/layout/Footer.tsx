@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { ExternalLink, Facebook, Heart, Instagram, Mail, MapPin, Phone, Twitter } from 'lucide-react';
+import { ExternalLink, Facebook, Heart, Instagram, Mail, MapPin, Phone } from 'lucide-react';
 import { FaTiktok } from 'react-icons/fa';
 import Image from 'next/image';
 import Link from 'next/link';
