@@ -26,10 +26,13 @@ export function useSubscription() {
   const subStore = useSubscriptionStore();
 
   const tenantSlug = (user as any)?.tenant_slug as string | undefined;
+  const roles = (((user as any)?.roles ?? []) as string[]).map((r) => String(r).toLowerCase());
+  const isSuperuser = roles.includes("superuser") || roles.includes("super_admin");
   const isPlatformOwner =
-    !!(user as any)?.is_platform_owner || tenantSlug === "codevertex";
+    !!(user as any)?.is_platform_owner || !!(user as any)?.isPlatformOwner || isSuperuser || tenantSlug === "codevertex";
   const isServiceCharge = (user as any)?.billing_mode === "service_charge";
   const isDemo = !!(user as any)?.is_demo || tenantSlug === "codevertex-demo";
+  const isExempt = isPlatformOwner || isDemo || isServiceCharge;
 
   // Hydrate from IndexedDB immediately on auth so gating works offline
   useEffect(() => {
@@ -168,13 +171,13 @@ export function useSubscription() {
     /** Plan code (e.g. "starter", "growth", "professional") */
     plan: info?.planCode ?? null,
     /** Whether subscription is active (active or trial) */
-    isActive: subStatus === "active" || subStatus === "trial" || isServiceCharge || isDemo,
+    isActive: subStatus === "active" || subStatus === "trial" || isExempt,
     /** Whether the subscription is in a warning state */
     isPastDue: subStatus === "past_due" || subStatus === "suspended",
     /** Whether the subscription has expired */
     isExpired: subStatus === "expired" || subStatus === "cancelled",
     /** Whether no subscription exists */
-    needsSubscription: subStatus === "none" && !isServiceCharge && !isDemo,
+    needsSubscription: subStatus === "none" && !isExempt,
     /** Whether subscription info is still loading */
     isLoading: subscriptionInfo === null || subscriptionInfo === undefined,
     /** Whether this is the platform owner (codevertex) — always has full access */
@@ -182,9 +185,9 @@ export function useSubscription() {
     isServiceCharge,
     isDemo,
     /** Check if a specific feature is available */
-    hasFeature: (code: string) => info?.features?.includes(code) ?? false,
+    hasFeature: (code: string) => isExempt || (info?.features?.includes(code) ?? false),
     /** Get a usage limit value (defaults to Infinity if not set) */
-    getLimit: (key: string) => info?.limits?.[key] ?? Infinity,
+    getLimit: (key: string) => (isExempt ? Infinity : (info?.limits?.[key] ?? Infinity)),
     /** Subscription price */
     price: info?.price ?? null,
     /** Currency code (e.g. "KES", "USD") */
