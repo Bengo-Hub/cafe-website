@@ -2,7 +2,10 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { setOn401 } from '@/lib/api/client';
+import { setOn401, setOnLimitReached } from '@/lib/api/client';
+import { parseLimitInfo } from '@/lib/api/error-handler';
+import { useLimitModal } from '@/store/limit-modal';
+import { LimitReachedModal } from '@/components/subscription/limit-reached-modal';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { TenantBrandProvider } from './TenantBrandProvider';
 import { ThemeProvider } from './ThemeProvider';
@@ -36,11 +39,21 @@ export function Providers({ children }: { children: React.ReactNode }) {
     return () => setOn401(null);
   }, [queryClient, logout]);
 
+  // Wire 402/429 plan-limit-reached → limit modal
+  useEffect(() => {
+    setOnLimitReached((data) => {
+      const info = parseLimitInfo(data);
+      if (info) useLimitModal.getState().show(info);
+    });
+    return () => setOnLimitReached(null);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TenantBrandProvider>
         <ThemeProvider>
           {children}
+          <LimitReachedModal />
         </ThemeProvider>
       </TenantBrandProvider>
     </QueryClientProvider>

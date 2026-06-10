@@ -73,6 +73,7 @@ function authHeader(): Record<string, string> {
 
 let on401Callback: (() => void) | null = null;
 let onSubscription403Callback: ((data: any) => void) | null = null;
+let onLimitReachedCallback: ((data: any) => void) | null = null;
 
 /** Register a callback to run when any API response is 401 (e.g. clear session / redirect to auth). */
 export function setOn401(callback: (() => void) | null) {
@@ -82,6 +83,11 @@ export function setOn401(callback: (() => void) | null) {
 /** Register a callback for subscription-related 403 errors (code=subscription_inactive, upgrade=true). */
 export function setOnSubscription403(callback: ((data: any) => void) | null) {
   onSubscription403Callback = callback;
+}
+
+/** Register a callback for 402/429 plan-limit-reached errors (opens the limit-reached modal). */
+export function setOnLimitReached(callback: ((data: any) => void) | null) {
+  onLimitReachedCallback = callback;
 }
 
 export async function apiClient<T = any>(
@@ -157,6 +163,13 @@ export async function apiClient<T = any>(
         if (response.status === 403 && onSubscription403Callback) {
           if (data?.code === 'subscription_inactive' || data?.upgrade === true) {
             onSubscription403Callback(data);
+          }
+        }
+        // 402/429 = a plan limit was reached (orders, transactions, tracking, …). Surface
+        // the structured limit-reached modal across the staff dashboard.
+        if ((response.status === 402 || response.status === 429) && onLimitReachedCallback) {
+          if (data?.code === 'usage_limit_exceeded' || data?.metric) {
+            onLimitReachedCallback(data);
           }
         }
         throw new ApiError(response.status, data.message || 'API request failed', data);
