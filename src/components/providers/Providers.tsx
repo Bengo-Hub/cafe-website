@@ -6,6 +6,7 @@ import { setOn401, setOnLimitReached } from '@/lib/api/client';
 import { parseLimitInfo } from '@/lib/api/error-handler';
 import { useLimitModal } from '@/store/limit-modal';
 import { LimitReachedModal } from '@/components/subscription/limit-reached-modal';
+import { OfflineBar } from '@bengo-hub/shared-ui-lib/offline';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { TenantBrandProvider } from './TenantBrandProvider';
 import { ThemeProvider } from './ThemeProvider';
@@ -52,6 +53,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <TenantBrandProvider>
         <ThemeProvider>
+          <OfflineBar availableOffline={['Browse cached pages']} disabledOffline={['Ordering', 'Account actions']} />
           {children}
           <LimitReachedModal />
         </ThemeProvider>
