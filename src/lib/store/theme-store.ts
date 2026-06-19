@@ -35,7 +35,8 @@ export const useThemeStore = create<ThemeState>()(
         }
       },
       initTheme: () => {
-        // Initialize theme based on system preference or saved preference
+        // Initialize theme from the saved preference only. With no saved
+        // preference, default to light (do NOT follow the OS color scheme).
         if (typeof window !== 'undefined') {
           const root = window.document.documentElement;
           const savedTheme = localStorage.getItem('theme-storage');
@@ -48,8 +49,6 @@ export const useThemeStore = create<ThemeState>()(
             } catch {
               theme = 'light';
             }
-          } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            theme = 'dark';
           }
 
           root.classList.remove('light', 'dark');
