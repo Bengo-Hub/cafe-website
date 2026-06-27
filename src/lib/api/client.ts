@@ -31,11 +31,28 @@ export function getTenantSlug(): string {
   return config.tenant.slug;
 }
 
-/** Tenant headers using auth-api /me tenant_id (UUID) and tenant_slug. Only sends X-Tenant-ID when value is a valid UUID. Exported for use by orders, catalog, riders, inventory. Platform owners skip tenant headers — scope resolved from JWT. */
+/**
+ * Tenant headers using auth-api /me tenant_id (UUID) and tenant_slug. Only sends
+ * X-Tenant-ID when value is a valid UUID. Exported for use by orders, catalog,
+ * riders, inventory.
+ *
+ * Platform-owner scope ("Dedicated Platform section" model, see
+ * .claude/plans/platform-owner-self-tenant-separation.md): the platform owner
+ * (codevertex) runs its OWN business in the main dashboard by default, so it
+ * must carry its own-tenant headers like any other tenant. The only place a
+ * cross-tenant drill-in may live is `/platform/*`, where the owner administers
+ * OTHER tenants and we drop the X-Tenant-* headers so the backend resolves scope
+ * from the JWT (or a future explicit drill-in). cafe-website has NO `/platform`
+ * route today, so in practice the owner always carries its own-tenant scope —
+ * this guard simply makes sure header suppression can never leak onto a normal
+ * business page.
+ */
 export function getTenantHeaders(): Record<string, string> {
   if (typeof window !== 'undefined') {
     const user = useAuthStore.getState().user;
-    if (user?.is_platform_owner || user?.tenant_slug === 'codevertex') {
+    const isPlatformOwner = !!user?.is_platform_owner || user?.tenant_slug === 'codevertex';
+    const onPlatform = window.location.pathname.includes('/platform');
+    if (isPlatformOwner && onPlatform) {
       return {};
     }
   }
