@@ -5,7 +5,7 @@
 
 ## Service Integration Overview
 
-The Urban Loft Cafe Website integrates with multiple BengoBox microservices. This document analyzes each dependency, identifies gaps, and provides mitigation strategies.
+The Urban Loft Cafe Website integrates with multiple Codevertex microservices. This document analyzes each dependency, identifies gaps, and provides mitigation strategies.
 
 ### Quick Reference: Integration Priority Order
 

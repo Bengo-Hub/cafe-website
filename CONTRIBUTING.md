@@ -172,9 +172,9 @@ When reviewing code:
 6. Test integration
 7. Update documentation
 
-## BengoBox Standards
+## Codevertex Standards
 
-Follow the broader BengoBox guidelines:
+Follow the broader Codevertex guidelines:
 - Use ASCII characters in code
 - Add comments only for non-obvious logic
 - Follow microservice patterns

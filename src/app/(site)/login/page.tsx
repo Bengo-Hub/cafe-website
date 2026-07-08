@@ -22,7 +22,7 @@ function LoginContent() {
       <div className="text-center">
         <div className="w-12 h-12 border-4 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-4" />
         <h1 className="text-xl font-medium text-primary-brand">Redirecting to sign in...</h1>
-        <p className="text-secondary-brand mt-2">You will be taken to BengoBox SSO.</p>
+        <p className="text-secondary-brand mt-2">You will be taken to Codevertex SSO.</p>
       </div>
     </main>
   );

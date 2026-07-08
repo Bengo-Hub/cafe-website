@@ -27,7 +27,7 @@
 
 ## Role in the platform
 
-The cafe-website is the **hub** for the BengoBox ecosystem. It follows a **display-only + redirect pattern**:
+The cafe-website is the **hub** for the Codevertex ecosystem. It follows a **display-only + redirect pattern**:
 
 - **Read data** from microservice APIs for display (menus, orders, riders, inventory)
 - **Redirect for mutations** to the owning service's UI (ordering PWA for cart/checkout)

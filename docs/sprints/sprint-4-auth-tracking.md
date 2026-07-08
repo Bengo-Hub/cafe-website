@@ -18,7 +18,7 @@
 ### 2. Login Flow
 - [x] Create login page (`/auth/login`)
 - [x] Implement "Login with Email" form (Dummy)
-- [x] Add "Sign in with BengoBox SSO" button
+- [x] Add "Sign in with Codevertex SSO" button
 - [ ] Add "Login with Google" button
 - [ ] Add "Login with Microsoft" button
 - [x] Build authorization redirect handler (NextAuth)

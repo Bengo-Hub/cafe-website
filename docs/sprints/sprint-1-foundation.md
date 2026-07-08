@@ -160,7 +160,7 @@ Created reusable skeleton components:
 - Focus on structure and foundation, not features
 - All service integrations should use dummy data for now
 - Keep components simple and reusable
-- Follow BengoBox coding conventions (ASCII, minimal comments)
+- Follow Codevertex coding conventions (ASCII, minimal comments)
 - Use mobile-first responsive design principles
 
 ---

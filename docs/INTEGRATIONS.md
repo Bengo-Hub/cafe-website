@@ -31,7 +31,7 @@
 
 ## Integration Overview
 
-The Urban Loft Cafe Website serves as the **converging point** for all BengoBox microservices. It integrates with backend services to provide:
+The Urban Loft Cafe Website serves as the **converging point** for all Codevertex microservices. It integrates with backend services to provide:
 
 - **SSO Authentication** via auth-service
 - **Online Ordering** via ordering-service (redirect pattern)

@@ -1,7 +1,7 @@
 # Sprint 7 -- MVP Launch
 
 **Timeline**: March 3 - March 27, 2026
-**Goal**: Replace all dummy data in the cafe-website with real microservice API integrations, fix auth token flow, enforce role-based access in the dashboard, and ship as the central hub of the BengoBox MVP.
+**Goal**: Replace all dummy data in the cafe-website with real microservice API integrations, fix auth token flow, enforce role-based access in the dashboard, and ship as the central hub of the Codevertex MVP.
 
 ---
 

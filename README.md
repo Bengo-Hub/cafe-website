@@ -223,7 +223,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for development guidelines.
 
 ## License
 
-Proprietary - Urban Loft Cafe / BengoBox
+Proprietary - Urban Loft Cafe / Codevertex
 
 ## Support
 
