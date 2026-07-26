@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-const ERP_URL = process.env.NEXT_PUBLIC_ERP_API_URL ?? 'https://erp.codevertexitsolutions.com';
+const ERP_URL = process.env.NEXT_PUBLIC_ERP_API_URL ?? 'https://erp.codevertexafrica.com';
 const SERVICE_KEY = process.env.INTERNAL_SERVICE_KEY ?? '';
 
 function erpHeaders() {

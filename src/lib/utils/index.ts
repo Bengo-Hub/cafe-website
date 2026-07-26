@@ -17,7 +17,7 @@ export function getMediaUrl(path: string | undefined | null): string {
   if (path.startsWith('http://') || path.startsWith('https://')) return path;
 
   // Relative path — resolve against inventory-api (master data source) or ordering-api fallback
-  const inventoryBase = process.env.NEXT_PUBLIC_INVENTORY_SERVICE_URL || 'https://inventoryapi.codevertexitsolutions.com';
+  const inventoryBase = process.env.NEXT_PUBLIC_INVENTORY_SERVICE_URL || 'https://inventoryapi.codevertexafrica.com';
   const cleanBase = inventoryBase.replace(/\/v1\/?$/, '').replace(/\/+$/, '');
 
   const cleanPath = path.startsWith('/') ? path : `/${path}`;

@@ -2,8 +2,8 @@
 
 import { useEffect } from 'react';
 
-const VERA_WIDGET_URL = 'https://marketflow.codevertexitsolutions.com/widget/chat.js';
-const VERA_API_URL    = 'https://marketflowai.codevertexitsolutions.com';
+const VERA_WIDGET_URL = 'https://marketflow.codevertexafrica.com/widget/chat.js';
+const VERA_API_URL    = 'https://marketflowai.codevertexafrica.com';
 
 // Loads the Vera AI widget for the Urban Loft public site.
 // Uses useEffect so document.currentScript is properly set when chat.js

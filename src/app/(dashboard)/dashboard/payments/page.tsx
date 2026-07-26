@@ -14,7 +14,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 const TREASURY_UI_URL =
-  process.env.NEXT_PUBLIC_TREASURY_UI_URL || 'https://books.codevertexitsolutions.com';
+  process.env.NEXT_PUBLIC_TREASURY_UI_URL || 'https://books.codevertexafrica.com';
 
 type TreasuryView = 'dashboard' | 'transactions' | 'settlements';
 

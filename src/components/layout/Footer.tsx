@@ -22,7 +22,7 @@ export function Footer() {
               
               <div className="flex items-center gap-2">
                 <a
-                  href="https://codevertexitsolutions.com"
+                  href="https://codevertexafrica.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 transition-all hover:ring-4 hover:ring-primary/20"
@@ -220,7 +220,7 @@ export function Footer() {
 
           {/* Codevertex Branding */}
           <a
-            href="https://codevertexitsolutions.com"
+            href="https://codevertexafrica.com"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-brand-orange/20 to-brand-gold/20 border border-brand-orange/30 text-brand-muted dark:text-brand-beige/70 hover:text-brand-orange dark:hover:text-brand-orange hover:border-brand-orange/60 transition-all duration-300 group/codevertex hover:bg-brand-orange/30"

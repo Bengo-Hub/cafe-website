@@ -44,7 +44,7 @@
 
 ### Login/Signup (`/login`, `/signup`)
 
-- Redirect to auth-ui (accounts.codevertexitsolutions.com)
+- Redirect to auth-ui (accounts.codevertexafrica.com)
 - Login: `signIn('bengobox-auth')` via NextAuth
 - Signup: redirect to auth-ui registration page
 

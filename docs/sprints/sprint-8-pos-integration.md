@@ -21,8 +21,8 @@ This approach (iframe embedding) was explicitly chosen to avoid duplicating POS 
 ## Environment Variables to Add
 
 ```bash
-NEXT_PUBLIC_POS_UI_URL=https://pos.codevertexitsolutions.com
-POS_API_URL=https://posapi.codevertexitsolutions.com
+NEXT_PUBLIC_POS_UI_URL=https://pos.codevertexafrica.com
+POS_API_URL=https://posapi.codevertexafrica.com
 POS_API_KEY=<from auth-api S2S>
 ```
 
@@ -158,14 +158,14 @@ Use `pos-staff.ts` in the Team page to show POS role assignments alongside Supab
 
 ## Part D: Iframe Security (CSP)
 
-Update `next.config.mjs` to allow `pos.codevertexitsolutions.com` in frame-src:
+Update `next.config.mjs` to allow `pos.codevertexafrica.com` in frame-src:
 
 ```javascript
 // next.config.mjs
 const securityHeaders = [
   {
     key: 'Content-Security-Policy',
-    value: `frame-src 'self' https://pos.codevertexitsolutions.com;`
+    value: `frame-src 'self' https://pos.codevertexafrica.com;`
   }
 ]
 ```
@@ -179,8 +179,8 @@ pos-ui must also send `X-Frame-Options: ALLOWFROM https://theurbanloftcafe.com` 
 Add to `apps/cafe-website/values.yaml`:
 ```yaml
 env:
-  NEXT_PUBLIC_POS_UI_URL: "https://pos.codevertexitsolutions.com"
-  POS_API_URL: "https://posapi.codevertexitsolutions.com"
+  NEXT_PUBLIC_POS_UI_URL: "https://pos.codevertexafrica.com"
+  POS_API_URL: "https://posapi.codevertexafrica.com"
   # POS_API_KEY set via sealed secret
 ```
 
@@ -197,7 +197,7 @@ env:
 - [x] Create `src/lib/api/pos-staff.ts` — getPOSUsers/getPOSRoles/assignPOSRole
 - [x] Create `src/app/api/pos-staff/route.ts` — Route Handler proxying POS staff queries
 - [x] Update Team page to show POS role column (matched by email from /api/pos-staff)
-- [x] Update `next.config.mjs` with frame-src CSP header for pos.codevertexitsolutions.com
+- [x] Update `next.config.mjs` with frame-src CSP header for pos.codevertexafrica.com
 - [x] Add `POS_API_URL` env var to `devops-k8s apps/cafe-website/values.yaml` (POS_API_KEY via sealed secret)
 - [x] Run `pnpm build` — zero TypeScript errors
 - [x] Push to master (commits 4170072, 8ca86a3)

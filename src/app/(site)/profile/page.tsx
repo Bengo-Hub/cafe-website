@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-const AUTH_UI_URL = typeof config?.services?.auth === 'string' ? config.services.auth : 'https://sso.codevertexitsolutions.com';
+const AUTH_UI_URL = typeof config?.services?.auth === 'string' ? config.services.auth : 'https://sso.codevertexafrica.com';
 
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading } = useAuth();

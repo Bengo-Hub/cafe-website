@@ -31,7 +31,7 @@ const nextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value: "frame-src 'self' https://pos.codevertexitsolutions.com;",
+            value: "frame-src 'self' https://pos.codevertexafrica.com;",
           },
         ],
       },

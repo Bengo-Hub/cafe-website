@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 import { useSubscription } from "@/hooks/use-subscription";
 
 const SUBSCRIBE_URL =
-  process.env.NEXT_PUBLIC_SUBSCRIPTIONS_UI_URL || "https://pricing.codevertexitsolutions.com";
+  process.env.NEXT_PUBLIC_SUBSCRIPTIONS_UI_URL || "https://pricing.codevertexafrica.com";
 
 interface SubscriptionGateProps {
   /** Feature code required (e.g. "loyalty_program", "multi_outlet") */

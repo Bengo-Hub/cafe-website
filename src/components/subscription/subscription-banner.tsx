@@ -6,7 +6,7 @@ import { useUsageAlerts } from '@/hooks/use-usage-alerts';
 import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
 
 const SUBSCRIPTIONS_UI_URL =
-  process.env.NEXT_PUBLIC_SUBSCRIPTIONS_UI_URL || 'https://pricing.codevertexitsolutions.com';
+  process.env.NEXT_PUBLIC_SUBSCRIPTIONS_UI_URL || 'https://pricing.codevertexafrica.com';
 
 // Cafe-website features derive from the ordering plan — upgrade points to ordering plans
 const UPGRADE_URL = `${SUBSCRIPTIONS_UI_URL}/plans?service=ordering`;

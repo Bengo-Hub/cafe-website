@@ -2,9 +2,9 @@
  * SSO URL helpers. Main auth flow uses sso-api (PKCE) and auth store.
  */
 
-const AUTH_SERVICE_URL = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'https://sso.codevertexitsolutions.com';
+const AUTH_SERVICE_URL = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'https://sso.codevertexafrica.com';
 const CAFE_WEBSITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://theurbanloftcafe.com';
-const AUTH_UI_URL = process.env.NEXT_PUBLIC_AUTH_UI_URL || 'https://accounts.codevertexitsolutions.com';
+const AUTH_UI_URL = process.env.NEXT_PUBLIC_AUTH_UI_URL || 'https://accounts.codevertexafrica.com';
 
 export const SSO_URLS = {
   authService: AUTH_SERVICE_URL,

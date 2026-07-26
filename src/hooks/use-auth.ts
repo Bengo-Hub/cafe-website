@@ -26,7 +26,7 @@ export const useAuth = () => {
     login,
     logout,
     getSSOLoginUrl: (returnTo?: string) => {
-      const base = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'https://sso.codevertexitsolutions.com';
+      const base = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'https://sso.codevertexafrica.com';
       const url = new URL('/api/v1/authorize', base);
       if (returnTo) url.searchParams.set('return_to', returnTo);
       return url.toString();

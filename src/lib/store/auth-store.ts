@@ -170,7 +170,7 @@ export const useAuthStore = create<AuthState>()(
           try { sessionStorage.clear(); } catch { /* no-op */ }
           // Redirect to SSO logout → clears session cookie → accounts login page
           const returnTo = encodeURIComponent(window.location.origin);
-          window.location.href = buildLogoutUrl(`https://accounts.codevertexitsolutions.com/login?return_to=${returnTo}`);
+          window.location.href = buildLogoutUrl(`https://accounts.codevertexafrica.com/login?return_to=${returnTo}`);
         }
       },
 

@@ -18,7 +18,7 @@ const TIME_SLOTS = [
   '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00',
 ];
 
-const VERA_API = 'https://marketflowai.codevertexitsolutions.com';
+const VERA_API = 'https://marketflowai.codevertexafrica.com';
 const WA_NUMBER = '254712345678';
 
 const inputCls =
