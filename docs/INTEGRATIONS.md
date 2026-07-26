@@ -133,7 +133,7 @@ Based on the [roadmap.md](../../../docs/roadmap.md) and service dependencies, in
 
 **Status**: ✅ **FULLY AVAILABLE**
 **Integration Priority**: 1 (CRITICAL)
-**Production URL**: `https://sso.codevertexitsolutions.com/`
+**Production URL**: `https://sso.codevertexafrica.com/`
 
 #### Endpoints Used
 
@@ -190,11 +190,11 @@ All Services Validate JWT:
 
 ```env
 # Auth Service Configuration
-AUTH_SERVICE_URL=https://sso.codevertexitsolutions.com
+AUTH_SERVICE_URL=https://sso.codevertexafrica.com
 AUTH_CLIENT_ID=cafe-website
 AUTH_CLIENT_SECRET=<stored-encrypted>
 AUTH_REDIRECT_URI=https://theurbanloftcafe.com/auth/callback
-AUTH_JWKS_ENDPOINT=https://sso.codevertexitsolutions.com/api/v1/.well-known/jwks.json
+AUTH_JWKS_ENDPOINT=https://sso.codevertexafrica.com/api/v1/.well-known/jwks.json
 ```
 
 ---
@@ -203,8 +203,8 @@ AUTH_JWKS_ENDPOINT=https://sso.codevertexitsolutions.com/api/v1/.well-known/jwks
 
 **Status**: ✅ **FULLY AVAILABLE**
 **Integration Priority**: 2 (HIGH)
-**Production URL**: `https://orderingapi.codevertexitsolutions.com/`
-**PWA URL**: `https://ordersapp.codevertexitsolutions.com/`
+**Production URL**: `https://orderingapi.codevertexafrica.com/`
+**PWA URL**: `https://ordering.codevertexafrica.com/`
 
 #### Endpoints Used
 
@@ -269,8 +269,8 @@ Cafe Website                          Ordering Service
 
 ```env
 # Ordering Service Configuration
-ORDERING_API_URL=https://orderingapi.codevertexitsolutions.com
-ORDERING_PWA_URL=https://ordersapp.codevertexitsolutions.com
+ORDERING_API_URL=https://orderingapi.codevertexafrica.com
+ORDERING_PWA_URL=https://ordering.codevertexafrica.com
 DEFAULT_TENANT_SLUG=urban-cafe
 ```
 
@@ -280,7 +280,7 @@ DEFAULT_TENANT_SLUG=urban-cafe
 
 **Status**: ✅ **FULLY AVAILABLE**
 **Integration Priority**: 4 (MEDIUM)
-**Production URL**: `https://logistics.codevertexitsolutions.com/` (API TBD)
+**Production URL**: `https://logistics.codevertexafrica.com/` (API TBD)
 
 #### Endpoints Used
 
@@ -346,8 +346,8 @@ setInterval(pollOrderStatus, 5000);
 
 ```env
 # Logistics Service Configuration
-LOGISTICS_API_URL=https://logistics.codevertexitsolutions.com
-LOGISTICS_WS_URL=wss://logistics.codevertexitsolutions.com
+LOGISTICS_API_URL=https://logistics.codevertexafrica.com
+LOGISTICS_WS_URL=wss://logistics.codevertexafrica.com
 ```
 
 ---
@@ -356,7 +356,7 @@ LOGISTICS_WS_URL=wss://logistics.codevertexitsolutions.com
 
 **Status**: ⚠️ **NEEDS VERIFICATION**
 **Integration Priority**: 5 (MEDIUM)
-**Production URL**: `https://booksapi.codevertexitsolutions.com/`
+**Production URL**: `https://booksapi.codevertexafrica.com/`
 
 #### Endpoints Used (Expected)
 
@@ -401,7 +401,7 @@ if (paymentIntent.payment_method === 'mpesa') {
 
 ```env
 # Treasury Service Configuration
-TREASURY_API_URL=https://booksapi.codevertexitsolutions.com
+TREASURY_API_URL=https://booksapi.codevertexafrica.com
 ```
 
 ---
@@ -410,7 +410,7 @@ TREASURY_API_URL=https://booksapi.codevertexitsolutions.com
 
 **Status**: ✅ **FULLY AVAILABLE**
 **Integration Priority**: 3 (HIGH)
-**Production URL**: `https://notifications.codevertexitsolutions.com/`
+**Production URL**: `https://notifications.codevertexafrica.com/`
 
 #### Endpoints Used
 
@@ -463,7 +463,7 @@ const sendContactForm = async (formData) => {
 
 ```env
 # Notifications Service Configuration
-NOTIFICATIONS_API_URL=https://notifications.codevertexitsolutions.com
+NOTIFICATIONS_API_URL=https://notifications.codevertexafrica.com
 NOTIFICATIONS_API_KEY=<stored-encrypted>
 ```
 
@@ -573,7 +573,7 @@ logistics.task.completed (delivered)
   "roles": ["customer", "staff"],
   "permissions": ["order.create", "order.view"],
   "exp": 1704067200,
-  "iss": "https://sso.codevertexitsolutions.com"
+  "iss": "https://sso.codevertexafrica.com"
 }
 ```
 

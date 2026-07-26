@@ -17,13 +17,13 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Build-time args: production service base URLs (see devops-k8s apps/cafe-website/values.yaml)
-ARG NEXT_PUBLIC_AUTH_SERVICE_URL=https://sso.codevertexitsolutions.com
-ARG NEXT_PUBLIC_AUTH_UI_URL=https://accounts.codevertexitsolutions.com
-ARG NEXT_PUBLIC_ORDERING_SERVICE_URL=https://orderingapi.codevertexitsolutions.com
-ARG NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL=https://notificationsapi.codevertexitsolutions.com
-ARG NEXT_PUBLIC_LOGISTICS_SERVICE_URL=https://logisticsapi.codevertexitsolutions.com
-ARG NEXT_PUBLIC_TREASURY_SERVICE_URL=https://booksapi.codevertexitsolutions.com
-ARG NEXT_PUBLIC_INVENTORY_SERVICE_URL=https://inventoryapi.codevertexitsolutions.com
+ARG NEXT_PUBLIC_AUTH_SERVICE_URL=https://sso.codevertexafrica.com
+ARG NEXT_PUBLIC_AUTH_UI_URL=https://accounts.codevertexafrica.com
+ARG NEXT_PUBLIC_ORDERING_SERVICE_URL=https://orderingapi.codevertexafrica.com
+ARG NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL=https://notificationsapi.codevertexafrica.com
+ARG NEXT_PUBLIC_LOGISTICS_SERVICE_URL=https://logisticsapi.codevertexafrica.com
+ARG NEXT_PUBLIC_TREASURY_SERVICE_URL=https://booksapi.codevertexafrica.com
+ARG NEXT_PUBLIC_INVENTORY_SERVICE_URL=https://inventoryapi.codevertexafrica.com
 ARG NEXT_PUBLIC_SITE_URL=https://theurbanloftcafe.com
 ARG NEXT_PUBLIC_APP_URL=https://theurbanloftcafe.com
 ARG NEXT_PUBLIC_TENANT_SLUG=urban-loft

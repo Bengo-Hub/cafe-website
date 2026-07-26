@@ -208,7 +208,7 @@ All Services Validate JWT:
 ```
 Website → Ordering Service API → Fetch Sample Dishes (Display Only)
 User Action (Add to Cart) → Redirect to:
-https://ordersapp.codevertexitsolutions.com/menu?item_id={id}&action=add-to-cart&tenant={tenant}
+https://ordering.codevertexafrica.com/menu?item_id={id}&action=add-to-cart&tenant={tenant}
 ```
 
 ---
@@ -292,7 +292,7 @@ https://ordersapp.codevertexitsolutions.com/menu?item_id={id}&action=add-to-cart
 - Seamless transition via shared SSO.
 
 **Integration Points**:
-- Redirect URL: `https://ordersapp.codevertexitsolutions.com/track?id={order_id}&tenant={tenant_slug}`
+- Redirect URL: `https://ordering.codevertexafrica.com/track?id={order_id}&tenant={tenant_slug}`
 
 ---
 
@@ -348,10 +348,10 @@ https://ordersapp.codevertexitsolutions.com/menu?item_id={id}&action=add-to-cart
 
 | Service   | URL (canonical) |
 |----------|------------------------------------------|
-| Inventory | https://inventory.codevertexitsolutions.com |
-| Ordering  | https://ordersapp.codevertexitsolutions.com  |
-| Logistics | https://logistics.codevertexitsolutions.com |
-| Treasury  | https://books.codevertexitsolutions.com    |
+| Inventory | https://inventory.codevertexafrica.com |
+| Ordering  | https://ordering.codevertexafrica.com  |
+| Logistics | https://logistics.codevertexafrica.com |
+| Treasury  | https://books.codevertexafrica.com    |
 
 **Features** (after SSO login):
 - Dashboard overview with **Service shortcuts** (tiles to Inventory, Ordering, Logistics, Treasury)
@@ -724,7 +724,7 @@ workbox.routing.registerRoute(
 **Data Flow**:
 ```
 User enters Order ID → Redirect to:
-https://ordersapp.codevertexitsolutions.com/track?id={order_id}&tenant={tenant}
+https://ordering.codevertexafrica.com/track?id={order_id}&tenant={tenant}
 ```
 
 ---
@@ -841,7 +841,7 @@ See detailed sprint documents in [docs/sprints/](./sprints/) directory.
 - ✅ JWT token validation via JWKS
 - ✅ Access token refresh flow
 - ✅ SSO logout (clears NextAuth session + redirects to SSO logout endpoint)
-- ✅ Production URLs as defaults (`https://sso.codevertexitsolutions.com`)
+- ✅ Production URLs as defaults (`https://sso.codevertexafrica.com`)
 - ✅ Return URL support for post-login/signup redirects
 
 ### Critical Integration Gaps

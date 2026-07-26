@@ -64,13 +64,13 @@ trivy fs . --exit-code "$TRIVY_ECODE" --format table --skip-files "*.pem" --skip
 step "Docker build"
 # Pass production API/base URLs so Next.js bundle uses them (NEXT_PUBLIC_* are build-time only)
 DOCKER_BUILDKIT=1 docker build . \
-  --build-arg NEXT_PUBLIC_AUTH_SERVICE_URL="${NEXT_PUBLIC_AUTH_SERVICE_URL:-https://sso.codevertexitsolutions.com}" \
-  --build-arg NEXT_PUBLIC_AUTH_UI_URL="${NEXT_PUBLIC_AUTH_UI_URL:-https://accounts.codevertexitsolutions.com}" \
-  --build-arg NEXT_PUBLIC_ORDERING_SERVICE_URL="${NEXT_PUBLIC_ORDERING_SERVICE_URL:-https://orderingapi.codevertexitsolutions.com}" \
-  --build-arg NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL="${NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL:-https://notificationsapi.codevertexitsolutions.com}" \
-  --build-arg NEXT_PUBLIC_LOGISTICS_SERVICE_URL="${NEXT_PUBLIC_LOGISTICS_SERVICE_URL:-https://logisticsapi.codevertexitsolutions.com}" \
-  --build-arg NEXT_PUBLIC_TREASURY_SERVICE_URL="${NEXT_PUBLIC_TREASURY_SERVICE_URL:-https://booksapi.codevertexitsolutions.com}" \
-  --build-arg NEXT_PUBLIC_INVENTORY_SERVICE_URL="${NEXT_PUBLIC_INVENTORY_SERVICE_URL:-https://inventoryapi.codevertexitsolutions.com}" \
+  --build-arg NEXT_PUBLIC_AUTH_SERVICE_URL="${NEXT_PUBLIC_AUTH_SERVICE_URL:-https://sso.codevertexafrica.com}" \
+  --build-arg NEXT_PUBLIC_AUTH_UI_URL="${NEXT_PUBLIC_AUTH_UI_URL:-https://accounts.codevertexafrica.com}" \
+  --build-arg NEXT_PUBLIC_ORDERING_SERVICE_URL="${NEXT_PUBLIC_ORDERING_SERVICE_URL:-https://orderingapi.codevertexafrica.com}" \
+  --build-arg NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL="${NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL:-https://notificationsapi.codevertexafrica.com}" \
+  --build-arg NEXT_PUBLIC_LOGISTICS_SERVICE_URL="${NEXT_PUBLIC_LOGISTICS_SERVICE_URL:-https://logisticsapi.codevertexafrica.com}" \
+  --build-arg NEXT_PUBLIC_TREASURY_SERVICE_URL="${NEXT_PUBLIC_TREASURY_SERVICE_URL:-https://booksapi.codevertexafrica.com}" \
+  --build-arg NEXT_PUBLIC_INVENTORY_SERVICE_URL="${NEXT_PUBLIC_INVENTORY_SERVICE_URL:-https://inventoryapi.codevertexafrica.com}" \
   --build-arg NEXT_PUBLIC_SITE_URL="${NEXT_PUBLIC_SITE_URL:-https://theurbanloftcafe.com}" \
   --build-arg NEXT_PUBLIC_APP_URL="${NEXT_PUBLIC_APP_URL:-https://theurbanloftcafe.com}" \
   --build-arg NEXT_PUBLIC_TENANT_SLUG="${NEXT_PUBLIC_TENANT_SLUG:-urban-loft}" \

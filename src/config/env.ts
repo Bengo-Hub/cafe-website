@@ -1,16 +1,16 @@
 // Production base URLs (used when NEXT_PUBLIC_* are not set, e.g. Docker build without build-args)
 const PRODUCTION = {
-  auth: 'https://sso.codevertexitsolutions.com',
-  ordering: 'https://orderingapi.codevertexitsolutions.com',
-  orderingPwa: 'https://ordersapp.codevertexitsolutions.com',
-  logistics: 'https://logisticsapi.codevertexitsolutions.com',
-  treasury: 'https://booksapi.codevertexitsolutions.com',
+  auth: 'https://sso.codevertexafrica.com',
+  ordering: 'https://orderingapi.codevertexafrica.com',
+  orderingPwa: 'https://ordering.codevertexafrica.com',
+  logistics: 'https://logisticsapi.codevertexafrica.com',
+  treasury: 'https://booksapi.codevertexafrica.com',
   // Event/room bookings are handled by the ordering backend (guest checkout against inventory SERVICE items) — matches the POS/inventory architecture; there is no separate booking service.
-  booking: 'https://orderingapi.codevertexitsolutions.com',
-  notifications: 'https://notificationsapi.codevertexitsolutions.com',
-  inventory: 'https://inventoryapi.codevertexitsolutions.com',
-  pos: 'https://posapi.codevertexitsolutions.com',
-  erp: 'https://erp.codevertexitsolutions.com',
+  booking: 'https://orderingapi.codevertexafrica.com',
+  notifications: 'https://notificationsapi.codevertexafrica.com',
+  inventory: 'https://inventoryapi.codevertexafrica.com',
+  pos: 'https://posapi.codevertexafrica.com',
+  erp: 'https://erp.codevertexafrica.com',
   site: 'https://theurbanloftcafe.com',
 };
 

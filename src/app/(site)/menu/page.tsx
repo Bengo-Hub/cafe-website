@@ -82,7 +82,7 @@ export default function MenuPage() {
   };
 
   const handleRedirect = (item: MenuItem, action: 'add-to-cart' | 'view' | 'whitelist') => {
-    const orderingPwaUrl = config.services.orderingPwa || 'https://ordersapp.codevertexitsolutions.com';
+    const orderingPwaUrl = config.services.orderingPwa || 'https://ordering.codevertexafrica.com';
     const redirectUrl = `${orderingPwaUrl}/${tenantSlug}/menu?item_id=${item.id}&action=${action}`;
 
     window.location.href = redirectUrl;

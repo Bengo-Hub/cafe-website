@@ -118,7 +118,7 @@ Post-MVP: outlet selector in dashboard header; API calls scoped by `X-Outlet-ID`
 ### SSO only (PKCE, no local login form)
 
 - **Client ID**: `cafe-website` (public client, PKCE)
-- **Auth service**: `NEXT_PUBLIC_AUTH_SERVICE_URL` (default `https://sso.codevertexitsolutions.com`)
+- **Auth service**: `NEXT_PUBLIC_AUTH_SERVICE_URL` (default `https://sso.codevertexafrica.com`)
 - **Callback**: `{origin}/auth/callback` (must be registered in auth-api OAuth client redirect_uris)
 
 ### Flow
@@ -193,14 +193,14 @@ All API data fetching is done via TanStack Query (`useQuery` / `useMutation`). N
 
 | Service | Env variable | Default |
 |---------|-------------|---------|
-| Auth | `NEXT_PUBLIC_AUTH_SERVICE_URL` | `https://sso.codevertexitsolutions.com` |
-| Auth UI | `NEXT_PUBLIC_AUTH_UI_URL` | `https://accounts.codevertexitsolutions.com` |
-| Ordering | `NEXT_PUBLIC_ORDERING_SERVICE_URL` | `https://orderingapi.codevertexitsolutions.com` |
-| Ordering PWA | `NEXT_PUBLIC_ORDERING_PWA_URL` | `https://ordersapp.codevertexitsolutions.com` |
-| Logistics | `NEXT_PUBLIC_LOGISTICS_SERVICE_URL` | `https://logisticsapi.codevertexitsolutions.com` |
+| Auth | `NEXT_PUBLIC_AUTH_SERVICE_URL` | `https://sso.codevertexafrica.com` |
+| Auth UI | `NEXT_PUBLIC_AUTH_UI_URL` | `https://accounts.codevertexafrica.com` |
+| Ordering | `NEXT_PUBLIC_ORDERING_SERVICE_URL` | `https://orderingapi.codevertexafrica.com` |
+| Ordering PWA | `NEXT_PUBLIC_ORDERING_PWA_URL` | `https://ordering.codevertexafrica.com` |
+| Logistics | `NEXT_PUBLIC_LOGISTICS_SERVICE_URL` | `https://logisticsapi.codevertexafrica.com` |
 | Inventory | `NEXT_PUBLIC_INVENTORY_SERVICE_URL` | (not set) |
-| Treasury | `NEXT_PUBLIC_TREASURY_SERVICE_URL` | `https://booksapi.codevertexitsolutions.com` |
-| Notifications | `NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL` | `https://notifications.codevertexitsolutions.com` |
+| Treasury | `NEXT_PUBLIC_TREASURY_SERVICE_URL` | `https://booksapi.codevertexafrica.com` |
+| Notifications | `NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL` | `https://notifications.codevertexafrica.com` |
 
 ---
 

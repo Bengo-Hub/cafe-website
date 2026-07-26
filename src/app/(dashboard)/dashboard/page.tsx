@@ -25,11 +25,11 @@ import Link from 'next/link';
 function buildServiceLinks(orgSlug: string | undefined) {
   const slug = orgSlug ? `/${orgSlug}` : '';
   return [
-    { label: 'Inventory', href: `https://inventory.codevertexitsolutions.com${slug}`, permission: 'inventory.items.view' as const, icon: Box },
-    { label: 'Ordering', href: `https://ordersapp.codevertexitsolutions.com${slug}`, permission: 'ordering.orders.view' as const, icon: ShoppingBag },
-    { label: 'Logistics', href: `https://logistics.codevertexitsolutions.com${slug}`, permission: 'logistics.fleet.view' as const, icon: Bike },
-    { label: 'Treasury', href: `https://books.codevertexitsolutions.com${slug}`, permission: null as null, icon: BookOpen },
-    { label: 'POS Terminal', href: `https://pos.codevertexitsolutions.com${slug}`, permission: null as null, icon: Monitor },
+    { label: 'Inventory', href: `https://inventory.codevertexafrica.com${slug}`, permission: 'inventory.items.view' as const, icon: Box },
+    { label: 'Ordering', href: `https://ordering.codevertexafrica.com${slug}`, permission: 'ordering.orders.view' as const, icon: ShoppingBag },
+    { label: 'Logistics', href: `https://logistics.codevertexafrica.com${slug}`, permission: 'logistics.fleet.view' as const, icon: Bike },
+    { label: 'Treasury', href: `https://books.codevertexafrica.com${slug}`, permission: null as null, icon: BookOpen },
+    { label: 'POS Terminal', href: `https://pos.codevertexafrica.com${slug}`, permission: null as null, icon: Monitor },
   ];
 }
 

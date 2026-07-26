@@ -9,13 +9,13 @@ stringData:
   # API / SERVICE BASE URLS (production)
   # Must match src/config/env.ts and Dockerfile ARGs. For Next.js, pass these at Docker build time via build.sh.
   # ============================================
-  NEXT_PUBLIC_AUTH_SERVICE_URL: "https://sso.codevertexitsolutions.com"
-  NEXT_PUBLIC_AUTH_UI_URL: "https://accounts.codevertexitsolutions.com"
-  NEXT_PUBLIC_ORDERING_SERVICE_URL: "https://orderingapi.codevertexitsolutions.com"
-  NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL: "https://notificationsapi.codevertexitsolutions.com"
-  NEXT_PUBLIC_LOGISTICS_SERVICE_URL: "https://logisticsapi.codevertexitsolutions.com"
-  NEXT_PUBLIC_TREASURY_SERVICE_URL: "https://booksapi.codevertexitsolutions.com"
-  NEXT_PUBLIC_INVENTORY_SERVICE_URL: "https://inventoryapi.codevertexitsolutions.com"
+  NEXT_PUBLIC_AUTH_SERVICE_URL: "https://sso.codevertexafrica.com"
+  NEXT_PUBLIC_AUTH_UI_URL: "https://accounts.codevertexafrica.com"
+  NEXT_PUBLIC_ORDERING_SERVICE_URL: "https://orderingapi.codevertexafrica.com"
+  NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL: "https://notificationsapi.codevertexafrica.com"
+  NEXT_PUBLIC_LOGISTICS_SERVICE_URL: "https://logisticsapi.codevertexafrica.com"
+  NEXT_PUBLIC_TREASURY_SERVICE_URL: "https://booksapi.codevertexafrica.com"
+  NEXT_PUBLIC_INVENTORY_SERVICE_URL: "https://inventoryapi.codevertexafrica.com"
   NEXT_PUBLIC_SITE_URL: "https://theurbanloftcafe.com"
   NEXT_PUBLIC_APP_URL: "https://theurbanloftcafe.com"
   NEXT_PUBLIC_TENANT_SLUG: "urban-loft"
