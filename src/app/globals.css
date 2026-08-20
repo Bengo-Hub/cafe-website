@@ -122,6 +122,66 @@ body::before {
     @apply text-brand-muted dark:text-brand-beige transition-colors duration-500;
   }
 
+  /* Bridges shared-ui-lib's PhoneInputField (its own CSS reads shadcn-style --border/
+     --background/--foreground/--ring/--muted-foreground as space-separated HSL triplets) onto
+     this site's own brand-color system, which uses named Tailwind colors instead of those
+     tokens — without this, PhoneInputField renders with browser-default (unstyled) colors.
+     Two variants matching this site's two existing input aesthetics; compound .PhoneInput
+     selectors so these win over phone-input.css's own base rule regardless of import order. */
+  .phone-input-dark-glass {
+    --border: 0 0% 100%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --ring: 28 83% 53%; /* brand-orange */
+    --muted-foreground: 0 0% 100%;
+  }
+  .PhoneInput.phone-input-dark-glass {
+    background-color: rgb(255 255 255 / 0.05);
+    border-color: rgb(255 255 255 / 0.1);
+  }
+  .phone-input-dark-glass .PhoneInputInput::placeholder {
+    color: rgb(255 255 255 / 0.3);
+  }
+
+  .phone-input-light-admin {
+    --border: 40 14% 79%; /* brand-beige */
+    --background: 0 0% 100%;
+    --foreground: 34 91% 9%; /* brand-dark */
+    --ring: 28 83% 53%; /* brand-orange */
+    --muted-foreground: 33 18% 29%; /* brand-muted */
+  }
+  .PhoneInput.phone-input-light-admin {
+    background-color: rgb(255 255 255 / 0.5);
+    border-color: rgb(209 204 194 / 0.2); /* brand-beige/20 */
+  }
+
+  /* Dual-theme variant, mirroring this site's own light/dark input style (see
+     TableReservationModal/BookingModal's inputCls: bg-brand-light/60 dark:bg-white/5 etc.) */
+  .phone-input-dual-theme {
+    --border: 40 14% 79%; /* brand-beige/40 in light mode */
+    --background: 40 33% 91%; /* brand-light */
+    --foreground: 34 91% 9%; /* brand-dark */
+    --ring: 28 83% 53%; /* brand-orange */
+    --muted-foreground: 33 18% 29%; /* brand-muted */
+  }
+  .PhoneInput.phone-input-dual-theme {
+    background-color: rgb(245 241 236 / 0.6); /* brand-light/60 */
+    border-color: rgb(209 204 194 / 0.4); /* brand-beige/40 */
+  }
+  .dark .phone-input-dual-theme {
+    --border: 0 0% 100%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --muted-foreground: 0 0% 100%;
+  }
+  .dark .PhoneInput.phone-input-dual-theme {
+    background-color: rgb(255 255 255 / 0.05);
+    border-color: rgb(255 255 255 / 0.1);
+  }
+  .dark .phone-input-dual-theme .PhoneInputInput::placeholder {
+    color: rgb(255 255 255 / 0.3);
+  }
+
   /* Enhanced Glass Morphism with theme support */
   .glass-morphism {
     @apply backdrop-blur-xl bg-brand-light/10 dark:bg-brand-dark/40 border border-brand-beige/20 dark:border-brand-orange/10 transition-all duration-500;

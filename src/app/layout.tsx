@@ -5,6 +5,7 @@ import { ChunkErrorHandler } from '@/components/ChunkErrorHandler';
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Toaster } from 'sonner';
+import '@bengo-hub/shared-ui-lib/contact/style.css';
 import './globals.css';
 
 const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist-sans' });

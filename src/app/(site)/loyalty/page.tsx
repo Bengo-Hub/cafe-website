@@ -12,6 +12,7 @@ import { Award, CheckCircle2, Gift, Phone, Star, Trophy, Zap } from 'lucide-reac
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { PhoneInputField } from '@bengo-hub/shared-ui-lib/contact';
 
 const TIER_STYLES: Record<string, { color: string; bgColor: string; borderColor: string }> = {
   Bronze:   { color: 'text-brand-orange',  bgColor: 'bg-brand-orange/5',  borderColor: 'border-brand-orange/20' },
@@ -32,13 +33,14 @@ function PhoneLookupForm({ onFound }: { onFound: (phone: string) => void }) {
   return (
     <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto mt-8">
       <div className="relative flex-1">
-        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-orange/60" />
-        <input
-          type="tel"
+        {/* PhoneInputField has its own flag/country selector on the left, so the standalone
+            Phone icon overlay (which the old plain <input> needed) is dropped — it would
+            overlap. phone-input-dark-glass bridges this site's brand tokens (globals.css). */}
+        <PhoneInputField
           value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="+254 7XX XXX XXX"
-          className="w-full h-14 pl-12 pr-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-brand-orange/50 transition-all"
+          onChange={setInput}
+          placeholder="7XX XXX XXX"
+          className="phone-input-dark-glass !h-14 !rounded-2xl"
         />
       </div>
       <Button

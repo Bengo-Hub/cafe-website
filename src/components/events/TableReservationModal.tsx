@@ -6,6 +6,7 @@ import type { CatalogEvent } from '@/lib/api/events';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Building2, CalendarDays, CheckCircle2, ChevronRight, Loader2, MapPin, Users, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { PhoneInputField } from '@bengo-hub/shared-ui-lib/contact';
 
 interface Props {
   onClose: () => void;
@@ -226,7 +227,11 @@ export function TableReservationModal({ onClose, selectedEvent }: Props) {
                     </div>
                     <div>
                       <label className={labelCls}>Phone</label>
-                      <input type="tel" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} placeholder="+254 7XX…" className={inputCls} />
+                      <PhoneInputField
+                        value={form.phone}
+                        onChange={(v) => setForm((f) => ({ ...f, phone: v }))}
+                        className="phone-input-dual-theme !h-12 !rounded-xl"
+                      />
                     </div>
                     <div>
                       <label className={labelCls}>Email</label>

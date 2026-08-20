@@ -4,8 +4,9 @@ import { Badge, Button, Card } from '@/components/ui';
 import { useLoyaltyAccountByPhone, useLoyaltyPrograms, useLoyaltyTransactions } from '@/hooks/use-loyalty';
 import { type LoyaltyAccount } from '@/lib/api/loyalty';
 import { motion } from 'framer-motion';
-import { Gift, Loader2, Phone, Search, Star, Trophy, TrendingUp } from 'lucide-react';
+import { Gift, Loader2, Search, Star, Trophy, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
+import { PhoneInputField } from '@bengo-hub/shared-ui-lib/contact';
 
 function TierBadge({ tier }: { tier: string }) {
   const colors: Record<string, string> = {
@@ -189,13 +190,14 @@ export default function LoyaltyDashboard() {
         <h2 className="text-xl font-black text-primary-brand">Member Lookup</h2>
         <form onSubmit={handleSearch} className="flex gap-3 max-w-md">
           <div className="relative flex-1">
-            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-secondary-brand" />
-            <input
-              type="tel"
+            {/* PhoneInputField has its own flag/country selector on the left, so the standalone
+                Phone icon overlay (which the old plain <input> needed) is dropped.
+                phone-input-light-admin bridges this site's brand tokens (globals.css). */}
+            <PhoneInputField
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+254712345678"
-              className="w-full pl-11 pr-4 py-3 rounded-2xl border border-brand-beige/20 bg-white/50 text-primary-brand placeholder:text-secondary-brand focus:outline-none focus:ring-2 focus:ring-brand-orange/30"
+              onChange={setPhone}
+              placeholder="712345678"
+              className="phone-input-light-admin !rounded-2xl"
             />
           </div>
           <Button type="submit" disabled={phone.length < 6}>

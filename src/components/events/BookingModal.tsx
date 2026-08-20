@@ -6,6 +6,7 @@ import { type TicketTier } from '@/lib/api/events';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CalendarDays, CheckCircle2, ChevronRight, Loader2, Tag, Users, X } from 'lucide-react';
 import { useState } from 'react';
+import { PhoneInputField } from '@bengo-hub/shared-ui-lib/contact';
 
 interface Props {
   event: CatalogEvent;
@@ -174,7 +175,11 @@ export function BookingModal({ event, onClose }: Props) {
                     </div>
                     <div>
                       <label className="block text-xs font-black uppercase tracking-widest text-white/60 mb-2">Phone</label>
-                      <input type="tel" value={party.phone} onChange={(e) => setParty((p) => ({ ...p, phone: e.target.value }))} placeholder="+254 7XX..." className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-brand-orange/50" />
+                      <PhoneInputField
+                        value={party.phone}
+                        onChange={(v) => setParty((p) => ({ ...p, phone: v }))}
+                        className="phone-input-dark-glass !h-12 !rounded-xl"
+                      />
                     </div>
                     <div>
                       <label className="block text-xs font-black uppercase tracking-widest text-white/60 mb-2">Email</label>
