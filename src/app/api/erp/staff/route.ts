@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-const ERP_URL = process.env.NEXT_PUBLIC_ERP_API_URL ?? 'https://erp.codevertexafrica.com';
+// Server-to-server call — prefer the in-cluster Service DNS so this never
+// leaves the cluster and round-trips through the public ingress/Cloudflare.
+const ERP_URL =
+  process.env.ERP_BASE_URL ??
+  process.env.NEXT_PUBLIC_ERP_API_URL ??
+  'https://erp.codevertexafrica.com';
 const SERVICE_KEY = process.env.INTERNAL_SERVICE_KEY ?? '';
 
 function erpHeaders() {
