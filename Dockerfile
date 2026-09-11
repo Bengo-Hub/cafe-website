@@ -5,7 +5,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Install pnpm
-RUN npm install -g pnpm
+RUN npm install -g pnpm@10
 
 # Copy package files
 COPY package.json pnpm-lock.yaml* ./
@@ -49,7 +49,7 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Install pnpm in production image
-RUN npm install -g pnpm
+RUN npm install -g pnpm@10
 
 # Copy from builder
 COPY --from=builder /app/package.json /app/pnpm-lock.yaml* ./
