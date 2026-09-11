@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const res = await fetch(
-      `${ERP_URL}/hrm/employees/?tenant=${encodeURIComponent(tenant)}&page_size=100`,
+      `${ERP_URL}/api/v1/hrm/employees/?tenant=${encodeURIComponent(tenant)}&page_size=100`,
       { headers: erpHeaders() }
     );
     const data = await res.json();

@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
   if (endDate) params.set('end_date', endDate);
 
   try {
-    const res = await fetch(`${ERP_URL}/hrm/attendance/records/?${params.toString()}`, {
+    const res = await fetch(`${ERP_URL}/api/v1/hrm/attendance/records/?${params.toString()}`, {
       headers: erpHeaders(),
     });
     const data = await res.json();
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
 
   try {
-    const res = await fetch(`${ERP_URL}/hrm/attendance/records/?tenant=${tenant}`, {
+    const res = await fetch(`${ERP_URL}/api/v1/hrm/attendance/records/?tenant=${tenant}`, {
       method: 'POST',
       headers: erpHeaders(),
       body: JSON.stringify(body),
@@ -76,7 +76,7 @@ export async function PATCH(req: NextRequest) {
   const body = await req.json();
 
   try {
-    const res = await fetch(`${ERP_URL}/hrm/attendance/records/${recordId}/?tenant=${tenant}`, {
+    const res = await fetch(`${ERP_URL}/api/v1/hrm/attendance/records/${recordId}/?tenant=${tenant}`, {
       method: 'PATCH',
       headers: erpHeaders(),
       body: JSON.stringify(body),
