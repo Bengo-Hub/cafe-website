@@ -223,7 +223,6 @@ test.describe('Rider Management Dashboard', () => {
 
     // Verify action buttons exist on active riders
     const detailsBtn = page.locator('button:has-text("Details")').first();
-    const suspendBtn = page.locator('button:has-text("Suspend")').first();
 
     if (await detailsBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
       // Click Details to open KYC review modal for fleet member

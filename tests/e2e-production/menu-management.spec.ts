@@ -202,7 +202,7 @@ test.describe('Menu Management Dashboard', () => {
 
     // Check if recipe ingredients are pre-populated (if recipe exists for this item)
     const ingredientCards = page.locator('[class*="rounded-xl"][class*="bg-brand-beige"]').filter({ hasText: /\w+-\w+/ });
-    const ingredientCount = await ingredientCards.count();
+    console.log(`recipe ingredients pre-populated: ${await ingredientCards.count()}`);
 
     await page.screenshot({ path: path.join(OUTPUT_DIR, 'menu-edit-item-form.png'), fullPage: true });
 

@@ -1,5 +1,4 @@
 import { test, expect } from './helpers/auth-fixture';
-import { DashboardNav } from './helpers/dashboard-nav';
 import { NetworkLogger } from './helpers/network-logger';
 import { KubectlLogger } from './helpers/kubectl-logger';
 import * as path from 'path';
@@ -8,13 +7,11 @@ const OUTPUT_DIR = path.join(__dirname, '..', '..', 'test-results', 'production'
 
 test.describe.serial('Order Management Dashboard', () => {
   let logger: NetworkLogger;
-  let nav: DashboardNav;
   let k8sLogger: KubectlLogger;
 
   test.beforeEach(async ({ authenticatedPage }) => {
     logger = new NetworkLogger();
     logger.attachToPage(authenticatedPage);
-    nav = new DashboardNav(authenticatedPage);
     k8sLogger = new KubectlLogger();
   });
 
