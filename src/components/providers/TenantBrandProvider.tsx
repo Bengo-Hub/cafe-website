@@ -1,6 +1,7 @@
 'use client';
 
 import { fetchTenantBySlug, type TenantBrand } from '@/lib/api/tenants';
+import { serviceAppName } from '@bengo-hub/shared-ui-lib/branding';
 import { useTenantSlug } from '@/hooks/use-tenant-slug';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -80,11 +81,16 @@ export function TenantBrandProvider({ children }: { children: ReactNode }) {
     applyBrandColors(tenant ?? null);
   }, [tenant]);
 
-  const getServiceTitle = (appName: string) => {
-    const tenantName = effectiveBrand?.orgName || effectiveBrand?.name || '';
-    const firstWord = tenantName.split(' ')[0] || 'Codevertex';
-    return `${firstWord} ${appName}`;
-  };
+  // Shared rule (shared-ui-lib branding): the tenant's own name for this site (Accounts >
+  // Branding, key "cafe") wins, else "<brand word> <appName>" ("The Urban Loft Cafe" gives
+  // "The Urban Cafe").
+  const getServiceTitle = (appName: string) =>
+    serviceAppName(
+      effectiveBrand?.orgName || effectiveBrand?.name,
+      appName,
+      'Codevertex',
+      effectiveBrand?.serviceBranding?.cafe,
+    );
 
   const value = useMemo<TenantBrandContextValue>(
     () => ({
