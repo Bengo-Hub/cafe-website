@@ -197,6 +197,7 @@ All API data fetching is done via TanStack Query (`useQuery` / `useMutation`). N
 | Auth UI | `NEXT_PUBLIC_AUTH_UI_URL` | `https://accounts.codevertexafrica.com` |
 | Ordering | `NEXT_PUBLIC_ORDERING_SERVICE_URL` | `https://orderingapi.codevertexafrica.com` |
 | Ordering PWA | `NEXT_PUBLIC_ORDERING_PWA_URL` | `https://ordering.codevertexafrica.com` |
+| Cafe store domain | `NEXT_PUBLIC_ORDERING_STORE_URL` | empty (set to `https://urbaneats.theurbanloftcafe.com` once active) |
 | Logistics | `NEXT_PUBLIC_LOGISTICS_SERVICE_URL` | `https://logisticsapi.codevertexafrica.com` |
 | Inventory | `NEXT_PUBLIC_INVENTORY_SERVICE_URL` | (not set) |
 | Treasury | `NEXT_PUBLIC_TREASURY_SERVICE_URL` | `https://booksapi.codevertexafrica.com` |
