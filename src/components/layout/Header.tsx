@@ -108,17 +108,32 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-paper/95 backdrop-blur supports-[backdrop-filter]:bg-paper/85">
       <nav className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:h-[72px] lg:px-8" aria-label="Main">
-        <Link href="/" className="flex shrink-0 items-center gap-3" aria-label={`${siteName} home`}>
-          <span className="relative h-10 w-10 overflow-hidden rounded-md border border-line bg-white">
-            {logoSrc.startsWith('http') ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={logoSrc} alt="" className="h-full w-full object-cover" />
-            ) : (
-              <Image src={logoSrc} alt="" fill sizes="40px" className="object-cover" priority />
-            )}
-          </span>
-          <span className="font-display text-xl leading-none text-ink">{siteName}</span>
-        </Link>
+        {isDashboard ? (
+          <Link href="/" className="flex shrink-0 items-center gap-3" aria-label={`${siteName} home`}>
+            <span className="relative h-10 w-10 overflow-hidden rounded-md border border-line bg-white">
+              {logoSrc.startsWith('http') ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={logoSrc} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <Image src={logoSrc} alt="" fill sizes="40px" className="object-cover" priority />
+              )}
+            </span>
+            <span className="font-display text-xl leading-none text-ink">{siteName}</span>
+          </Link>
+        ) : (
+          // The full logo (sunburst and "The Urban Loft" wordmark), trimmed of its white margin. A white
+          // plate keeps the brown lettering readable in the dark theme.
+          <Link href="/" className="flex shrink-0 items-center rounded-md dark:bg-white dark:px-1.5 dark:py-1" aria-label={`${siteName} home`}>
+            <Image
+              src="/images/logo/urban-loft-lockup.png"
+              alt={siteName}
+              width={618}
+              height={364}
+              priority
+              className="h-11 w-auto lg:h-[52px]"
+            />
+          </Link>
+        )}
 
         {!isDashboard && (
           <div className="ml-4 hidden items-center lg:flex">

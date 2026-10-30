@@ -6,6 +6,7 @@ import { orderingUrl } from '@/lib/ordering-url';
 import { SITE } from '@/lib/site';
 import { PoweredByBadge } from '@bengo-hub/shared-ui-lib';
 import { Facebook, Instagram } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FaTiktok } from 'react-icons/fa';
@@ -44,7 +45,9 @@ export function Footer() {
     <footer className="bg-roast text-white">
       <div className="mx-auto grid max-w-7xl gap-12 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr] lg:px-8">
         <div>
-          <p className="font-display text-3xl leading-none">{siteName}</p>
+          <span className="inline-block rounded-md bg-white px-3 py-2">
+            <Image src="/images/logo/urban-loft-lockup.png" alt={siteName} width={618} height={364} className="h-14 w-auto" />
+          </span>
           <p className="mt-3 max-w-xs text-[15px] text-white/70">Cafe, restaurant, work hub and rooms in {SITE.town}.</p>
           <div className="mt-6">
             <VisitDetails tone="light" />
