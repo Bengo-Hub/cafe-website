@@ -3,6 +3,7 @@
 import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
 import { Button } from '@/components/ui';
 import { useAuth } from '@/hooks/use-auth';
+import { orderingUrl } from '@/lib/ordering-url';
 import { useMe } from '@/hooks/use-me';
 import type { UserProfile } from '@/lib/store/auth-store';
 import { useThemeStore } from '@/lib/store/theme-store';
@@ -16,7 +17,6 @@ import {
     Menu,
     Moon,
     Phone,
-    Search,
     Settings,
     ShoppingBag,
     Sun,
@@ -72,6 +72,7 @@ export function Header() {
   const navigation = [
     { name: 'Home', href: '/' },
     { name: 'Menu', href: '/menu' },
+    { name: 'Book a table', href: '/reserve' },
     { name: 'Services', href: '/services' },
     { name: 'Events', href: '/events' },
     { name: 'Loyalty', href: '/loyalty' },
@@ -159,13 +160,14 @@ export function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-2 md:gap-4">
-            {/* Search & Cart - hidden on dashboard */}
+            {/* Online ordering (the cafe's store on the ordering service) - hidden on dashboard */}
             {!isDashboard && (
-              <div className="hidden md:flex items-center gap-2">
-                <button className="p-2 rounded-xl text-brand-muted dark:text-brand-beige/70 hover:bg-brand-orange/10 hover:text-brand-orange transition-all">
-                  <Search className="h-5 w-5" />
-                </button>
-              </div>
+              <a
+                href={orderingUrl('/catalog', tenant?.slug || undefined)}
+                className="hidden md:inline-flex items-center gap-2 rounded-xl bg-brand-orange px-4 py-2 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-brand-orange/25 hover:bg-brand-burnt transition-all"
+              >
+                <ShoppingBag className="h-4 w-4" /> Order online
+              </a>
             )}
 
             <div className="h-6 w-[1px] bg-brand-beige/20 dark:bg-brand-orange/10 hidden md:block" />
@@ -363,14 +365,14 @@ export function Header() {
                 {/* Quick Actions */}
                 <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
                   <div className="grid grid-cols-2 gap-3">
-                    <Link
-                      href="/menu"
+                    <a
+                      href={orderingUrl('/catalog', tenant?.slug || undefined)}
                       onClick={() => setMobileMenuOpen(false)}
                       className="flex flex-col items-center justify-center p-3 rounded-xl bg-brand-orange/10 border border-brand-orange/20 hover:bg-brand-orange/20 transition-all"
                     >
                       <ShoppingBag className="h-5 w-5 text-brand-orange mb-1" />
-                      <span className="text-xs font-semibold text-brand-dark dark:text-white">Order</span>
-                    </Link>
+                      <span className="text-xs font-semibold text-brand-dark dark:text-white">Order online</span>
+                    </a>
                     <button
                       onClick={toggleTheme}
                       className="flex flex-col items-center justify-center p-3 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
@@ -440,10 +442,12 @@ export function Header() {
                       </a>
                     ))}
                   </div>
-                  <a href="tel:+254700000000" className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-brand-orange transition-colors">
-                    <Phone className="h-4 w-4" />
-                    <span>Call Us</span>
-                  </a>
+                  {tenant?.contactPhone && (
+                    <a href={`tel:${tenant.contactPhone.replace(/\s+/g, '')}`} className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-brand-orange transition-colors">
+                      <Phone className="h-4 w-4" />
+                      <span>Call Us</span>
+                    </a>
+                  )}
                 </div>
               </div>
             </motion.div>

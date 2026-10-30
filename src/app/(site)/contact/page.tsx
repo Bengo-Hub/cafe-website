@@ -1,6 +1,7 @@
 'use client';
 
 import { Button, Input } from '@/components/ui';
+import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
 import { motion } from 'framer-motion';
 import { CheckCircle, Clock, Loader2, Mail, MapPin, Phone, Send, XCircle } from 'lucide-react';
 import Image from 'next/image';
@@ -9,6 +10,7 @@ import { useState } from 'react';
 type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
 
 export default function ContactPage() {
+  const { tenant } = useTenantBrand();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -95,8 +97,8 @@ export default function ContactPage() {
       <section className="container relative z-10 -mt-24 pb-20">
         <div className="grid gap-8 md:grid-cols-3">
           {[
-            { icon: Phone, title: "Call Us", details: ["0116010638"], color: "bg-brand-brown" },
-            { icon: Mail, title: "Email Us", details: ["urbanloftc@gmail.com"], color: "bg-brand-orange" },
+            { icon: Phone, title: "Call Us", details: [tenant?.contactPhone || "0116010638"], color: "bg-brand-brown" },
+            { icon: Mail, title: "Email Us", details: [tenant?.contactEmail || "urbanloftc@gmail.com"], color: "bg-brand-orange" },
             { icon: Clock, title: "Visit Us", details: ["Everyday: 7:30AM - 10:00PM"], color: "bg-brand-dark" }
           ].map((item, idx) => (
             <motion.div

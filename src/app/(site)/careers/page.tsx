@@ -1,6 +1,7 @@
 'use client';
 
 import { Button, Card, Input } from '@/components/ui';
+import { enquiryLines, sendEnquiry } from '@/lib/api/enquiry';
 import { dummyJobs, Job } from '@/lib/dummy-data/jobs';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Briefcase, ChevronRight, Filter, MapPin, Search, Users } from 'lucide-react';
@@ -11,6 +12,28 @@ export default function CareersPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('All');
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [apply, setApply] = useState({ name: '', email: '', phone: '', about: '' });
+  const [applyStatus, setApplyStatus] = useState<'idle' | 'submitting' | 'sent' | 'error'>('idle');
+  const [applyError, setApplyError] = useState('');
+
+  const submitApplication = async (e: React.FormEvent, job: Job) => {
+    e.preventDefault();
+    setApplyStatus('submitting');
+    setApplyError('');
+    try {
+      await sendEnquiry({
+        name: apply.name,
+        email: apply.email,
+        subject: `Job application: ${job.title}`,
+        message: enquiryLines({ Role: job.title, Phone: apply.phone, About: apply.about }),
+      });
+      setApplyStatus('sent');
+      setApply({ name: '', email: '', phone: '', about: '' });
+    } catch (err) {
+      setApplyStatus('error');
+      setApplyError(err instanceof Error ? err.message : 'Failed to send. Please try again.');
+    }
+  };
 
   const departments = ['All', ...Array.from(new Set(dummyJobs.map((job) => job.department)))];
 
@@ -198,7 +221,7 @@ export default function CareersPage() {
                           </div>
                         </div>
                         <Button 
-                          onClick={() => setSelectedJob(job)} 
+                          onClick={() => { setSelectedJob(job); setApplyStatus('idle'); }}
                           className="bg-brand-orange hover:bg-brand-gold text-white font-black rounded-2xl px-10 h-14 shadow-xl shadow-brand-orange/20 transition-all hover:scale-105 active:scale-95"
                         >
                           View Details
@@ -295,19 +318,31 @@ export default function CareersPage() {
                     <div className="p-8 rounded-[2rem] bg-brand-orange/5 border border-brand-orange/20">
                       <h3 className="text-xl font-black text-white mb-6">Quick Apply</h3>
                       <p className="text-brand-beige/60 text-sm mb-8 leading-relaxed">
-                        Ready to join the team? Send your CV and a brief cover letter to our recruitment team.
+                        Ready to join the team? Tell us a little about yourself and our recruitment team will reply by email.
                       </p>
-                      <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); alert('Application submitted!'); setSelectedJob(null); }}>
-                        <Input placeholder="Full Name" required className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-brand-orange rounded-xl h-12" />
-                        <Input placeholder="Email Address" type="email" required className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-brand-orange rounded-xl h-12" />
-                        <div className="flex flex-col gap-2">
-                          <label className="text-[10px] font-black text-brand-orange uppercase tracking-[0.2em]">Upload CV (PDF)</label>
-                          <Input type="file" accept=".pdf" required className="bg-white/5 border-white/10 text-white file:bg-brand-orange/10 file:text-brand-orange file:border-0 file:rounded-lg file:px-4 file:py-1 file:mr-4 file:text-xs file:font-black rounded-xl h-12" />
-                        </div>
-                        <Button type="submit" className="w-full h-14 bg-brand-orange hover:bg-brand-gold text-white font-black rounded-xl shadow-xl shadow-brand-orange/20 transition-all">
-                          Submit Application
-                        </Button>
-                      </form>
+                      {applyStatus === 'sent' ? (
+                        <p className="rounded-2xl bg-green-500/15 p-4 text-sm font-semibold text-green-300" role="status">
+                          Application sent. We will be in touch.
+                        </p>
+                      ) : (
+                        <form className="space-y-4" onSubmit={(e) => submitApplication(e, selectedJob)}>
+                          <Input placeholder="Full Name" required value={apply.name} onChange={(e) => setApply({ ...apply, name: e.target.value })} className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-brand-orange rounded-xl h-12" />
+                          <Input placeholder="Email Address" type="email" required value={apply.email} onChange={(e) => setApply({ ...apply, email: e.target.value })} className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-brand-orange rounded-xl h-12" />
+                          <Input placeholder="Phone Number" type="tel" required value={apply.phone} onChange={(e) => setApply({ ...apply, phone: e.target.value })} className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-brand-orange rounded-xl h-12" />
+                          <textarea
+                            placeholder="Your experience, and a link to your CV (Google Drive, LinkedIn)"
+                            required
+                            rows={4}
+                            value={apply.about}
+                            onChange={(e) => setApply({ ...apply, about: e.target.value })}
+                            className="w-full rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white placeholder:text-white/30 focus:border-brand-orange focus:outline-none"
+                          />
+                          {applyStatus === 'error' && <p className="text-sm font-semibold text-red-300" role="alert">{applyError}</p>}
+                          <Button type="submit" disabled={applyStatus === 'submitting'} className="w-full h-14 bg-brand-orange hover:bg-brand-gold text-white font-black rounded-xl shadow-xl shadow-brand-orange/20 transition-all">
+                            {applyStatus === 'submitting' ? 'Sending...' : 'Submit Application'}
+                          </Button>
+                        </form>
+                      )}
                     </div>
                     
                     <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10">

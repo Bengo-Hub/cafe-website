@@ -1,6 +1,7 @@
 'use client';
 
 import { Button, Card, Input } from '@/components/ui';
+import { enquiryLines, sendEnquiry } from '@/lib/api/enquiry';
 import { motion } from 'framer-motion';
 import { BarChart3, CheckCircle2, DollarSign, Globe, HelpCircle, ShieldCheck, Users } from 'lucide-react';
 import Image from 'next/image';
@@ -22,11 +23,32 @@ export default function FranchisingPage() {
     setFormStep(formStep + 1);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'sent' | 'error'>('idle');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Thank you for your interest! Our franchising team will contact you shortly.');
-    setFormStep(1);
-    setFormData({ name: '', email: '', phone: '', location: '', investment: '', experience: '' });
+    setStatus('submitting');
+    setError('');
+    try {
+      await sendEnquiry({
+        name: formData.name,
+        email: formData.email,
+        subject: `Franchise enquiry: ${formData.location}`,
+        message: enquiryLines({
+          Phone: formData.phone,
+          'Proposed location': formData.location,
+          'Investment capacity': formData.investment,
+          'Business experience': formData.experience,
+        }),
+      });
+      setStatus('sent');
+      setFormStep(1);
+      setFormData({ name: '', email: '', phone: '', location: '', investment: '', experience: '' });
+    } catch (err) {
+      setStatus('error');
+      setError(err instanceof Error ? err.message : 'Failed to send. Please try again.');
+    }
   };
 
   return (
@@ -212,6 +234,14 @@ export default function FranchisingPage() {
                 <p className="mt-2 font-light opacity-90">Step {formStep} of 2</p>
               </div>
               <div className="p-8 md:p-12">
+                {status === 'sent' && (
+                  <p className="mb-8 flex items-center gap-3 rounded-2xl bg-green-500/15 p-4 text-sm font-semibold text-green-700 dark:text-green-300" role="status">
+                    <CheckCircle2 className="h-5 w-5 shrink-0" /> Thank you. Our franchising team will contact you shortly.
+                  </p>
+                )}
+                {status === 'error' && (
+                  <p className="mb-8 rounded-2xl bg-red-500/15 p-4 text-sm font-semibold text-red-700 dark:text-red-300" role="alert">{error}</p>
+                )}
                 {formStep === 1 ? (
                   <form onSubmit={handleNext} className="space-y-8">
                     <div className="grid gap-8 md:grid-cols-2">
@@ -287,8 +317,10 @@ export default function FranchisingPage() {
                       />
                     </div>
                     <div className="flex gap-6">
-                      <Button variant="outline" className="w-1/3 h-16 border-brand-orange text-brand-orange hover:bg-brand-orange/10 rounded-xl font-bold" onClick={() => setFormStep(1)}>Back</Button>
-                      <Button type="submit" className="w-2/3 h-16 bg-brand-orange hover:bg-brand-orange/90 font-bold rounded-xl text-lg shadow-xl shadow-brand-orange/20">Submit Inquiry</Button>
+                      <Button type="button" variant="outline" className="w-1/3 h-16 border-brand-orange text-brand-orange hover:bg-brand-orange/10 rounded-xl font-bold" onClick={() => setFormStep(1)}>Back</Button>
+                      <Button type="submit" disabled={status === 'submitting'} className="w-2/3 h-16 bg-brand-orange hover:bg-brand-orange/90 font-bold rounded-xl text-lg shadow-xl shadow-brand-orange/20">
+                        {status === 'submitting' ? 'Sending...' : 'Submit Inquiry'}
+                      </Button>
                     </div>
                   </form>
                 )}

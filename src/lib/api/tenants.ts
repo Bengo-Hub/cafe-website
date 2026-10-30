@@ -22,6 +22,8 @@ export interface TenantResponse {
   name: string;
   slug: string;
   status?: string;
+  contact_phone?: string;
+  contact_email?: string;
   metadata?: Record<string, unknown>;
   created_at?: string;
   updated_at?: string;
@@ -35,6 +37,9 @@ export interface TenantBrand {
   primaryColor: string | null;
   secondaryColor: string | null;
   orgName: string;
+  /** Contact details the business set in its account (public on the tenant record). */
+  contactPhone?: string;
+  contactEmail?: string;
   /** The tenant's own app names (metadata service_branding, set in Accounts > Branding). */
   serviceBranding?: Record<string, ServiceBrandingEntry>;
 }
@@ -61,6 +66,8 @@ function parseBrandFromTenant(t: TenantResponse): TenantBrand {
     secondaryColor: typeof secondaryColor === 'string' ? secondaryColor : null,
     orgName: typeof orgName === 'string' ? orgName : (t.name ?? ''),
     serviceBranding: serviceBrandingMap(t.metadata),
+    ...(t.contact_phone ? { contactPhone: t.contact_phone } : {}),
+    ...(t.contact_email ? { contactEmail: t.contact_email } : {}),
   };
 }
 

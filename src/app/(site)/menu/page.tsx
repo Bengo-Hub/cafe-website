@@ -5,7 +5,7 @@ import {
     MenuItemModal
 } from '@/components/sections';
 import { Badge, Button } from '@/components/ui';
-import { config } from '@/config/env';
+import { orderingUrl } from '@/lib/ordering-url';
 import { useMenu } from '@/hooks/use-menu';
 import { useTenantSlug } from '@/hooks/use-tenant-slug';
 import { generateMenuSchema } from '@/lib/utils/schema';
@@ -82,10 +82,7 @@ export default function MenuPage() {
   };
 
   const handleRedirect = (item: MenuItem, action: 'add-to-cart' | 'view' | 'whitelist') => {
-    const orderingPwaUrl = config.services.orderingPwa || 'https://ordering.codevertexafrica.com';
-    const redirectUrl = `${orderingPwaUrl}/${tenantSlug}/menu?item_id=${item.id}&action=${action}`;
-
-    window.location.href = redirectUrl;
+    window.location.href = orderingUrl(`/catalog?item_id=${encodeURIComponent(item.id)}&action=${action}`, tenantSlug);
   };
 
   const handleOrder = (item: MenuItem) => {

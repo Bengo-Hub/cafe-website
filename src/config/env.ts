@@ -19,6 +19,9 @@ export const config = {
     auth: process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || PRODUCTION.auth,
     ordering: process.env.NEXT_PUBLIC_ORDERING_SERVICE_URL || PRODUCTION.ordering,
     orderingPwa: process.env.NEXT_PUBLIC_ORDERING_PWA_URL || PRODUCTION.orderingPwa,
+    // The cafe's own store domain (e.g. https://urbaneats.theurbanloftcafe.com), which serves the
+    // storefront without the slug in the path. Empty: use the shared PWA at /<slug>.
+    orderingStore: process.env.NEXT_PUBLIC_ORDERING_STORE_URL || '',
     logistics: process.env.NEXT_PUBLIC_LOGISTICS_SERVICE_URL || PRODUCTION.logistics,
     treasury: process.env.NEXT_PUBLIC_TREASURY_SERVICE_URL || PRODUCTION.treasury,
     booking: process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL || PRODUCTION.booking,
