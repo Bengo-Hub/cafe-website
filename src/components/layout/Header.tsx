@@ -1,459 +1,318 @@
 'use client';
 
 import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
-import { Button } from '@/components/ui';
 import { useAuth } from '@/hooks/use-auth';
-import { orderingUrl } from '@/lib/ordering-url';
 import { useMe } from '@/hooks/use-me';
+import { orderingUrl } from '@/lib/ordering-url';
+import { SITE, displayPhone, telHref } from '@/lib/site';
 import type { UserProfile } from '@/lib/store/auth-store';
 import { useThemeStore } from '@/lib/store/theme-store';
-import { AnimatePresence, motion } from 'framer-motion';
-import {
-    Bell,
-    ChevronDown,
-    Facebook,
-    Instagram,
-    LogOut,
-    Menu,
-    Moon,
-    Phone,
-    Settings,
-    ShoppingBag,
-    Sun,
-    Twitter,
-    User,
-    X
-} from 'lucide-react';
+import { Bell, ChevronDown, LogOut, Menu, Moon, Phone, Settings, ShoppingBag, Sun, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { NAV, type NavLink } from './nav';
+
 
 function displayName(user: UserProfile | null | undefined): string {
   if (!user) return 'Account';
   return user.name ?? user.fullName ?? user.email?.split('@')[0] ?? 'Account';
 }
 
+function isActive(pathname: string, href: string): boolean {
+  return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
+}
+
+/** A top-level group with a dropdown. Opens on hover or click, closes on Escape or outside click. */
+function NavGroup({ item, pathname }: { item: { name: string; items: NavLink[] }; pathname: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const active = item.items.some((i) => isActive(pathname, i.href));
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  useEffect(() => setOpen(false), [pathname]);
+
+  return (
+    <div ref={ref} className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+        className={`flex items-center gap-1 px-3 py-2 text-[15px] font-medium transition-colors ${
+          active ? 'text-ink underline decoration-loft decoration-2 underline-offset-[10px]' : 'text-ink-soft hover:text-ink'
+        }`}
+      >
+        {item.name}
+        <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
+      </button>
+      {open && (
+        <div className="absolute left-0 top-full z-50 pt-2">
+          <ul className="w-72 rounded-lg border border-line bg-paper p-2 shadow-lg">
+            {item.items.map((sub) => (
+              <li key={sub.href}>
+                <Link
+                  href={sub.href}
+                  className={`block rounded-md px-3 py-2.5 hover:bg-leaf ${isActive(pathname, sub.href) ? 'bg-leaf' : ''}`}
+                >
+                  <span className="block text-[15px] font-medium text-ink">{sub.name}</span>
+                  {sub.note && <span className="block text-sm text-ink-soft">{sub.note}</span>}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Header() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
-  const pathname = usePathname();
+  const pathname = usePathname() ?? '/';
   const { theme, toggleTheme } = useThemeStore();
   const { isAuthenticated, user, login, logout } = useAuth();
   const { me, roles: meRoles } = useMe();
   const { tenant, getServiceTitle } = useTenantBrand();
-  const siteName = getServiceTitle('Cafe');
+  const isDashboard = pathname.startsWith('/dashboard');
+  // The public site carries the cafe's own name; the staff dashboard follows the shared app-name rule.
+  const siteName = isDashboard ? getServiceTitle('Cafe') : SITE.name;
   const logoSrc = tenant?.logoUrl ?? '/images/logo/logo.jpeg';
-  const profileRef = useRef<HTMLDivElement>(null);
-  const userRole = (meRoles?.[0] ?? me?.roles?.[0] ?? user?.role ?? (user?.roles as string[] | undefined)?.[0] ?? 'Staff');
+  const phone = displayPhone(tenant?.contactPhone || SITE.phone);
+  const storeHref = orderingUrl('/catalog', tenant?.slug || undefined);
+  const hrefFor = (href: string) => (href === '/menu' ? storeHref : href);
+  const userRole = meRoles?.[0] ?? me?.roles?.[0] ?? user?.role ?? (user?.roles as string[] | undefined)?.[0] ?? 'Staff';
 
+  useEffect(() => setMobileOpen(false), [pathname]);
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      setIsScrolled(currentScrollY > 50);
-
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsVisible(false);
-      } else {
-        setIsVisible(true);
-      }
-      setLastScrollY(currentScrollY);
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
     };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
-
-  const isDashboard = pathname?.startsWith('/dashboard') ?? false;
-
-  const navigation = [
-    { name: 'Home', href: '/' },
-    { name: 'Menu', href: '/menu' },
-    { name: 'Book a table', href: '/reserve' },
-    { name: 'Services', href: '/services' },
-    { name: 'Events', href: '/events' },
-    { name: 'Loyalty', href: '/loyalty' },
-    { name: 'About', href: '/about' },
-    { name: 'Contact', href: '/contact' },
-  ];
-
-  const socialLinks = [
-    { icon: Facebook, href: '#' },
-    { icon: Instagram, href: '#' },
-    { icon: Twitter, href: '#' },
-  ];
+  }, [mobileOpen]);
 
   return (
-    <header
-      className={`sticky top-0 z-50 transition-all duration-500 ${isVisible ? 'translate-y-0' : '-translate-y-full'
-        } ${isScrolled
-          ? 'py-2 bg-white/80 dark:bg-brand-dark/80 backdrop-blur-xl shadow-xl border-b border-brand-orange/10'
-          : 'py-4 bg-transparent'
-        }`}
-    >
-      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 md:h-20 items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center flex-shrink-0">
-            <Link href="/" className="flex items-center gap-3 group" aria-label={`${siteName} Home`}>
-              <div className="relative h-10 w-10 md:h-14 md:w-14 rounded-2xl overflow-hidden transition-all duration-500 group-hover:rotate-3 shadow-lg shadow-brand-orange/20">
-                {logoSrc.startsWith('http') ? (
-                  <img
-                    src={logoSrc}
-                    alt={`${siteName} logo`}
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                ) : (
-                  <Image
-                    src={logoSrc}
-                    alt={`${siteName} logo`}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                    priority
-                  />
-                )}
-              </div>
-              <div className="hidden sm:flex flex-col">
-                <span className="text-lg md:text-xl font-black text-brand-dark dark:text-brand-light tracking-tight group-hover:text-brand-orange transition-all duration-300">
-                  {siteName}
-                </span>
-                <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-brand-brown dark:text-brand-orange/70 group-hover:text-brand-orange transition-colors">
-                  Eat. Work. Connect. Experience
-                </span>
-              </div>
-            </Link>
-          </div>
+    <header className="sticky top-0 z-50 border-b border-line bg-paper/95 backdrop-blur supports-[backdrop-filter]:bg-paper/85">
+      <nav className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:h-[72px] lg:px-8" aria-label="Main">
+        <Link href="/" className="flex shrink-0 items-center gap-3" aria-label={`${siteName} home`}>
+          <span className="relative h-10 w-10 overflow-hidden rounded-md border border-line bg-white">
+            {logoSrc.startsWith('http') ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={logoSrc} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <Image src={logoSrc} alt="" fill sizes="40px" className="object-cover" priority />
+            )}
+          </span>
+          <span className="font-display text-xl leading-none text-ink">{siteName}</span>
+        </Link>
 
-          {/* Desktop Navigation - hidden on dashboard (dashboard has its own top bar) */}
+        {!isDashboard && (
+          <div className="ml-4 hidden items-center lg:flex">
+            {NAV.map((item) =>
+              'items' in item ? (
+                <NavGroup key={item.name} item={item} pathname={pathname} />
+              ) : (
+                <Link
+                  key={item.name}
+                  href={hrefFor(item.href)}
+                  className={`px-3 py-2 text-[15px] font-medium transition-colors ${
+                    isActive(pathname, item.href)
+                      ? 'text-ink underline decoration-loft decoration-2 underline-offset-[10px]'
+                      : 'text-ink-soft hover:text-ink'
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              ),
+            )}
+          </div>
+        )}
+
+        <div className="ml-auto flex items-center gap-1 sm:gap-2">
           {!isDashboard && (
-            <div className="hidden lg:block">
-              <div className="flex items-center space-x-1">
-                {navigation.map((item) => {
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className={`relative px-4 py-2 text-sm font-bold uppercase tracking-widest transition-all duration-300 group ${isActive
-                        ? 'text-brand-orange'
-                        : 'text-brand-muted dark:text-brand-beige/70 hover:text-brand-orange'
-                        }`}
-                    >
-                      <span className="relative z-10">{item.name}</span>
-                      {isActive && (
-                        <motion.div
-                          layoutId="nav-underline"
-                          className="absolute bottom-0 left-4 right-4 h-0.5 bg-gradient-to-r from-brand-orange to-brand-gold"
-                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-brand-orange/5 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300 -z-10" />
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
+            <>
+              <Link
+                href="/reserve"
+                className="hidden h-10 items-center rounded-md border border-ink/20 px-4 text-sm font-semibold text-ink hover:border-ink xl:inline-flex"
+              >
+                Book a table
+              </Link>
+              <a
+                href={storeHref}
+                className="hidden h-10 items-center gap-2 rounded-md bg-loft px-4 text-sm font-semibold text-white hover:bg-loft-deep sm:inline-flex"
+              >
+                <ShoppingBag className="h-4 w-4" aria-hidden /> Order online
+              </a>
+            </>
           )}
 
-          {/* Actions */}
-          <div className="flex items-center gap-2 md:gap-4">
-            {/* Online ordering (the cafe's store on the ordering service) - hidden on dashboard */}
-            {!isDashboard && (
-              <a
-                href={orderingUrl('/catalog', tenant?.slug || undefined)}
-                className="hidden md:inline-flex items-center gap-2 rounded-xl bg-brand-orange px-4 py-2 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-brand-orange/25 hover:bg-brand-burnt transition-all"
-              >
-                <ShoppingBag className="h-4 w-4" /> Order online
-              </a>
-            )}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="rounded-md p-2 text-ink-soft hover:bg-leaf hover:text-ink"
+            aria-label={theme === 'light' ? 'Use dark theme' : 'Use light theme'}
+          >
+            {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+          </button>
 
-            <div className="h-6 w-[1px] bg-brand-beige/20 dark:bg-brand-orange/10 hidden md:block" />
-
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-xl text-brand-muted dark:text-brand-beige/70 hover:bg-brand-orange/10 hover:text-brand-orange transition-all border border-transparent hover:border-brand-orange/20"
-              aria-label="Toggle theme"
-            >
-              {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+          {isDashboard && isAuthenticated && (
+            <button className="rounded-md p-2 text-ink-soft hover:bg-leaf" aria-label="Notifications">
+              <Bell className="h-5 w-5" />
             </button>
+          )}
 
-            {/* Notification bell (dashboard only) */}
-            {isDashboard && isAuthenticated && (
-              <button className="relative p-2.5 rounded-xl bg-brand-orange/5 text-brand-muted hover:bg-brand-orange/10 hover:text-brand-orange transition-all" aria-label="Notifications">
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-2 right-2 h-2 w-2 bg-brand-orange rounded-full border-2 border-white dark:border-brand-dark" />
+          <div className="hidden md:block">
+            {isAuthenticated ? (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setUserMenuOpen((o) => !o)}
+                  className="flex items-center gap-2 rounded-md p-1 pr-2 hover:bg-leaf"
+                  aria-expanded={userMenuOpen}
+                  aria-haspopup="true"
+                >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-roast text-xs font-bold text-white">
+                    {displayName(user).split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U'}
+                  </span>
+                  <span className="hidden text-left xl:block">
+                    <span className="block max-w-[120px] truncate text-sm font-semibold text-ink">{displayName(user).split(' ')[0]}</span>
+                    {isDashboard && <span className="block text-xs capitalize text-ink-soft">{userRole}</span>}
+                  </span>
+                  <ChevronDown className="h-4 w-4 text-ink-soft" aria-hidden />
+                </button>
+                {userMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" aria-hidden onClick={() => setUserMenuOpen(false)} />
+                    <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border border-line bg-paper p-2 shadow-lg">
+                      <p className="px-3 py-2 text-sm font-semibold text-ink">{displayName(user)}</p>
+                      <p className="truncate px-3 pb-2 text-xs text-ink-soft">{user?.email}</p>
+                      <Link
+                        href={isDashboard ? '/dashboard/settings' : '/profile'}
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-ink hover:bg-leaf"
+                      >
+                        <Settings className="h-4 w-4" /> Settings
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          logout();
+                        }}
+                        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/10"
+                      >
+                        <LogOut className="h-4 w-4" /> Sign out
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <button type="button" onClick={() => login()} className="rounded-md px-3 py-2 text-sm font-semibold text-ink-soft hover:text-ink">
+                Sign in
               </button>
             )}
-
-            {/* Auth / Profile Section */}
-            <div className="hidden md:block">
-              {isAuthenticated ? (
-                <div className="relative" ref={profileRef}>
-                  <button
-                    type="button"
-                    onClick={() => setUserMenuOpen((o) => !o)}
-                    className="flex items-center gap-3 rounded-2xl hover:bg-brand-orange/5 p-1 pr-2 transition-all group"
-                    aria-expanded={userMenuOpen}
-                    aria-haspopup="true"
-                    aria-label="Open profile menu"
-                  >
-                    <div className="h-9 w-9 rounded-xl bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center text-brand-orange font-black text-xs shadow-inner">
-                      {displayName(user).split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U'}
-                    </div>
-                    <div className="hidden sm:block text-left">
-                      <p className="text-xs font-black text-brand-dark dark:text-white truncate max-w-[120px] uppercase tracking-tight group-hover:text-brand-orange transition-colors">
-                        {displayName(user).split(' ')[0]}
-                      </p>
-                      <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest">{userRole}</p>
-                    </div>
-                    <ChevronDown className={`h-4 w-4 text-brand-muted transition-transform duration-300 ${userMenuOpen ? 'rotate-180' : ''}`} />
-                  </button>
-                  <AnimatePresence>
-                    {userMenuOpen && (
-                      <>
-                        <div className="fixed inset-0 z-40" aria-hidden="true" onClick={() => setUserMenuOpen(false)} />
-                        <motion.div
-                          initial={{ opacity: 0, y: -8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -8 }}
-                          transition={{ duration: 0.15 }}
-                          className="absolute right-0 top-full mt-2 z-50 w-56 rounded-2xl p-3 shadow-2xl border border-brand-orange/10 bg-white dark:bg-brand-dark overflow-hidden"
-                        >
-                          <div className="mb-2 px-3 py-2">
-                            <p className="text-sm font-black text-brand-dark dark:text-white">{displayName(user)}</p>
-                            <p className="text-[10px] text-brand-muted truncate font-bold uppercase tracking-widest mt-0.5">{user?.email}</p>
-                          </div>
-                          <div className="h-[1px] bg-brand-beige/20 dark:bg-brand-orange/10 my-2 mx-1" />
-                          <div className="grid gap-1">
-                            <Link
-                              href={isDashboard ? '/dashboard/settings' : '/profile'}
-                              onClick={() => setUserMenuOpen(false)}
-                              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-brand-dark dark:text-white hover:bg-brand-orange/5 transition-all group"
-                            >
-                              <div className="w-8 h-8 rounded-lg bg-brand-orange/5 flex items-center justify-center group-hover:text-brand-orange transition-colors">
-                                <Settings className="h-4 w-4" />
-                              </div>
-                              Settings
-                            </Link>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setUserMenuOpen(false);
-                                logout();
-                              }}
-                              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all group w-full"
-                            >
-                              <div className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center transition-colors">
-                                <LogOut className="h-4 w-4" />
-                              </div>
-                              Logout
-                            </button>
-                          </div>
-                        </motion.div>
-                      </>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => login()}
-                    className="font-black uppercase tracking-widest text-[10px] rounded-xl"
-                  >
-                    Login
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 rounded-xl text-brand-muted dark:text-brand-beige/70 hover:bg-brand-orange/10 hover:text-brand-orange transition-all"
-              aria-label="Open menu"
-            >
-              <Menu className="h-6 w-6" />
-            </button>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setMobileOpen(true)}
+            className="rounded-md p-2 text-ink hover:bg-leaf lg:hidden"
+            aria-label="Open menu"
+            aria-expanded={mobileOpen}
+          >
+            <Menu className="h-6 w-6" />
+          </button>
         </div>
       </nav>
 
-      {/* Modern Half-Screen Mobile Menu */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <>
-            {/* Backdrop with blur effect */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm lg:hidden"
-              onClick={() => setMobileMenuOpen(false)}
-            />
+      {mobileOpen && (
+        <div className="fixed inset-0 z-[100] lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
+          <div className="absolute right-0 top-0 flex h-[100dvh] w-[86%] max-w-sm flex-col bg-paper">
+            <div className="flex h-16 items-center justify-between border-b border-line px-5">
+              <span className="font-display text-xl text-ink">{siteName}</span>
+              <button type="button" onClick={() => setMobileOpen(false)} className="rounded-md p-2 text-ink hover:bg-leaf" aria-label="Close menu">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
 
-            {/* Slide-in Drawer - Right side, half width, full height */}
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed top-0 right-0 z-[9999] lg:hidden w-[80%] sm:w-[65%] md:w-[50%] max-w-sm flex flex-col shadow-2xl"
-              style={{
-                backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff',
-                height: '100dvh',
-                minHeight: '100vh',
-              }}
-            >
-              {/* Drawer Header */}
-              <div
-                className="flex-shrink-0 flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-800"
-                style={{ backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff' }}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-xl overflow-hidden shadow-md">
-                    <Image src="/images/logo/logo.jpeg" alt="Logo" width={36} height={36} className="object-cover" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold text-brand-dark dark:text-white">Urban Loft</span>
-                    <span className="text-[10px] text-brand-muted dark:text-gray-400">Cafe</span>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-brand-orange hover:text-white transition-all duration-200"
-                  aria-label="Close menu"
-                >
-                  <X className="h-5 w-5" />
-                </button>
+            <div className="flex-1 overflow-y-auto px-5 py-4">
+              <div className="grid grid-cols-2 gap-2">
+                <a href={storeHref} className="flex h-11 items-center justify-center gap-2 rounded-md bg-loft text-sm font-semibold text-white">
+                  <ShoppingBag className="h-4 w-4" aria-hidden /> Order online
+                </a>
+                <Link href="/reserve" className="flex h-11 items-center justify-center rounded-md border border-ink/20 text-sm font-semibold text-ink">
+                  Book a table
+                </Link>
               </div>
 
-              {/* Navigation Links */}
-              <nav
-                className="flex-1 min-h-0 overflow-y-auto py-6 px-4"
-                style={{
-                  backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff',
-                }}
-              >
-                <ul className="space-y-1">
-                  {navigation.map((item) => {
-                    const isActive = pathname === item.href;
-                    return (
-                      <li key={item.name}>
-                        <Link
-                          href={item.href}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 ${isActive
-                            ? 'bg-brand-orange text-white'
-                            : 'text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
-                            }`}
-                        >
-                          <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-white' : 'bg-brand-orange'}`} />
-                          <span className="text-base font-semibold">{item.name}</span>
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-
-                {/* Quick Actions */}
-                <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
-                  <div className="grid grid-cols-2 gap-3">
-                    <a
-                      href={orderingUrl('/catalog', tenant?.slug || undefined)}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex flex-col items-center justify-center p-3 rounded-xl bg-brand-orange/10 border border-brand-orange/20 hover:bg-brand-orange/20 transition-all"
-                    >
-                      <ShoppingBag className="h-5 w-5 text-brand-orange mb-1" />
-                      <span className="text-xs font-semibold text-brand-dark dark:text-white">Order online</span>
-                    </a>
-                    <button
-                      onClick={toggleTheme}
-                      className="flex flex-col items-center justify-center p-3 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
-                    >
-                      {theme === 'light' ? <Moon className="h-5 w-5 text-gray-600 mb-1" /> : <Sun className="h-5 w-5 text-yellow-400 mb-1" />}
-                      <span className="text-xs font-semibold text-brand-dark dark:text-white">{theme === 'light' ? 'Dark' : 'Light'}</span>
-                    </button>
-                  </div>
-                </div>
-              </nav>
-
-              {/* Drawer Footer */}
-              <div
-                className="flex-shrink-0 px-5 py-4 border-t border-gray-200 dark:border-gray-700"
-                style={{ backgroundColor: theme === 'dark' ? '#222222' : '#f9fafb' }}
-              >
-                {/* Auth Buttons */}
-                {!isAuthenticated ? (
-                  <div className="flex gap-3 mb-4">
-                    <Button
-                      variant="outline"
-                      className="flex-1 rounded-xl font-semibold text-sm h-11 border-gray-200 dark:border-gray-700"
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        login();
-                      }}
-                    >
-                      Log In
-                    </Button>
-                    <Link href="/signup" onClick={() => setMobileMenuOpen(false)} className="flex-1">
-                      <Button className="w-full rounded-xl font-semibold text-sm h-11 bg-brand-orange hover:bg-brand-burnt text-white shadow-lg shadow-brand-orange/25">
-                        Sign Up
-                      </Button>
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3 mb-4 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
-                    <div className="h-10 w-10 rounded-full bg-brand-orange text-white flex items-center justify-center font-bold">
-                      {(displayName(user))[0]?.toUpperCase() ?? <User className="h-5 w-5" />}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-brand-dark dark:text-white">{displayName(user)}</p>
-                      {user?.roles?.[0] ? <p className="text-xs text-gray-500 capitalize">{user.roles[0]}</p> : null}
-                    </div>
-                    <button
-                      onClick={() => {
-                        logout();
-                        setMobileMenuOpen(false);
-                      }}
-                      className="text-xs font-semibold text-brand-orange hover:underline"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
-
-                {/* Contact & Social */}
-                <div className="flex items-center justify-between">
-                  <div className="flex gap-2">
-                    {socialLinks.map((social, idx) => (
-                      <a
-                        key={idx}
-                        href={social.href}
-                        className="h-9 w-9 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:text-brand-orange hover:border-brand-orange transition-all"
+              <ul className="mt-4">
+                {NAV.map((item) =>
+                  'items' in item ? (
+                    <li key={item.name} className="border-t border-line py-3">
+                      <p className="pb-1 text-sm text-ink-soft">{item.name}</p>
+                      <ul>
+                        {item.items.map((sub) => (
+                          <li key={sub.href}>
+                            <Link
+                              href={sub.href}
+                              className={`block py-2 text-[17px] ${isActive(pathname, sub.href) ? 'font-semibold text-loft-deep' : 'text-ink'}`}
+                            >
+                              {sub.name}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  ) : (
+                    <li key={item.name} className="border-t border-line">
+                      <Link
+                        href={hrefFor(item.href)}
+                        className={`block py-3 text-[17px] ${isActive(pathname, item.href) ? 'font-semibold text-loft-deep' : 'text-ink'}`}
                       >
-                        <social.icon className="h-4 w-4" />
-                      </a>
-                    ))}
-                  </div>
-                  {tenant?.contactPhone && (
-                    <a href={`tel:${tenant.contactPhone.replace(/\s+/g, '')}`} className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-brand-orange transition-colors">
-                      <Phone className="h-4 w-4" />
-                      <span>Call Us</span>
-                    </a>
-                  )}
+                        {item.name}
+                      </Link>
+                    </li>
+                  ),
+                )}
+              </ul>
+            </div>
+
+            <div className="border-t border-line px-5 py-4">
+              {isAuthenticated ? (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-ink">{displayName(user)}</span>
+                  <button type="button" onClick={() => logout()} className="text-sm font-semibold text-loft-deep">
+                    Sign out
+                  </button>
                 </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+              ) : (
+                <button type="button" onClick={() => login()} className="h-11 w-full rounded-md border border-ink/20 text-sm font-semibold text-ink">
+                  Sign in
+                </button>
+              )}
+              <a href={telHref(phone)} className="mt-3 flex items-center gap-2 text-sm text-ink-soft">
+                <Phone className="h-4 w-4" aria-hidden /> {phone}
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

@@ -1,3 +1,5 @@
+import { buildOrderingUrl, orderingTarget } from "./src/lib/ordering-url.config.mjs";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -31,10 +33,18 @@ const nextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value: "frame-src 'self' https://pos.codevertexafrica.com;",
+            value: "frame-src 'self' https://pos.codevertexafrica.com https://www.google.com https://maps.google.com;",
           },
         ],
       },
+    ];
+  },
+  // The menu lives in the online store (ordering service); the website has no copy of it.
+  async redirects() {
+    const store = orderingTarget();
+    return [
+      { source: "/menu", destination: buildOrderingUrl(store, "/catalog"), permanent: false },
+      { source: "/menu/:path*", destination: buildOrderingUrl(store, "/catalog"), permanent: false },
     ];
   },
 };

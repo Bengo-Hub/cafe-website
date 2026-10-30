@@ -21,8 +21,8 @@ ARG NEXT_PUBLIC_AUTH_SERVICE_URL=https://sso.codevertexafrica.com
 ARG NEXT_PUBLIC_AUTH_UI_URL=https://accounts.codevertexafrica.com
 ARG NEXT_PUBLIC_ORDERING_SERVICE_URL=https://orderingapi.codevertexafrica.com
 ARG NEXT_PUBLIC_ORDERING_PWA_URL=https://ordering.codevertexafrica.com
-# The cafe's own store domain once it is active in Domains; empty uses the PWA at /<slug>
-ARG NEXT_PUBLIC_ORDERING_STORE_URL=
+# The cafe's own store domain (connected in Domains); empty uses the PWA at /<slug>
+ARG NEXT_PUBLIC_ORDERING_STORE_URL=https://urbaneats.theurbanloftcafe.com
 ARG NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL=https://notificationsapi.codevertexafrica.com
 ARG NEXT_PUBLIC_LOGISTICS_SERVICE_URL=https://logisticsapi.codevertexafrica.com
 ARG NEXT_PUBLIC_TREASURY_SERVICE_URL=https://booksapi.codevertexafrica.com

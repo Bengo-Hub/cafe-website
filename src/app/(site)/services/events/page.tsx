@@ -1,67 +1,68 @@
 'use client';
 
-import { Button } from '@/components/ui';
-import { motion } from 'framer-motion';
+import { FactList, LinkButton, PageIntro, Section } from '@/components/site';
+import { EnquiryForm } from '@/components/site/EnquiryForm';
 import Image from 'next/image';
-import Link from 'next/link';
 
-export default function EventsServicesPage() {
+export default function EventsAndCateringPage() {
   return (
-    <main>
-      {/* Hero */}
-      <section className="relative h-[320px] md:h-[420px] overflow-hidden">
-        <Image
-          src="/images/hero/hero-events.jpg"
-          alt="Urban Loft Events & Catering"
-          fill
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-black/60" />
-        <div className="relative z-10 flex h-full items-center justify-center px-4 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <h1 className="text-4xl font-black text-white md:text-7xl tracking-tight">Events & Catering</h1>
-            <p className="mt-4 text-brand-orange md:text-2xl font-light">Corporate • Private Parties • Custom Catering • AV Available</p>
-          </motion.div>
-        </div>
-      </section>
+    <>
+      <PageIntro
+        title="Events and catering"
+        lede="Birthdays, team days, meetings and family gatherings in our garden, or our food brought to your venue."
+        image="/images/hero/hero-events.jpg"
+        imageAlt="A group sharing a long table at Urban Loft Cafe"
+      >
+        <LinkButton href="#enquire">Ask for a quote</LinkButton>
+        <LinkButton href="/events" tone="secondary">See what's on</LinkButton>
+      </PageIntro>
 
-      {/* Content */}
-      <section className="section-blend-cream py-12 md:py-24">
-        <div className="container">
-          <div className="grid gap-12 md:grid-cols-2 items-center">
-            <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-              <h2 className="text-3xl font-black text-primary-brand md:text-5xl tracking-tight">Signature Events</h2>
-              <p className="mt-6 text-lg text-secondary-brand font-light leading-relaxed">
-                From intimate gatherings to large-scale corporate events, we provide the perfect backdrop and culinary experience to make your occasion unforgettable.
-              </p>
-              <ul className="mt-8 space-y-4 text-secondary-brand">
-                {['Pizza Day', 'Couples Night', 'Game Night', "Chef's Special Day", 'Holiday Themes'].map((item) => (
-                  <li key={item} className="flex items-center gap-3 font-light">
-                    <div className="h-2 w-2 rounded-full bg-brand-orange" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-10">
-                <Link href="#enquire">
-                  <Button className="bg-brand-orange hover:bg-brand-orange/90 px-10 py-6 text-lg font-bold rounded-full transition-transform hover:scale-105">
-                    Make an Enquiry
-                  </Button>
-                </Link>
-              </div>
-            </motion.div>
-
-            <motion.div className="relative aspect-square w-full overflow-hidden rounded-[2.5rem] shadow-2xl" initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-              <Image src="/images/events/events-1.jpg" alt="Event setup" fill className="object-cover" />
-            </motion.div>
+      <Section title="How it works">
+        <div className="grid gap-10 md:grid-cols-2 md:items-start">
+          <ol className="space-y-6">
+            {[
+              ['Tell us about it', 'The date, how many guests, and whether it is here or at your place.'],
+              ['Get a quote', 'We suggest a menu and a price, and change it until it fits.'],
+              ['Confirm the date', 'Say yes to the quote and the date is yours.'],
+              ['Enjoy the day', 'We set up, serve and clear away.'],
+            ].map(([title, body], i) => (
+              <li key={title} className="grid grid-cols-[2.5rem_1fr] gap-3">
+                <span className="font-display flex h-10 w-10 items-center justify-center rounded-full bg-roast text-lg text-white">{i + 1}</span>
+                <span>
+                  <span className="block text-[17px] font-semibold text-ink">{title}</span>
+                  <span className="text-[15px] text-ink-soft">{body}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+          <div className="space-y-6">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-leaf">
+              <Image src="/images/events/catering-1.jpg" alt="A catering spread of meats, bread and fruit" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+            </div>
+            <FactList
+              items={[
+                { label: 'Here', value: 'Garden and indoor dining areas, booked privately or in part' },
+                { label: 'Outside catering', value: 'Buffets and platters delivered and served at your venue' },
+                { label: 'Extras', value: 'Cakes from our bakery and a screen with projector on request' },
+              ]}
+            />
           </div>
         </div>
-      </section>
-    </main>
+      </Section>
+
+      <Section id="enquire" tone="leaf" title="Ask for a quote">
+        <div className="max-w-2xl">
+          <EnquiryForm
+            subject="Event enquiry"
+            dateLabel="Event date"
+            guestsLabel="Guests"
+            messageLabel="About the event"
+            messagePlaceholder="Office end-of-year lunch, here in the garden, about 40 people"
+            submitLabel="Ask for a quote"
+            sentText="Thanks. We will call or email you with a menu and a quote."
+          />
+        </div>
+      </Section>
+    </>
   );
 }

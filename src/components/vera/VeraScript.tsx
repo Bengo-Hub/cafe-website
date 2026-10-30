@@ -1,5 +1,6 @@
 'use client';
 
+import { SITE, whatsappHref } from '@/lib/site';
 import { useEffect } from 'react';
 
 const VERA_WIDGET_URL = 'https://marketflow.codevertexafrica.com/widget/chat.js';
@@ -20,12 +21,13 @@ export function VeraScript() {
     script.setAttribute('data-mode',          'tenant');
     script.setAttribute('data-api-url',       VERA_API_URL);
     script.setAttribute('data-widget-title',  'Vera');
-    script.setAttribute('data-subtitle',      'Urban Loft Cafe · AI Assistant');
+    script.setAttribute('data-subtitle',      SITE.name);
     script.setAttribute('data-persona',       'urban-loft-cafe');
     script.setAttribute('data-business-type', 'cafe');
-    script.setAttribute('data-primary-color', '#f97316');
-    script.setAttribute('data-accent-color',  '#dc6b19');
-    script.setAttribute('data-whatsapp',      '254712345678');
+    // The logo's rust, like every action on the site.
+    script.setAttribute('data-primary-color', '#bb542f');
+    script.setAttribute('data-accent-color',  '#9a4325');
+    script.setAttribute('data-whatsapp',      whatsappHref(SITE.phone).replace('https://wa.me/', ''));
     script.setAttribute('data-theme',         'auto');
     document.body.appendChild(script);
 

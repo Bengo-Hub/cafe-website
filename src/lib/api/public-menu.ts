@@ -28,7 +28,10 @@ export interface PublicMenuCategory {
 
 /** Public catalog item from ordering-backend GET /catalog/items (camelCase) */
 export interface PublicMenuItemResponse {
-  id: string;
+  /** Not always present; the store keys items by `sku`. */
+  id?: string;
+  sku?: string;
+  inventoryId?: string;
   categoryId: string;
   categoryName?: string;
   name: string;

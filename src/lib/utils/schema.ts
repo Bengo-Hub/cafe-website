@@ -1,3 +1,5 @@
+import { SITE, telHref } from '@/lib/site';
+
 export interface LocalBusinessSchema {
   '@context': string;
   '@type': string;
@@ -28,27 +30,6 @@ export interface LocalBusinessSchema {
   priceRange?: string;
   servesCuisine?: string | string[];
   acceptsReservations?: boolean;
-}
-
-export interface MenuSchema {
-  '@context': string;
-  '@type': string;
-  name: string;
-  description?: string;
-  hasMenuSection?: Array<{
-    '@type': string;
-    name: string;
-    hasMenuItem?: Array<{
-      '@type': string;
-      name: string;
-      description?: string;
-      offers?: {
-        '@type': string;
-        price: string;
-        priceCurrency: string;
-      };
-    }>;
-  }>;
 }
 
 export interface EventSchema {
@@ -90,47 +71,32 @@ export function generateLocalBusinessSchema(): LocalBusinessSchema {
   return {
     '@context': 'https://schema.org',
     '@type': 'Restaurant',
-    name: 'Urban Loft Cafe',
+    name: SITE.name,
     image: [
-      `${process.env.NEXT_PUBLIC_APP_URL || 'https://theurbanloftcafe.com'}/images/hero/hero-food.jpg`,
+      `${process.env.NEXT_PUBLIC_APP_URL || 'https://theurbanloftcafe.com'}/images/services/events.jpg`,
       `${process.env.NEXT_PUBLIC_APP_URL || 'https://theurbanloftcafe.com'}/images/logo/logo.jpeg`,
     ],
     url: process.env.NEXT_PUBLIC_APP_URL || 'https://theurbanloftcafe.com',
-    telephone: '+254-700-000-000',
-    email: 'info@urbanloftcafe.com',
+    telephone: telHref(SITE.phone).replace('tel:', ''),
+    email: SITE.email,
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Main Street',
-      addressLocality: 'Busia',
+      streetAddress: '',
+      addressLocality: SITE.town,
       addressRegion: 'Busia County',
       addressCountry: 'KE',
     },
     openingHoursSpecification: [
       {
         '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-        opens: '07:00',
-        closes: '22:00',
-      },
-      {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Saturday', 'Sunday'],
-        opens: '08:00',
-        closes: '23:00',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        opens: SITE.opens,
+        closes: SITE.closes,
       },
     ],
     priceRange: 'KES 300 - KES 2000',
     servesCuisine: ['International', 'African', 'Italian', 'Asian'],
     acceptsReservations: true,
-  };
-}
-
-export function generateMenuSchema(): MenuSchema {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'Menu',
-    name: 'Urban Loft Cafe Menu',
-    description: 'Fresh, delicious, and made with love',
   };
 }
 

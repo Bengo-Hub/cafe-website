@@ -1,67 +1,85 @@
 'use client';
 
-import { Button } from '@/components/ui';
-import { motion } from 'framer-motion';
+import { FactList, LinkButton, PageIntro, Section } from '@/components/site';
+import { EnquiryForm } from '@/components/site/EnquiryForm';
+import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
+import { useMenuBoard } from '@/hooks/use-menu-board';
+import { orderingItemUrl } from '@/lib/ordering-url';
+import { HOURS_LABEL } from '@/lib/site';
 import Image from 'next/image';
-import Link from 'next/link';
 
-export default function BusinessHubPage() {
+/** Day passes are sold in the online store; this reads them from there so prices never drift. */
+function DayPasses({ slug }: { slug?: string }) {
+  const { data, isLoading } = useMenuBoard(['Day Passes'], 6);
+  const passes = data?.[0]?.items ?? [];
+  if (isLoading) return <div className="h-24 rounded-lg bg-leaf" aria-busy="true" />;
+  if (passes.length === 0) return null;
   return (
-    <main>
-      {/* Hero */}
-      <section className="relative h-[320px] md:h-[420px] overflow-hidden">
-        <Image
-          src="/images/hero/hero-work-hub-1.jpg"
-          alt="Urban Loft Business Hub"
-          fill
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-black/60" />
-        <div className="relative z-10 flex h-full items-center justify-center px-4 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <h1 className="text-4xl font-black text-white md:text-7xl tracking-tight">Business Hub</h1>
-            <p className="mt-4 text-brand-orange md:text-2xl font-light">Co-working • Boardrooms • Executive Offices • Conferencing</p>
-          </motion.div>
-        </div>
-      </section>
+    <ul className="divide-y divide-line border-y border-line">
+      {passes.map((p) => (
+        <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 py-4">
+          <span>
+            <span className="block text-[17px] font-semibold text-ink">{p.name}</span>
+            <span className="text-[15px] tabular-nums text-ink-soft">KSh {p.price.toLocaleString('en-KE')}</span>
+          </span>
+          <LinkButton href={orderingItemUrl(p.id, slug)} tone="secondary">
+            Buy a pass
+          </LinkButton>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
-      {/* Content */}
-      <section className="section-blend-cream py-12 md:py-24">
-        <div className="container">
-          <div className="grid gap-12 md:grid-cols-2 items-center">
-            <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-              <h2 className="text-3xl font-black text-primary-brand md:text-5xl tracking-tight">Modern Facilities</h2>
-              <p className="mt-6 text-lg text-secondary-brand font-light leading-relaxed">
-                Our Business Hub is designed for the modern professional. Whether you need a quiet corner to focus or a fully equipped boardroom for your next big pitch, we have the perfect space for you.
-              </p>
-              <ul className="mt-8 space-y-4 text-secondary-brand">
-                {['Co-working spaces', 'Boardrooms', 'Executive offices', 'Conferencing halls', 'High-speed Wi-Fi'].map((item) => (
-                  <li key={item} className="flex items-center gap-3 font-light">
-                    <div className="h-2 w-2 rounded-full bg-brand-orange" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-10">
-                <Link href="#book">
-                  <Button className="bg-brand-orange hover:bg-brand-orange/90 px-10 py-6 text-lg font-bold rounded-full transition-transform hover:scale-105">
-                    Book Now
-                  </Button>
-                </Link>
-              </div>
-            </motion.div>
+export default function WorkHubPage() {
+  const { tenant } = useTenantBrand();
 
-            <motion.div className="relative aspect-square w-full overflow-hidden rounded-[2.5rem] shadow-2xl" initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-              <Image src="/images/events/catering-2.jpg" alt="Meeting room" fill className="object-cover" />
-            </motion.div>
+  return (
+    <>
+      <PageIntro
+        title="Work hub"
+        lede="A desk, a socket, Wi-Fi and coffee that comes to you. Drop in for half a day, or book a room for a meeting."
+        image="/images/hero/hero-work-hub-1.jpg"
+        imageAlt="Armchairs and tables in the Urban Loft lounge"
+      >
+        <LinkButton href="#passes">Day passes</LinkButton>
+        <LinkButton href="#book" tone="secondary">Book a meeting room</LinkButton>
+      </PageIntro>
+
+      <Section title="What you get">
+        <div className="grid gap-10 md:grid-cols-2 md:items-start">
+          <FactList
+            items={[
+              { label: 'Open', value: HOURS_LABEL },
+              { label: 'Desks', value: 'Shared desks with power at every seat' },
+              { label: 'Internet', value: 'Fast Wi-Fi, fine for video calls' },
+              { label: 'Rooms', value: 'Boardroom and private offices, booked in advance' },
+              { label: 'Food', value: 'Order from the full menu without leaving your desk' },
+            ]}
+          />
+          <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-leaf">
+            <Image src="/images/gallery/gallery-4.jpg" alt="Desks with chairs in the work hub" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
           </div>
         </div>
-      </section>
-    </main>
+      </Section>
+
+      <Section id="passes" tone="leaf" title="Day passes" lede="Pay online and show the receipt at the counter, or pay when you arrive.">
+        <DayPasses slug={tenant?.slug || undefined} />
+      </Section>
+
+      <Section id="book" title="Book a meeting room or office">
+        <div className="max-w-2xl">
+          <EnquiryForm
+            subject="Work hub booking"
+            dateLabel="Date"
+            guestsLabel="People"
+            messageLabel="What you need"
+            messagePlaceholder="Boardroom for 8 from 9 to 1, with a projector and tea at 11"
+            submitLabel="Send booking request"
+            sentText="Thanks. We will confirm the room and the price by phone or email."
+          />
+        </div>
+      </Section>
+    </>
   );
 }

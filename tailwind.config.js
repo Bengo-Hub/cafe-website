@@ -4,6 +4,8 @@ module.exports = {
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    // shared-ui-lib components (PoweredByBadge, PhoneInputField) ship Tailwind classes, not CSS
+    './node_modules/@bengo-hub/shared-ui-lib/dist/**/*.js',
   ],
   darkMode: 'class',
   theme: {
@@ -19,11 +21,22 @@ module.exports = {
     },
     extend: {
       colors: {
+        // Public site palette, taken from the Urban Loft logo: espresso brown, rust and white
+        // (see globals.css for the themed values).
+        paper: 'rgb(var(--paper) / <alpha-value>)',
+        ink: {
+          DEFAULT: 'rgb(var(--ink) / <alpha-value>)',
+          soft: 'rgb(var(--ink-soft) / <alpha-value>)',
+        },
+        leaf: 'rgb(var(--leaf) / <alpha-value>)',
+        line: 'rgb(var(--line) / <alpha-value>)',
+        roast: '#2c1c12',
+        loft: { DEFAULT: '#bb542f', deep: '#9a4325' },
         brand: {
           // Official Brand Colors - Works in both light & dark modes
           dark: '#2c1a02', // Dark background
           light: '#fbfcf9', // Light background
-          orange: '#ea8022', // Primary orange
+          orange: '#bb542f', // Logo rust (the sunburst and "Loft")
           beige: '#d1ccc2', // Secondary text
           muted: '#584c3d', // Muted text
           brown: '#663209', // Brown accent
@@ -33,7 +46,7 @@ module.exports = {
           darker: '#1a0f01', // Darker background
           surface: '#1a0f01', // Surface elements
           cream: '#fbfcf9', // Creamy elements
-          burnt: '#d46c1a', // Burnt accent
+          burnt: '#9a4325', // Logo rust, pressed/hover
           rose: '#b85a2f', // Rose accent
           copper: '#8b5a1f', // Copper accent
         },
@@ -43,7 +56,7 @@ module.exports = {
           200: '#958c80', // Warm taupe
           300: '#584c3d', // Muted brown
           400: '#ae6221', // Rich gold
-          500: '#ea8022', // Vibrant orange
+          500: '#bb542f', // Logo rust
           600: '#ae6221', // Deep gold
           700: '#663209', // Dark brown
           800: '#2c1a02', // Very dark brown
@@ -56,7 +69,7 @@ module.exports = {
           200: '#fbd2ae', // Warm peach
           300: '#f8b179', // Muted peach
           400: '#f58b42', // Rich peach
-          500: '#ea8022', // Vibrant orange
+          500: '#bb542f', // Logo rust
           600: '#ae6221', // Deep gold
           700: '#663209', // Dark brown
           800: '#2c1a02', // Very dark brown
@@ -65,8 +78,7 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
-        sans: ['var(--font-geist-sans)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-archivo)', 'system-ui', 'sans-serif'],
         mono: ['var(--font-geist-mono)', 'monospace'],
         serif: ['var(--font-serif)', 'Georgia', 'serif'],
         artistic: ['"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif', 'Times New Roman', 'serif'],

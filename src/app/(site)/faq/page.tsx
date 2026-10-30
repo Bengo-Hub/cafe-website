@@ -1,68 +1,81 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { HelpCircle } from 'lucide-react';
+import { LinkButton, PageIntro, Section } from '@/components/site';
+import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
+import { orderingUrl } from '@/lib/ordering-url';
+import { HOURS_LABEL, SITE } from '@/lib/site';
+import { ChevronDown } from 'lucide-react';
 import Link from 'next/link';
-
-const FAQ_ITEMS = [
-  {
-    q: 'What are your opening hours?',
-    a: 'Our cafe and Business Hub hours vary by outlet. Please check the Contact page or call us for the latest schedule.',
-  },
-  {
-    q: 'Do you take reservations?',
-    a: 'Yes. For the cafe, events, and accommodation you can enquire via the Contact page or call us.',
-  },
-  {
-    q: 'Is the Business Hub available for hourly booking?',
-    a: 'Yes. Co-working, boardrooms, and meeting spaces can be booked by the hour or day. Contact us for rates and availability.',
-  },
-  {
-    q: 'Do you cater for dietary requirements?',
-    a: 'We offer vegetarian, vegan, and gluten-free options. Please mention your requirements when ordering or booking.',
-  },
-  {
-    q: 'How does the loyalty program work?',
-    a: 'Earn points on every purchase and redeem them for discounts and rewards. See our Loyalty page for details.',
-  },
-];
+import type { ReactNode } from 'react';
 
 export default function FAQPage() {
+  const { tenant } = useTenantBrand();
+  const storeHref = orderingUrl('/catalog', tenant?.slug || undefined);
+
+  const items: { q: string; a: ReactNode }[] = [
+    { q: 'When are you open?', a: `${HOURS_LABEL}, including weekends and public holidays.` },
+    {
+      q: 'Can I book a table?',
+      a: (
+        <>
+          Yes. <Link href="/reserve" className="font-semibold text-ink underline underline-offset-4">Book a table online</Link> and
+          we confirm it by phone or text. For groups bigger than 12, call us.
+        </>
+      ),
+    },
+    {
+      q: 'Do you deliver?',
+      a: (
+        <>
+          Yes, around {SITE.town}. <a href={storeHref} className="font-semibold text-ink underline underline-offset-4">Order in the online store</a>.
+          It shows the delivery fee for your address before you pay.
+        </>
+      ),
+    },
+    { q: 'How can I pay?', a: 'M-Pesa or cash at the counter. Online orders are paid by M-Pesa when you check out.' },
+    {
+      q: 'Can I work from the cafe?',
+      a: (
+        <>
+          Yes. The <Link href="/services/hub" className="font-semibold text-ink underline underline-offset-4">work hub</Link> has
+          desks with power and Wi-Fi by the half or full day, and meeting rooms you can book.
+        </>
+      ),
+    },
+    {
+      q: 'Do you have vegetarian food?',
+      a: 'Yes, including the Veggie Burger and several breakfasts. Tell us about allergies when you order and the kitchen will tell you what is safe.',
+    },
+    {
+      q: 'How does the loyalty programme work?',
+      a: (
+        <>
+          You collect points every time you buy and spend them on later orders.{' '}
+          <Link href="/loyalty" className="font-semibold text-ink underline underline-offset-4">Check your points</Link> with your phone number.
+        </>
+      ),
+    },
+  ];
+
   return (
-    <main className="min-h-screen section-blend-cream py-16 md:py-24">
-      <div className="container max-w-3xl">
-        <motion.header
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-14"
-        >
-          <h1 className="text-4xl font-black text-primary-brand md:text-5xl tracking-tight flex items-center justify-center gap-3">
-            <HelpCircle className="h-10 w-10 text-brand-orange" />
-            Frequently Asked Questions
-          </h1>
-          <p className="mt-4 text-secondary-brand font-light">Quick answers to common questions.</p>
-        </motion.header>
-
-        <ul className="space-y-6">
-          {FAQ_ITEMS.map((item, i) => (
-            <motion.li
-              key={item.q}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08, duration: 0.4 }}
-              className="p-6 rounded-2xl bg-white/80 dark:bg-white/5 border border-brand-beige/20 dark:border-white/10"
-            >
-              <h2 className="text-lg font-bold text-primary-brand">{item.q}</h2>
-              <p className="mt-2 text-secondary-brand font-light">{item.a}</p>
-            </motion.li>
+    <>
+      <PageIntro title="Questions and answers" lede="The things people ask us most. Anything else, call or message us." />
+      <Section>
+        <div className="max-w-3xl divide-y divide-line border-y border-line">
+          {items.map((item) => (
+            <details key={item.q} className="group py-1">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-[17px] font-semibold text-ink [&::-webkit-details-marker]:hidden">
+                {item.q}
+                <ChevronDown className="h-5 w-5 shrink-0 text-ink-soft transition-transform group-open:rotate-180" aria-hidden />
+              </summary>
+              <div className="pb-5 pr-8 text-[16px] leading-relaxed text-ink-soft">{item.a}</div>
+            </details>
           ))}
-        </ul>
-
-        <p className="mt-12 text-center text-secondary-brand font-light">
-          Can&apos;t find your answer? <Link href="/contact" className="text-brand-orange font-semibold hover:underline">Contact us</Link>.
-        </p>
-      </div>
-    </main>
+        </div>
+        <div className="mt-10">
+          <LinkButton href="/contact" tone="secondary">Ask us something else</LinkButton>
+        </div>
+      </Section>
+    </>
   );
 }

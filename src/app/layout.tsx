@@ -1,18 +1,17 @@
 import { Footer, Header } from '@/components/layout';
-import PageTransition from '@/components/layout/PageTransition';
 import { Providers } from '@/components/providers/Providers';
 import { ChunkErrorHandler } from '@/components/ChunkErrorHandler';
 import type { Metadata, Viewport } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Archivo } from 'next/font/google';
 import { Toaster } from 'sonner';
 import '@bengo-hub/shared-ui-lib/contact/style.css';
 import './globals.css';
 
-const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist-sans' });
-const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' });
+// One family in two widths: condensed for headings (menu-board style), normal for text.
+const archivo = Archivo({ subsets: ['latin'], axes: ['wdth'], variable: '--font-archivo', display: 'swap' });
 
 export const viewport: Viewport = {
-  themeColor: '#ea8022',
+  themeColor: '#2c1c12',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -21,7 +20,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://theurbanloftcafe.com'),
   title: {
-    default: 'Urban Loft Cafe - Beyond Food',
+    default: 'Urban Loft Cafe, Busia',
     template: '%s | Urban Loft Cafe',
   },
   manifest: '/manifest.json',
@@ -31,7 +30,7 @@ export const metadata: Metadata = {
     apple: '/images/logo/logo.jpeg',
   },
   description:
-    'Eat. Work. Connect. Experience. Premium cafe, business hub, and event space in Busia, Kenya. Specialty coffee, coworking spaces, and memorable events.',
+    'Cafe and restaurant in Busia, Kenya, open every day from 7:30 AM to 10 PM. Breakfast, coffee, full meals, a work hub, rooms and event space. Order online or book a table.',
   keywords: [
     'cafe',
     'coffee shop',
@@ -56,15 +55,15 @@ export const metadata: Metadata = {
     telephone: false,
   },
   openGraph: {
-    title: 'Urban Loft Cafe - Beyond Food',
-    description: 'Eat. Work. Connect. Experience. Premium cafe, business hub, and event space.',
+    title: 'Urban Loft Cafe, Busia',
+    description: 'Cafe and restaurant in Busia, open every day. Order online or book a table.',
     url: '/',
     siteName: 'Urban Loft Cafe',
     images: [
       {
-        url: '/images/hero/hero-food.jpg',
-        width: 1920,
-        height: 800,
+        url: '/images/services/events.jpg',
+        width: 4064,
+        height: 3048,
         alt: 'Urban Loft Cafe',
       },
     ],
@@ -73,9 +72,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Urban Loft Cafe - Beyond Food',
-    description: 'Eat. Work. Connect. Experience.',
-    images: ['/images/hero/hero-food.jpg'],
+    title: 'Urban Loft Cafe, Busia',
+    description: 'Cafe and restaurant in Busia, open every day.',
+    images: ['/images/services/events.jpg'],
   },
   robots: {
     index: true,
@@ -102,14 +101,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={archivo.variable} suppressHydrationWarning>
       <body className="antialiased font-sans">
         <Providers>
           <ChunkErrorHandler />
           <div className="min-h-screen flex flex-col">
             <Header />
             <main className="flex-1">
-              <PageTransition>{children}</PageTransition>
+              {children}
             </main>
             <Footer />
           </div>

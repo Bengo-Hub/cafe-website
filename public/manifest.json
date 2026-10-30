@@ -1,11 +1,11 @@
 {
   "name": "Urban Loft Cafe",
   "short_name": "Urban Loft",
-  "description": "Beyond Food - Eat. Work. Connect. Experience.",
+  "description": "Cafe and restaurant in Busia. Order online or book a table.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FFFFFF",
-  "theme_color": "#ea8022",
+  "theme_color": "#2c1c12",
   "orientation": "portrait-primary",
   "icons": [
     {
