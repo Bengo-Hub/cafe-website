@@ -8,6 +8,8 @@ import { useLimitModal } from '@/store/limit-modal';
 import { LimitReachedModal } from '@/components/subscription/limit-reached-modal';
 import { OfflineBar } from '@bengo-hub/shared-ui-lib/offline';
 import { useAuthStore } from '@/lib/store/auth-store';
+import { AUTH_STORAGE_KEY } from '@/lib/auth/token-refresh';
+import { watchSessionAcrossTabs } from '@bengo-hub/shared-ui-lib/auth';
 import { TenantBrandProvider } from './TenantBrandProvider';
 import { ThemeProvider } from './ThemeProvider';
 
@@ -23,6 +25,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   // NOTE: Do NOT call initialize() here — it races with Zustand persist hydration.
   // onRehydrateStorage in auth-store.ts handles initialization AFTER hydration completes.
+
+  // Another tab renewed or replaced the session: load it here so this tab neither sends a
+  // rotated-away token nor writes its stale copy back. The API client reads the token from the
+  // store on every request, so nothing else needs re-pointing.
+  useEffect(
+    () =>
+      watchSessionAcrossTabs(AUTH_STORAGE_KEY, () => {
+        void useAuthStore.persist.rehydrate();
+      }),
+    [],
+  );
 
   // Register 401 handler: clear all caches and redirect to SSO.
   // Skip during syncing/loading to avoid clearing session during JIT sync.

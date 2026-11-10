@@ -120,13 +120,14 @@ export async function apiClient<T = any>(
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);
 
+      const auth = authHeader();
       const response = await fetch(url, {
         ...options,
         signal: controller.signal,
         headers: {
           ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
           ...tenantHeaders(),
-          ...authHeader(),
+          ...auth,
           ...options.headers,
         },
       });
@@ -138,8 +139,9 @@ export async function apiClient<T = any>(
       if (!response.ok) {
         // 401: attempt token refresh before triggering logout
         if (response.status === 401 && !url.includes('/auth/me')) {
+          const sent = (auth.Authorization ?? '').replace(/^Bearer\s+/i, '');
           const { refreshAccessToken } = await import('@/lib/auth/token-refresh');
-          const newToken = await refreshAccessToken();
+          const newToken = await refreshAccessToken(sent || null);
 
           if (newToken) {
             // Retry the original request with the refreshed token
