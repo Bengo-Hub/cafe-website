@@ -20,7 +20,13 @@ export interface TokenExchangeParams {
   redirectUri: string;
 }
 
-export function buildAuthorizeUrl({ codeChallenge, state, redirectUri, scope, tenant }: AuthorizeParams): string {
+export function buildAuthorizeUrl({
+  codeChallenge,
+  state,
+  redirectUri,
+  scope,
+  tenant,
+}: AuthorizeParams): string {
   const url = new URL('/api/v1/authorize', SSO_BASE_URL);
   url.searchParams.set('response_type', 'code');
   url.searchParams.set('client_id', SSO_CLIENT_ID);

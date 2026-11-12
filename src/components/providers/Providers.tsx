@@ -14,13 +14,16 @@ import { TenantBrandProvider } from './TenantBrandProvider';
 import { ThemeProvider } from './ThemeProvider';
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 60 * 1000,
-      },
-    },
-  }));
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60 * 1000,
+          },
+        },
+      })
+  );
   const logout = useAuthStore((s) => s.logout);
 
   // NOTE: Do NOT call initialize() here — it races with Zustand persist hydration.
@@ -34,7 +37,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       watchSessionAcrossTabs(AUTH_STORAGE_KEY, () => {
         void useAuthStore.persist.rehydrate();
       }),
-    [],
+    []
   );
 
   // Register 401 handler: clear all caches and redirect to SSO.
@@ -66,7 +69,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <TenantBrandProvider>
         <ThemeProvider>
-          <OfflineBar availableOffline={['Browse cached pages']} disabledOffline={['Ordering', 'Account actions']} />
+          <OfflineBar
+            availableOffline={['Browse cached pages']}
+            disabledOffline={['Ordering', 'Account actions']}
+          />
           {children}
           <LimitReachedModal />
         </ThemeProvider>

@@ -170,7 +170,11 @@ export async function apiClient<T = any>(
             if (retryResponse.status === 401 && on401Callback) {
               on401Callback();
             }
-            throw new ApiError(retryResponse.status, retryData.message || 'API request failed after token refresh', retryData);
+            throw new ApiError(
+              retryResponse.status,
+              retryData.message || 'API request failed after token refresh',
+              retryData
+            );
           }
 
           // Refresh failed entirely — fire logout callback
