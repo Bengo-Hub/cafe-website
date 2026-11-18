@@ -105,25 +105,17 @@ fi
 
 kubectl get ns "$NAMESPACE" >/dev/null 2>&1 || kubectl create ns "$NAMESPACE"
 
-# Optional: Apply environment secrets if they exist
+# The environment Secret (cafe-website-env) is a SealedSecret in devops-k8s
+# (manifests/sealed-secrets/cafe/cafe-website-env.sealedsecret.yaml). This script never writes it:
+# change a key with devops-k8s scripts/sealing/seal-keys.sh. No env file is kept in this public repo.
 if [[ -n "${ENV_SECRET_NAME}" ]]; then
-  if [[ -f ".env.local" ]]; then
-    step "Creating K8s env secret from .env.local: ${ENV_SECRET_NAME}"
-    kubectl create secret generic "$ENV_SECRET_NAME" \
-      --from-env-file=.env.local \
-      -n "$NAMESPACE" \
-      --dry-run=client -o yaml | kubectl apply -f -
-    ok "Env secret created/updated from .env.local"
-  elif [[ -f "kubeSecrets/devENV.yaml" ]]; then
-    step "Applying K8s env secret from kubeSecrets/devENV.yaml"
-    kubectl apply -f kubeSecrets/devENV.yaml -n "$NAMESPACE"
-    ok "Env secret applied from kubeSecrets/devENV.yaml"
+  owner="$(kubectl -n "$NAMESPACE" get secret "$ENV_SECRET_NAME" -o jsonpath='{.metadata.ownerReferences[?(@.kind=="SealedSecret")].name}' 2>/dev/null || true)"
+  if [[ -n "$owner" ]]; then
+    ok "Env secret ${ENV_SECRET_NAME} comes from SealedSecret ${owner}"
+  elif kubectl get secret "$ENV_SECRET_NAME" -n "$NAMESPACE" >/dev/null 2>&1; then
+    warn "Env secret ${ENV_SECRET_NAME} exists but is not sealed yet (devops-k8s scripts/sealing/seal-from-live.sh adopts it)"
   else
-    # Ensure the secret exists at least as an empty secret to avoid deployment failure
-    if ! kubectl get secret "$ENV_SECRET_NAME" -n "$NAMESPACE" >/dev/null 2>&1; then
-      warn "No .env.local or kubeSecrets/devENV.yaml found. Creating empty secret ${ENV_SECRET_NAME} to avoid deployment failure."
-      kubectl create secret generic "$ENV_SECRET_NAME" -n "$NAMESPACE"
-    fi
+    warn "Env secret ${ENV_SECRET_NAME} is missing; seal it in devops-k8s before the next sync"
   fi
 fi
 

@@ -33,6 +33,10 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# Kubernetes Secret manifests never belong in this public repo (cafe-website-env is sealed in devops-k8s)
+kubeSecrets/
+KubeSecrets/
+
 # Vercel
 .vercel
 
