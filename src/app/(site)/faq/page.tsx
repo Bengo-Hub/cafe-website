@@ -3,7 +3,8 @@
 import { LinkButton, PageIntro, Section } from '@/components/site';
 import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
 import { orderingUrl } from '@/lib/ordering-url';
-import { HOURS_LABEL, SITE } from '@/lib/site';
+import { useOpeningHours } from '@/hooks/use-opening-hours';
+import { SITE } from '@/lib/site';
 import { ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
@@ -11,9 +12,10 @@ import type { ReactNode } from 'react';
 export default function FAQPage() {
   const { tenant } = useTenantBrand();
   const storeHref = orderingUrl('/catalog', tenant?.slug || undefined);
+  const { label: hoursLabel, daily } = useOpeningHours();
 
   const items: { q: string; a: ReactNode }[] = [
-    { q: 'When are you open?', a: `${HOURS_LABEL}, including weekends and public holidays.` },
+    { q: 'When are you open?', a: daily ? `${hoursLabel}, including weekends and public holidays.` : `${hoursLabel}.` },
     {
       q: 'Can I book a table?',
       a: (

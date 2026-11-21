@@ -37,7 +37,7 @@ export default function EventsAndCateringPage() {
           </ol>
           <div className="space-y-6">
             <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-leaf">
-              <Image src="/images/events/catering-1.jpg" alt="A catering spread of meats, bread and fruit" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+              <Image src="/images/home/skewer-platter.webp" alt="A platter of grilled chicken skewers and fried plantain from our kitchen" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
             </div>
             <FactList
               items={[

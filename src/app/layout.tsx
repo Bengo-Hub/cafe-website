@@ -1,6 +1,7 @@
 import { Footer, Header } from '@/components/layout';
 import { Providers } from '@/components/providers/Providers';
 import { ChunkErrorHandler } from '@/components/ChunkErrorHandler';
+import { SITE, clock } from '@/lib/site';
 import type { Metadata, Viewport } from 'next';
 import { Archivo } from 'next/font/google';
 import { Toaster } from 'sonner';
@@ -30,7 +31,7 @@ export const metadata: Metadata = {
     apple: '/images/logo/logo.jpeg',
   },
   description:
-    'Cafe and restaurant in Busia, Kenya, open every day from 7:30 AM to 10 PM. Breakfast, coffee, full meals, a work hub, rooms and event space. Order online or book a table.',
+    `Cafe and restaurant in Busia, Kenya, open every day from ${clock(SITE.opens)} to ${clock(SITE.closes)}. Breakfast, coffee, full meals, a work hub, rooms and event space. Order online or book a table.`,
   keywords: [
     'cafe',
     'coffee shop',
@@ -61,10 +62,10 @@ export const metadata: Metadata = {
     siteName: 'Urban Loft Cafe',
     images: [
       {
-        url: '/images/services/events.jpg',
-        width: 4064,
-        height: 3048,
-        alt: 'Urban Loft Cafe',
+        url: '/images/home/og-dining-canopy.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'The dining area under the canopy at Urban Loft Cafe, Busia',
       },
     ],
     locale: 'en_KE',
@@ -74,7 +75,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Urban Loft Cafe, Busia',
     description: 'Cafe and restaurant in Busia, open every day.',
-    images: ['/images/services/events.jpg'],
+    images: ['/images/home/og-dining-canopy.jpg'],
   },
   robots: {
     index: true,

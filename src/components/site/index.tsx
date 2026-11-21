@@ -1,7 +1,9 @@
 'use client';
 
 import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
-import { HOURS_LABEL, SITE, displayPhone, openState, telHref, whatsappHref } from '@/lib/site';
+import { useOpeningHours } from '@/hooks/use-opening-hours';
+import { openStateFor } from '@/lib/hours';
+import { SITE, displayPhone, telHref, whatsappHref } from '@/lib/site';
 import { cn } from '@/lib/utils';
 import { Clock, MapPin, MessageCircle, Phone } from 'lucide-react';
 import Image from 'next/image';
@@ -48,19 +50,20 @@ export function LinkButton({
 
 /** Today's open or closed line, worked out in the browser so it is never a cached build-time value. */
 export function OpenStatus({ className, tone = 'ink' }: { className?: string; tone?: 'ink' | 'light' }) {
-  const [state, setState] = useState<ReturnType<typeof openState> | null>(null);
+  const { hours, timeZone, label } = useOpeningHours();
+  const [state, setState] = useState<ReturnType<typeof openStateFor> | null>(null);
   useEffect(() => {
-    setState(openState());
-    const t = setInterval(() => setState(openState()), 60_000);
+    setState(openStateFor(hours, timeZone));
+    const t = setInterval(() => setState(openStateFor(hours, timeZone)), 60_000);
     return () => clearInterval(t);
-  }, []);
+  }, [hours, timeZone]);
   return (
     <p className={cn('flex items-center gap-2 text-[15px]', tone === 'light' ? 'text-white/90' : 'text-ink-soft', className)}>
       <span
         className={cn('h-2.5 w-2.5 rounded-full', state == null ? 'bg-line' : state.open ? 'bg-emerald-500' : 'bg-red-500')}
         aria-hidden
       />
-      {state ? state.line : HOURS_LABEL}
+      {state ? state.line : label}
     </p>
   );
 }
@@ -144,6 +147,7 @@ export function Section({
 /** Hours, phone, WhatsApp and directions: the same block wherever the page tells people how to visit. */
 export function VisitDetails({ tone = 'ink' }: { tone?: 'ink' | 'light' }) {
   const phone = useCafePhone();
+  const { label: hoursLabel } = useOpeningHours();
   const muted = tone === 'light' ? 'text-white/75' : 'text-ink-soft';
   const strong = tone === 'light' ? 'text-white' : 'text-ink';
   const row = 'flex items-start gap-3';
@@ -152,7 +156,7 @@ export function VisitDetails({ tone = 'ink' }: { tone?: 'ink' | 'light' }) {
       <li className={row}>
         <Clock className={cn('mt-0.5 h-5 w-5 shrink-0', muted)} aria-hidden />
         <span>
-          <span className={cn('block font-semibold', strong)}>{HOURS_LABEL}</span>
+          <span className={cn('block font-semibold', strong)}>{hoursLabel}</span>
           <OpenStatus tone={tone} className="mt-1 text-sm" />
         </span>
       </li>
@@ -177,6 +181,42 @@ export function VisitDetails({ tone = 'ink' }: { tone?: 'ink' | 'light' }) {
         </span>
       </li>
     </ul>
+  );
+}
+
+export type GridPhoto = {
+  src: string;
+  alt: string;
+  /** big: two columns by two rows; tall: two rows; wide: two columns; none: one cell. */
+  span?: 'big' | 'tall' | 'wide';
+};
+
+const PHOTO_SPAN: Record<NonNullable<GridPhoto['span']>, string> = {
+  big: 'col-span-2 row-span-2',
+  tall: 'row-span-2',
+  wide: 'col-span-2',
+};
+
+/**
+ * Real photos of the place in a tight mosaic: two columns on phones, four from tablets up. Order
+ * the photos so the spans fill whole rows (a big tile is four cells, tall and wide are two).
+ */
+export function PhotoGrid({ photos, className }: { photos: GridPhoto[]; className?: string }) {
+  return (
+    <div className={cn('grid grid-flow-dense auto-rows-[140px] grid-cols-2 gap-2 sm:auto-rows-[190px] sm:gap-3 md:grid-cols-4 lg:auto-rows-[220px]', className)}>
+      {photos.map((p, i) => (
+        <figure key={p.src} className={cn('relative overflow-hidden rounded-lg bg-leaf', p.span && PHOTO_SPAN[p.span])}>
+          <Image
+            src={p.src}
+            alt={p.alt}
+            fill
+            loading={i < 2 ? 'eager' : 'lazy'}
+            sizes={p.span === 'big' || p.span === 'wide' ? '(max-width: 768px) 100vw, 50vw' : '(max-width: 768px) 50vw, 25vw'}
+            className="object-cover"
+          />
+        </figure>
+      ))}
+    </div>
   );
 }
 

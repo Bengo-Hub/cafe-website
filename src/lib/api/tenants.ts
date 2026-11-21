@@ -5,6 +5,7 @@
 
 import { config } from '@/config/env';
 import { serviceBrandingMap, type ServiceBrandingEntry } from '@bengo-hub/shared-ui-lib/branding';
+import { parseOpeningHours, type WeeklyHours } from '@/lib/hours';
 
 export interface TenantBrandMetadata {
   logo_url?: string;
@@ -24,6 +25,7 @@ export interface TenantResponse {
   status?: string;
   contact_phone?: string;
   contact_email?: string;
+  timezone?: string | null;
   metadata?: Record<string, unknown>;
   created_at?: string;
   updated_at?: string;
@@ -42,12 +44,17 @@ export interface TenantBrand {
   contactEmail?: string;
   /** The tenant's own app names (metadata service_branding, set in Accounts > Branding). */
   serviceBranding?: Record<string, ServiceBrandingEntry>;
+  /** Weekly hours (metadata opening_hours, set in Accounts > Branding); absent when not set. */
+  openingHours?: WeeklyHours;
+  /** The tenant's IANA timezone, for reading the hours. */
+  timezone?: string;
 }
 
 const AUTH_BASE = config.services.auth;
 
 function parseBrandFromTenant(t: TenantResponse): TenantBrand {
   const meta = (t.metadata || {}) as TenantBrandMetadata;
+  const openingHours = parseOpeningHours(t.metadata?.opening_hours);
   const logoUrl =
     meta.logo_url ?? meta.logoUrl ?? null;
   const primaryColor =
@@ -68,6 +75,8 @@ function parseBrandFromTenant(t: TenantResponse): TenantBrand {
     serviceBranding: serviceBrandingMap(t.metadata),
     ...(t.contact_phone ? { contactPhone: t.contact_phone } : {}),
     ...(t.contact_email ? { contactEmail: t.contact_email } : {}),
+    ...(openingHours ? { openingHours } : {}),
+    ...(t.timezone ? { timezone: t.timezone } : {}),
   };
 }
 

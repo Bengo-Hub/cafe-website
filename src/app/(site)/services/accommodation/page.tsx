@@ -1,13 +1,17 @@
 'use client';
 
-import { FactList, PageIntro, Section } from '@/components/site';
+import { FactList, PageIntro, PhotoGrid, Section, type GridPhoto } from '@/components/site';
 import { EnquiryForm } from '@/components/site/EnquiryForm';
-import Image from 'next/image';
 
-const PHOTOS = [
-  { src: '/images/rooms/rooms-2.jpg', alt: 'A room with a double bed and a work desk' },
-  { src: '/images/rooms/rooms-5.jpg', alt: 'A room with a balcony door' },
-  { src: '/images/rooms/rooms-4.jpg', alt: 'A sitting area' },
+/** Our own rooms, photographed on site. Ordered so the mosaic fills whole rows. */
+const PHOTOS: GridPhoto[] = [
+  { src: '/images/rooms/room-lounge.webp', alt: 'The sitting room with armchairs, a reading lamp and garden windows', span: 'big' },
+  { src: '/images/rooms/room-kitchenette.webp', alt: 'A kitchenette with a kettle, toaster, microwave and open shelves', span: 'tall' },
+  { src: '/images/rooms/room-armchair.webp', alt: 'A green velvet armchair with a cushion', span: 'tall' },
+  { src: '/images/rooms/room-bed-mirror.webp', alt: 'A bed with a floral cover beside an arched mirror and a plant', span: 'tall' },
+  { src: '/images/rooms/room-reading-corner.webp', alt: 'A reading corner with an armchair under a floor lamp', span: 'tall' },
+  { src: '/images/rooms/garden-steps.webp', alt: 'Steps from the rooms down to the garden', span: 'tall' },
+  { src: '/images/rooms/walkway.webp', alt: 'The walkway to the rooms, lined with trees', span: 'tall' },
 ];
 
 export default function AccommodationPage() {
@@ -16,27 +20,23 @@ export default function AccommodationPage() {
       <PageIntro
         title="Rooms"
         lede="Quiet rooms for people in town on business or passing through the border, with breakfast and dinner from our own kitchen."
-        image="/images/services/accommodation-1.jpg"
-        imageAlt="A guest room with a double bed"
+        image="/images/rooms/room-double-bed.webp"
+        imageAlt="A double bed with fresh linen and a floral cover in one of our rooms"
       />
 
       <Section title="In every room">
-        <div className="grid gap-10 md:grid-cols-2 md:items-start">
-          <FactList
-            items={[
-              { label: 'Bed', value: 'Double bed with fresh linen' },
-              { label: 'Work', value: 'Desk, chair and Wi-Fi' },
-              { label: 'Food', value: 'Breakfast and room service from the cafe kitchen' },
-            ]}
-          />
-          <div className="grid grid-cols-3 gap-2">
-            {PHOTOS.map((p) => (
-              <div key={p.src} className="relative aspect-square overflow-hidden rounded-md bg-leaf">
-                <Image src={p.src} alt={p.alt} fill sizes="(max-width: 768px) 33vw, 16vw" className="object-cover" />
-              </div>
-            ))}
-          </div>
-        </div>
+        <FactList
+          items={[
+            { label: 'Bed', value: 'Double bed with fresh linen' },
+            { label: 'Work', value: 'Desk, chair and Wi-Fi' },
+            { label: 'Food', value: 'Breakfast and room service from the cafe kitchen' },
+          ]}
+        />
+        <h3 className="font-display mt-14 text-3xl leading-none md:text-4xl">Take a look inside</h3>
+        <p className="mt-3 mb-8 max-w-2xl text-lg leading-relaxed text-ink-soft">
+          The rooms, the sitting room and the garden path, as they are today.
+        </p>
+        <PhotoGrid photos={PHOTOS} />
       </Section>
 
       <Section tone="leaf" title="Ask about a room" lede="Tell us your dates. We reply with what is free and the rate.">

@@ -88,7 +88,7 @@ export default function AboutPage() {
       <section className="bg-roast text-white">
         <div className="mx-auto grid max-w-7xl md:grid-cols-2">
           <div className="relative aspect-[4/3] md:aspect-auto md:min-h-[380px]">
-            <Image src="/images/services/urban-experience.jpg" alt="Guests at a table in the cafe" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+            <Image src="/images/home/dining-room.webp" alt="Tables by the photo wall under woven pendant lamps" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
           </div>
           <div className="px-4 py-12 sm:px-6 md:px-12 md:py-16">
             <h2 className="font-display text-4xl leading-none md:text-5xl">Come and see for yourself</h2>

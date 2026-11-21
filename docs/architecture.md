@@ -174,6 +174,27 @@ Feature flag: `NEXT_PUBLIC_USE_DUMMY_DATA` controls whether `useMenu()` returns 
 | Team | auth-service | Hardcoded | Needs real data |
 | Settings | Local + auth-service | Hardcoded | Needs real data |
 
+### Opening hours (from the tenant record)
+
+The cafe's hours are not kept in this repo. auth-api owns them in the tenant's metadata
+`opening_hours` (with the tenant `timezone`), edited in Accounts > Branding > Opening Hours, and the
+online store and POS read the same record. `lib/api/tenants.ts` parses them into
+`TenantBrand.openingHours`, `hooks/use-opening-hours.ts` gives pages the label, the daily period
+and the schedule, and `lib/hours.ts` works out "Open now until ..." in the tenant's zone and the
+reservation time slots. `SITE.opens`/`SITE.closes` in `lib/site.ts` are only the fallback while
+the record loads, when no hours are set, and for build-time copy (page metadata, structured data).
+Urban Loft's hours were set to 07:30 to 22:30 every day on 22 November 2026.
+
+### Photos
+
+Every photo on the public pages is of the venue itself. The photo library lives outside the repo
+in `urban-loft/resources/website images/` (renamed, EXIF and location stripped, 2560 px JPG; the
+untouched originals sit in `originals/`). Web copies are cropped and exported as WebP into
+`public/images/home/` and `public/images/rooms/` at 1400 px (1600 px for the hero), because
+`next.config.mjs` serves images unoptimised. Galleries use `PhotoGrid` from `components/site`
+(order the photos so the spans fill whole rows). The share card is
+`public/images/home/og-dining-canopy.jpg` at 1200 x 630.
+
 ### API client
 
 `lib/api/client.ts` provides:

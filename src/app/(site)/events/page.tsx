@@ -82,7 +82,7 @@ function EventRow({ event, onBook }: { event: CatalogEvent; onBook: () => void }
   return (
     <article className="grid gap-6 border-t border-line py-10 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-10">
       <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-leaf">
-        <Image src={event.imageUrl ?? '/images/services/events.jpg'} alt="" fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover" />
+        <Image src={event.imageUrl ?? '/images/home/evening-gathering.webp'} alt="" fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover" />
       </div>
       <div>
         <h2 className="font-display text-4xl leading-none">{event.name}</h2>

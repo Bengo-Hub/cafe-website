@@ -73,7 +73,7 @@ export function generateLocalBusinessSchema(): LocalBusinessSchema {
     '@type': 'Restaurant',
     name: SITE.name,
     image: [
-      `${process.env.NEXT_PUBLIC_APP_URL || 'https://theurbanloftcafe.com'}/images/services/events.jpg`,
+      `${process.env.NEXT_PUBLIC_APP_URL || 'https://theurbanloftcafe.com'}/images/home/og-dining-canopy.jpg`,
       `${process.env.NEXT_PUBLIC_APP_URL || 'https://theurbanloftcafe.com'}/images/logo/logo.jpeg`,
     ],
     url: process.env.NEXT_PUBLIC_APP_URL || 'https://theurbanloftcafe.com',

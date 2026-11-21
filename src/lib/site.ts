@@ -7,9 +7,13 @@ export const SITE = {
   town: 'Busia',
   phone: '0116010638',
   email: 'urbanloftc@gmail.com',
-  /** Open every day; the kitchen takes the last table booking an hour before closing. */
+  /**
+   * Fallback hours only. The real hours live in the tenant's account (auth-api metadata
+   * opening_hours, Accounts > Branding) and are read through useOpeningHours; these apply while
+   * that loads, when it is not set, and in build-time copy (page metadata, structured data).
+   */
   opens: '07:30',
-  closes: '22:00',
+  closes: '22:30',
   mapUrl: 'https://maps.google.com/?q=The+Urban+Loft+Cafe+Busia,+Kenya',
   mapEmbed:
     'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.6927520153863!2d34.124710474474604!3d0.45457156380033154!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x177fa1fa9904e015%3A0x596a9eb86b54c451!2sThe%20Urban%20Loft%20Cafe%20Busia!5e0!3m2!1sen!2ske!4v1766102160363!5m2!1sen!2ske',
@@ -36,23 +40,6 @@ export function clock(hhmm: string): string {
   return mm === 0 ? `${h12} ${suffix}` : `${h12}:${String(mm).padStart(2, '0')} ${suffix}`;
 }
 
-export const HOURS_LABEL = `Every day, ${clock(SITE.opens)} to ${clock(SITE.closes)}`;
-
-/** Whether the cafe is open at `now`, in Busia time (UTC+3), with a short line to show. */
-export function openState(now: Date = new Date()): { open: boolean; line: string } {
-  const parts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Africa/Nairobi',
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-  }).formatToParts(now);
-  const h = Number(parts.find((p) => p.type === 'hour')?.value ?? 0);
-  const m = Number(parts.find((p) => p.type === 'minute')?.value ?? 0);
-  const t = h * 60 + m;
-  const open = t >= minutes(SITE.opens) && t < minutes(SITE.closes);
-  if (open) return { open, line: `Open now until ${clock(SITE.closes)}` };
-  return { open, line: `Closed now, opens at ${clock(SITE.opens)}` };
-}
 
 /** A Kenyan number as people write it: "+254116010638" or "0116010638" becomes "0116 010 638". */
 export function displayPhone(phone: string): string {

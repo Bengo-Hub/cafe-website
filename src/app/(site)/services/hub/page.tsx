@@ -5,7 +5,7 @@ import { EnquiryForm } from '@/components/site/EnquiryForm';
 import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
 import { useMenuBoard } from '@/hooks/use-menu-board';
 import { orderingItemUrl } from '@/lib/ordering-url';
-import { HOURS_LABEL } from '@/lib/site';
+import { useOpeningHours } from '@/hooks/use-opening-hours';
 import Image from 'next/image';
 
 /** Day passes are sold in the online store; this reads them from there so prices never drift. */
@@ -33,6 +33,7 @@ function DayPasses({ slug }: { slug?: string }) {
 
 export default function WorkHubPage() {
   const { tenant } = useTenantBrand();
+  const { label: hoursLabel } = useOpeningHours();
 
   return (
     <>
@@ -50,7 +51,7 @@ export default function WorkHubPage() {
         <div className="grid gap-10 md:grid-cols-2 md:items-start">
           <FactList
             items={[
-              { label: 'Open', value: HOURS_LABEL },
+              { label: 'Open', value: hoursLabel },
               { label: 'Desks', value: 'Shared desks with power at every seat' },
               { label: 'Internet', value: 'Fast Wi-Fi, fine for video calls' },
               { label: 'Rooms', value: 'Boardroom and private offices, booked in advance' },

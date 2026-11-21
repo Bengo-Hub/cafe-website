@@ -3,10 +3,13 @@
 import { FeatureRow, LinkButton, PageIntro, Section } from '@/components/site';
 import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
 import { orderingUrl } from '@/lib/ordering-url';
+import { useOpeningHours } from '@/hooks/use-opening-hours';
+import { SITE, clock } from '@/lib/site';
 
 export default function ServicesPage() {
   const { tenant } = useTenantBrand();
   const storeHref = orderingUrl('/catalog', tenant?.slug || undefined);
+  const { daily } = useOpeningHours();
 
   return (
     <>
@@ -19,8 +22,8 @@ export default function ServicesPage() {
         <div className="space-y-16 md:space-y-20">
           <FeatureRow
             title="The cafe"
-            image="/images/services/urban-experience.jpg"
-            imageAlt="Guests sharing a meal at Urban Loft Cafe"
+            image="/images/home/dining-hall.webp"
+            imageAlt="The dining hall under woven pendant lamps, with the counter and photo wall"
             actions={
               <>
                 <LinkButton href={storeHref}>See the menu and order</LinkButton>
@@ -29,7 +32,8 @@ export default function ServicesPage() {
             }
           >
             <p>
-              Breakfast from 7:30, coffee all day, then burgers, grills, pizza and Kenyan favourites until 10 at night.
+              Breakfast from {clock(daily?.open ?? SITE.opens)}, coffee all day, then burgers, grills, pizza and Kenyan
+              favourites until {clock(daily?.close ?? SITE.closes)}.
               Eat in the garden, take it away, or have it delivered.
             </p>
           </FeatureRow>
@@ -46,8 +50,8 @@ export default function ServicesPage() {
 
           <FeatureRow
             title="Rooms"
-            image="/images/services/accommodation-1.jpg"
-            imageAlt="A guest room with a double bed"
+            image="/images/rooms/room-double-bed.webp"
+            imageAlt="A double bed with fresh linen and a floral cover in one of our rooms"
             actions={<LinkButton href="/services/accommodation" tone="secondary">Ask about a room</LinkButton>}
           >
             <p>Quiet rooms with a desk and Wi-Fi for people in town on business, with the kitchen downstairs.</p>

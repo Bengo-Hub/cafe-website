@@ -1,16 +1,27 @@
 'use client';
 
-import { LinkButton, OpenStatus, Section, FeatureRow, VisitDetails, useCafePhone } from '@/components/site';
+import { LinkButton, OpenStatus, PhotoGrid, Section, FeatureRow, VisitDetails, useCafePhone, type GridPhoto } from '@/components/site';
 import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
 import { useMenuBoard } from '@/hooks/use-menu-board';
+import { useOpeningHours } from '@/hooks/use-opening-hours';
 import { orderingItemUrl, orderingUrl } from '@/lib/ordering-url';
-import { SITE, telHref } from '@/lib/site';
+import { SITE, clock, telHref } from '@/lib/site';
 import { generateLocalBusinessSchema } from '@/lib/utils/schema';
 import { ShoppingBag } from 'lucide-react';
 import Image from 'next/image';
 import Script from 'next/script';
 
 const BOARD_SECTIONS = ['Breakfast', 'Coffee', 'Burgers', 'Main Dishes'];
+
+/** Photographed at the cafe. Ordered so the mosaic fills whole rows on phones and desktops. */
+const GALLERY: GridPhoto[] = [
+  { src: '/images/home/dining-hall.webp', alt: 'The dining hall under woven pendant lamps, with the counter and photo wall', span: 'big' },
+  { src: '/images/home/head-chef.webp', alt: 'Our head chef in front of the graffiti mural', span: 'tall' },
+  { src: '/images/home/specials-chalkboard.webp', alt: 'A waiter chalking up the Monday special in the garden', span: 'tall' },
+  { src: '/images/home/fried-rice-croquettes.webp', alt: 'Fried rice with croquettes and a dipping sauce' },
+  { src: '/images/home/bar-counter.webp', alt: 'The bar counter with barrel tables and high stools' },
+  { src: '/images/home/high-stools.webp', alt: 'White high tables under string lights among the plants', span: 'wide' },
+];
 
 function money(n: number, currency: string): string {
   return `${currency === 'KES' ? 'KSh' : currency} ${n.toLocaleString('en-KE')}`;
@@ -77,6 +88,7 @@ export default function HomePage() {
   const { tenant } = useTenantBrand();
   const slug = tenant?.slug || undefined;
   const phone = useCafePhone();
+  const { daily } = useOpeningHours();
   const storeHref = orderingUrl('/catalog', slug);
 
   return (
@@ -96,7 +108,7 @@ export default function HomePage() {
               Breakfast to late dinner under the canopy in Busia
             </h1>
             <p className="mt-6 max-w-lg text-lg leading-relaxed text-ink-soft">
-              Coffee from 7:30 in the morning, full plates until 10 at night, and a table with a socket if you have
+              Coffee from {clock(daily?.open ?? SITE.opens)}, full plates until {clock(daily?.close ?? SITE.closes)}, and a table with a socket if you have
               work to do. Order for delivery, or come and sit in the garden.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -116,8 +128,8 @@ export default function HomePage() {
           </div>
           <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-leaf">
             <Image
-              src="/images/services/events.jpg"
-              alt="The garden dining area at Urban Loft Cafe, with hanging plants under the canopy"
+              src="/images/home/dining-canopy.webp"
+              alt="The dining area under the patterned canopy, with string lights and plants between the tables"
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 55vw"
@@ -140,7 +152,7 @@ export default function HomePage() {
         </div>
       </Section>
 
-      <Section title="Stay a while" lede="The cafe is the heart of the place, but people also come here to work and to celebrate.">
+      <Section title="Stay a while" lede="The cafe is the heart of the place, but people also come here to work, to celebrate and to stay the night.">
         <div className="space-y-16">
           <FeatureRow
             title="Work hub"
@@ -165,7 +177,22 @@ export default function HomePage() {
               Tell us the date and how many guests, and we will send you a quote.
             </p>
           </FeatureRow>
+          <FeatureRow
+            title="Rooms"
+            image="/images/rooms/room-double-bed.webp"
+            imageAlt="A double bed with fresh linen and a floral cover in one of our rooms"
+            actions={<LinkButton href="/services/accommodation" tone="secondary">See the rooms</LinkButton>}
+          >
+            <p>
+              Quiet rooms off the garden with a desk and Wi-Fi, for a night on business or on the way through the
+              border. Breakfast comes from our own kitchen.
+            </p>
+          </FeatureRow>
         </div>
+      </Section>
+
+      <Section title="A look around" lede="The canopy, the bar, the kitchen and the people who run them.">
+        <PhotoGrid photos={GALLERY} />
       </Section>
 
       <Section tone="leaf">

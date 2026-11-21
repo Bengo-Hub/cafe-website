@@ -4,23 +4,29 @@ import { Field, FormNotice, LinkButton, PageIntro, Section, VisitDetails, inputC
 import { useTenantBrand } from '@/components/providers/TenantBrandProvider';
 import { createReservation, fetchOutlets, freeTables, type PosOutlet } from '@/lib/api/reservations';
 import { orderingUrl } from '@/lib/ordering-url';
-import { SITE, telHref } from '@/lib/site';
+import { useOpeningHours } from '@/hooks/use-opening-hours';
+import { DAYS, toMinutes, type WeeklyHours } from '@/lib/hours';
+import { telHref } from '@/lib/site';
 import { Loader2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 const DURATION = 90;
 const MAX_PARTY = 12;
 
-function toMinutes(hhmm: string): number {
-  const [h, m] = hhmm.split(':').map(Number);
-  return (h ?? 0) * 60 + (m ?? 0);
-}
-
-/** Half-hour slots from opening until an hour before closing (the last table booking). */
-function slots(): string[] {
+/**
+ * Half-hour slots on the date's weekday, from opening until an hour before closing (the last table
+ * booking). A period past midnight offers slots until midnight.
+ */
+function slots(hours: WeeklyHours, date: string): string[] {
+  const day = DAYS[new Date(`${date}T12:00:00Z`).getUTCDay()]!;
   const out: string[] = [];
-  for (let m = toMinutes(SITE.opens); m <= toMinutes(SITE.closes) - 60; m += 30) {
-    out.push(`${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`);
+  for (const p of hours[day] ?? []) {
+    const open = toMinutes(p.open);
+    let close = toMinutes(p.close);
+    if (close <= open) close = 24 * 60;
+    for (let m = open; m <= close - 60; m += 30) {
+      out.push(`${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`);
+    }
   }
   return out;
 }
@@ -50,10 +56,11 @@ export default function ReservePage() {
   const [error, setError] = useState('');
 
   const tenantId = tenant?.id ?? '';
+  const { hours } = useOpeningHours();
   const timeOptions = useMemo(() => {
     const soonest = Date.now() + 30 * 60_000;
-    return slots().filter((t) => nairobiDate(date, t).getTime() > soonest);
-  }, [date]);
+    return slots(hours, date).filter((t) => nairobiDate(date, t).getTime() > soonest);
+  }, [date, hours]);
 
   useEffect(() => {
     if (!tenantId) return;
