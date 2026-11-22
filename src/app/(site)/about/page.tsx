@@ -38,8 +38,8 @@ export default function AboutPage() {
       <PageIntro
         title="Our story"
         lede={`Urban Loft opened in ${SITE.town} in 2023 with one idea: a cafe should be somewhere you can eat well, get work done and meet people, all in the same afternoon.`}
-        image="/images/hero/hero-team.jpg"
-        imageAlt="The Urban Loft kitchen team"
+        image="/images/home/head-chef.webp"
+        imageAlt="Our head chef in front of the graffiti mural"
       />
 
       <Section>

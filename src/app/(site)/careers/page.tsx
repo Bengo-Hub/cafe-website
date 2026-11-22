@@ -9,8 +9,8 @@ export default function CareersPage() {
       <PageIntro
         title="Work with us"
         lede="We hire cooks, baristas, waiters, cleaners and supervisors from Busia and nearby. Send us your details and we will call you when a place opens that fits."
-        image="/images/hero/hero-team.jpg"
-        imageAlt="Members of the Urban Loft team"
+        image="/images/home/garden-staff.webp"
+        imageAlt="One of our team tending the strawberry planters in the garden"
       />
 
       <Section title="Who we look for">

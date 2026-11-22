@@ -77,8 +77,8 @@ export default function ServicesPage() {
 
           <FeatureRow
             title="Service training"
-            image="/images/hero/hero-team.jpg"
-            imageAlt="Urban Loft staff in the kitchen"
+            image="/images/home/specials-chalkboard.webp"
+            imageAlt="A waiter chalking up the Monday special in the garden"
             actions={<LinkButton href="/contact" tone="secondary">Ask about training</LinkButton>}
           >
             <p>

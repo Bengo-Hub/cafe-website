@@ -4,6 +4,5 @@ export * from './loyalty';
 export * from './menu';
 export * from './orders';
 export * from './spaces';
-export * from './team';
 export * from './testimonials';
 

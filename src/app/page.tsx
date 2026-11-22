@@ -226,15 +226,15 @@ export default function HomePage() {
         <div className="mx-auto grid max-w-7xl md:grid-cols-2">
           <div className="relative aspect-[4/3] md:aspect-auto md:min-h-[420px]">
             <Image
-              src="/images/hero/hero-team.jpg"
-              alt="The Urban Loft kitchen team"
+              src="/images/home/garden-staff.webp"
+              alt="One of our team tending the strawberry planters in the garden"
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
             />
           </div>
           <div className="px-4 py-12 sm:px-6 md:px-12 md:py-16 lg:px-16">
-            <h2 className="font-display text-4xl leading-none md:text-5xl">Cooked here, by this team</h2>
+            <h2 className="font-display text-4xl leading-none md:text-5xl">Made here, by our own team</h2>
             <p className="mt-4 max-w-md text-[17px] leading-relaxed text-white">
               The breakfasts, burgers, grills and pizzas all come out of our own kitchen. Order often? Collect points
               on every visit with our loyalty programme.
