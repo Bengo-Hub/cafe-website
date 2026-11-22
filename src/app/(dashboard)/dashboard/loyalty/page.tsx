@@ -1,10 +1,10 @@
 'use client';
 
 import { Badge, Button, Card } from '@/components/ui';
-import { useLoyaltyAccountByPhone, useLoyaltyPrograms, useLoyaltyTransactions } from '@/hooks/use-loyalty';
-import { type LoyaltyAccount } from '@/lib/api/loyalty';
+import { useLoyaltyAccountByPhone, useLoyaltyProgram, useLoyaltyTransactions } from '@/hooks/use-loyalty';
+import { tierFor, type LoyaltyAccount, type LoyaltyTier } from '@/lib/api/loyalty';
 import { motion } from 'framer-motion';
-import { Gift, Loader2, Search, Star, Trophy, TrendingUp } from 'lucide-react';
+import { Gift, Loader2, Search, Trophy, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
 import { PhoneInputField } from '@bengo-hub/shared-ui-lib/contact';
 
@@ -22,7 +22,8 @@ function TierBadge({ tier }: { tier: string }) {
   );
 }
 
-function AccountCard({ account }: { account: LoyaltyAccount }) {
+function AccountCard({ account, tiers }: { account: LoyaltyAccount; tiers: LoyaltyTier[] }) {
+  const tier = tierFor(tiers, account.lifetime_points);
   const [showTx, setShowTx] = useState(false);
   const { data: transactions = [], isLoading: txLoading } = useLoyaltyTransactions(showTx ? account.id : null);
 
@@ -33,7 +34,7 @@ function AccountCard({ account }: { account: LoyaltyAccount }) {
           <p className="font-black text-lg text-primary-brand">{account.customer_name || '—'}</p>
           <p className="text-secondary-brand text-sm">{account.customer_phone}</p>
         </div>
-        <TierBadge tier={account.tier} />
+        {tier && <TierBadge tier={tier} />}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -68,11 +69,11 @@ function AccountCard({ account }: { account: LoyaltyAccount }) {
             transactions.map((tx) => (
               <div key={tx.id} className="flex items-center justify-between py-2 border-b border-brand-beige/10 last:border-0">
                 <div>
-                  <p className="text-sm text-primary-brand">{tx.description}</p>
+                  <p className="text-sm text-primary-brand capitalize">{tx.notes || tx.type_field}</p>
                   <p className="text-xs text-secondary-brand">{new Date(tx.created_at).toLocaleDateString()}</p>
                 </div>
-                <span className={`font-black text-sm ${tx.type === 'earn' ? 'text-green-600' : 'text-red-500'}`}>
-                  {tx.type === 'earn' ? '+' : '-'}{Math.abs(tx.points)}
+                <span className={`font-black text-sm ${tx.points >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                  {tx.points >= 0 ? '+' : '-'}{Math.abs(tx.points)}
                 </span>
               </div>
             ))
@@ -84,12 +85,10 @@ function AccountCard({ account }: { account: LoyaltyAccount }) {
 }
 
 export default function LoyaltyDashboard() {
-  const { data: programs = [], isLoading: programsLoading } = useLoyaltyPrograms();
+  const { data: program = null, isLoading: programsLoading } = useLoyaltyProgram();
   const [phone, setPhone] = useState('');
   const [searchPhone, setSearchPhone] = useState<string | null>(null);
   const { data: member, isLoading: memberLoading } = useLoyaltyAccountByPhone(searchPhone);
-
-  const program = programs[0] ?? null;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,7 +115,7 @@ export default function LoyaltyDashboard() {
             </div>
             <div>
               <h2 className="text-xl font-black text-primary-brand">{program.name}</h2>
-              <p className="text-sm text-secondary-brand">{program.tiers.length} tiers · {program.rewards.length} rewards</p>
+              <p className="text-sm text-secondary-brand">{program.tiers.length} tiers</p>
             </div>
           </div>
 
@@ -133,49 +132,36 @@ export default function LoyaltyDashboard() {
                   <Card className="magical-card border-none p-5 space-y-3">
                     <div className="flex items-center justify-between">
                       <TierBadge tier={tier.name} />
-                      <span className="text-xs text-secondary-brand font-black">{tier.multiplier}x points</span>
                     </div>
                     <p className="text-xs text-secondary-brand">
                       From <span className="font-black text-primary-brand">{tier.min_points.toLocaleString()}</span> pts
                     </p>
-                    {tier.benefits.length > 0 && (
-                      <ul className="space-y-1">
-                        {tier.benefits.map((b) => (
-                          <li key={b} className="flex items-center gap-2 text-xs text-secondary-brand">
-                            <Star className="h-3 w-3 text-brand-orange flex-shrink-0" />
-                            {b}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
                   </Card>
                 </motion.div>
               ))}
             </div>
           </div>
 
-          {/* Rewards */}
-          {program.rewards.length > 0 && (
-            <div>
-              <h3 className="text-sm font-black uppercase tracking-widest text-secondary-brand mb-4">Rewards</h3>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {program.rewards.map((reward) => (
-                  <Card key={reward.id} className="magical-card border-none p-5">
-                    <div className="flex items-start gap-3">
-                      <div className="h-9 w-9 rounded-xl bg-brand-orange/10 flex items-center justify-center text-brand-orange flex-shrink-0">
-                        <Gift className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-primary-brand text-sm">{reward.name}</p>
-                        <p className="text-xs text-secondary-brand">{reward.description}</p>
-                        <Badge className="mt-2 text-[10px]">{reward.points_required.toLocaleString()} pts</Badge>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Earning and spending terms (pos-api programme). */}
+          <div className="grid gap-4 sm:grid-cols-3">
+            {[
+              { label: 'Earn rate', value: `${program.earn_rate} pts per KSh 1` },
+              { label: 'Point value', value: `KSh ${program.redeem_rate}` },
+              { label: 'Spend from', value: `${program.min_redeem_points.toLocaleString()} pts` },
+            ].map((t) => (
+              <Card key={t.label} className="magical-card border-none p-5">
+                <div className="flex items-start gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-brand-orange/10 flex items-center justify-center text-brand-orange flex-shrink-0">
+                    <Gift className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-widest text-secondary-brand">{t.label}</p>
+                    <Badge className="mt-2 text-[10px]">{t.value}</Badge>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
         </section>
       ) : (
         <Card className="magical-card border-none p-8 text-center">
@@ -217,7 +203,7 @@ export default function LoyaltyDashboard() {
           <p className="text-secondary-brand text-sm">No member found for {searchPhone}.</p>
         )}
 
-        {member && <AccountCard account={member} />}
+        {member && <AccountCard account={member} tiers={program?.tiers ?? []} />}
       </section>
     </div>
   );

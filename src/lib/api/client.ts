@@ -137,8 +137,10 @@ export async function apiClient<T = any>(
       const data = await response.json();
 
       if (!response.ok) {
-        // 401: attempt token refresh before triggering logout
-        if (response.status === 401 && !url.includes('/auth/me')) {
+        // 401: attempt token refresh before triggering logout. A request sent without a token
+        // (a visitor) has no session to refresh or end: logging out there sent the browser to
+        // SSO logout on every public page load, in a loop.
+        if (response.status === 401 && !url.includes('/auth/me') && auth.Authorization) {
           const sent = (auth.Authorization ?? '').replace(/^Bearer\s+/i, '');
           const { refreshAccessToken } = await import('@/lib/auth/token-refresh');
           const newToken = await refreshAccessToken(sent || null);
