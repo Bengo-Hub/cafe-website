@@ -2,7 +2,9 @@ name: Build and Deploy Cafe Website
 
 on:
   push:
-    branches: [main, master]
+    # master is the default branch; main and staging were removed 2026-11-24 (they only caused
+    # duplicate deploys of the same commit).
+    branches: [master]
   workflow_dispatch:
 
 # Deployment secrets are stored in devops-k8s repo and synced here on demand.
