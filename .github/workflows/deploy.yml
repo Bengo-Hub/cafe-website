@@ -2,8 +2,8 @@ name: Build and Deploy Cafe Website
 
 on:
   push:
-    # master is the default branch; main and staging were removed 2026-11-24 (they only caused
-    # duplicate deploys of the same commit).
+    # master is the default branch. A push to main re-deployed master's commit a second time
+    # (2026-11-24); main and staging are stale and can be deleted.
     branches: [master]
   workflow_dispatch:
 
