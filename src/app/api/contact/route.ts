@@ -30,6 +30,10 @@ export async function POST(request: NextRequest) {
   const tenantSlug = config.tenant.slug;
   const notificationsUrl = config.services.notifications;
 
+  // The enquiry is saved as the cafe's lead in MarketFlow, which owns leads (one person stays one
+  // lead there). Best effort: the email to the cafe goes out either way.
+  await saveLead(tenantSlug, body).catch((e) => console.error('marketflow lead not saved:', e));
+
   try {
     // Resolve tenant contact_email from auth-api public endpoint
     const tenantResp = await fetch(
@@ -97,4 +101,22 @@ export async function POST(request: NextRequest) {
       { status: 503 }
     );
   }
+}
+
+/** Posts the enquiry to MarketFlow's public lead endpoint for the cafe's tenant. */
+async function saveLead(tenantSlug: string, body: ContactFormBody): Promise<void> {
+  const parts = body.name.trim().split(/\s+/);
+  const resp = await fetch(`${config.services.marketflow}/api/v1/public/leads/${encodeURIComponent(tenantSlug)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'User-Agent': 'cafe-website/1.0' },
+    body: JSON.stringify({
+      first_name: parts[0],
+      last_name: parts.slice(1).join(' ') || undefined,
+      email: body.email,
+      interest: `${body.subject}: ${body.message}`.slice(0, 2000),
+      source: 'website_contact',
+    }),
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!resp.ok) throw new Error(`status ${resp.status}`);
 }
